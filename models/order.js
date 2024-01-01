@@ -3,15 +3,10 @@ import Product from "./product.js";
 
 const orderSchema = new Schema(
   {
-    quantity: {
-      type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 100,
-    },
-    flavor: String,
-    weight: Number,
+    quantity: Number,
+    total_amount: Number,
     count: Number,
+    price: Number,
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
   },
   {
