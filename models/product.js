@@ -12,6 +12,7 @@ const productSchema = new Schema(
     flavor: String,
     weight: Number,
     count: Number,
+    availability: String,
     price: Number,
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
   },
