@@ -12,7 +12,7 @@ const DashboardLayout = (props) => {
   };
 
   return (
-    <div className='flex items-center w-full bg-[#f5f5f7]'>
+    <div className="flex items-center w-full bg-[#f5f5f7]">
       <SideBar show={isVisible} />
 
       <MobileMenu show={isVisible} />
@@ -20,13 +20,11 @@ const DashboardLayout = (props) => {
       <div
         className={`${
           isVisible ? "sm:ml-16" : "sm:ml-56 2xl:ml-72"
-        } transition-all duration-500 w-full min-h-screen`}>
-        <Navbar
-          onMenuClick={toggleMenu}
-          show={isVisible}
-        />
+        } transition-all duration-500 w-full min-h-screen`}
+      >
+        <Navbar onMenuClick={toggleMenu} show={isVisible} />
 
-        {props.children}
+        <div className="mt-16 p-5">{props.children}</div>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ export async function GET() {
       path: "category",
       select: "name",
     })
-    .select("name weight flavor price count category");
+    .select("name weight flavor price availability count category");
 
   return NextResponse.json(products);
 }
