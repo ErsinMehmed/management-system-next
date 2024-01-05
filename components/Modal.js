@@ -14,11 +14,15 @@ const ModalComponent = (props) => {
 
   return (
     <>
-      <Button color="primary" onPress={onOpen}>
+      <button
+        type="button"
+        className="hidden sm:block text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90"
+        onClick={onOpen}
+      >
         {props.openBtnText}
-      </Button>
+      </button>
 
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal placement="center" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
@@ -33,7 +37,16 @@ const ModalComponent = (props) => {
                   {props.secondaryBtnText ?? "Откажи"}
                 </Button>
 
-                <Button color="primary" onPress={props.saveBtnAction}>
+                <Button
+                  color="primary"
+                  onPress={async () => {
+                    const success = await props.saveBtnAction();
+
+                    if (success) {
+                      onClose();
+                    }
+                  }}
+                >
                   {props.primaryBtnText ?? "Запази"}
                 </Button>
               </ModalFooter>

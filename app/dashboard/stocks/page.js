@@ -62,7 +62,7 @@ const DashboardStocks = () => {
 
   return (
     <Layout>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 p-8 mt-14">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 p-8">
         {products.map((product) => (
           <div
             key={product._id}
@@ -87,7 +87,7 @@ const DashboardStocks = () => {
 
               <p className="mb-2 text-base text-gray-700 flex">
                 Наличност:{" "}
-                <div className="bg-blue-400 text-white h-6 w-6 ml-2 mr-1 rounded flex items-center justify-center font-semibold shadow-md">
+                <div className="bg-blue-400 text-white h-6 w-10 ml-2 mr-1 rounded flex items-center justify-center font-semibold shadow-md">
                   {product.availability}
                 </div>{" "}
                 бр.

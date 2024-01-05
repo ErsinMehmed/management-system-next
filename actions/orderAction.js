@@ -15,13 +15,13 @@ class Order {
     }
   };
 
-  getOrders = async () => {
+  getOrders = async (page, perPage, searchText, filterData) => {
     try {
-      let url = `/api/orders`;
+      let url = `/api/orders?page=${page ?? 1}&per_page=${perPage ?? 10}`;
 
-      //   if (searchText) {
-      //     url += `&search=${searchText}`;
-      //   }
+      if (searchText) {
+        url += `&search=${searchText}`;
+      }
 
       //   if (filterData?.dateFrom) {
       //     url += `&date_from=${filterData.dateFrom}`;
@@ -56,6 +56,22 @@ class Order {
       const data = await response.json();
 
       return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  deleteOrder = async (id) => {
+    try {
+      const response = await fetch(`/api/orders?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      return await response.json();
     } catch (error) {
       throw error;
     }

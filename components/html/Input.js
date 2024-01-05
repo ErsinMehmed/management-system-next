@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Input } from "@nextui-org/react";
-
 import { AiOutlineEye } from "react-icons/ai";
 import { AiOutlineEyeInvisible } from "react-icons/ai";
+
 const InputComponent = (props) => {
   const [isVisible, setIsVisible] = useState(false);
 

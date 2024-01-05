@@ -72,3 +72,33 @@ function validatePassword(field, value, errors) {
     }
   }
 }
+
+export function objectHasValues(obj) {
+  for (const key in obj) {
+    if (
+      obj.hasOwnProperty(key) &&
+      obj[key] !== null &&
+      obj[key] !== undefined &&
+      obj[key] !== ""
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function productTitle(product) {
+  switch (product?.name) {
+    case "Exotic Whip":
+    case "Great Whip":
+    case "Miami Magic":
+      return `${product.name} ${product.weight}гр.`;
+    case "Балони":
+      return `${product.name} пакет ${product.count}бр.`;
+    case "Накрайник с вкус":
+      return `${product.name} ${product.flavor}`;
+    default:
+      return product?.name;
+  }
+}
