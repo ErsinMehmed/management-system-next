@@ -1,9 +1,6 @@
-import { Inter } from "next/font/google";
 import Provider from "@/providers/MainProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Management System",
@@ -18,7 +15,7 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
 
-      <body className={inter.className}>
+      <body>
         <AuthProvider>
           <Provider>{children}</Provider>
         </AuthProvider>
