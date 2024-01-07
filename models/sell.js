@@ -1,13 +1,14 @@
 import mongoose, { Schema } from "mongoose";
 import Product from "./product.js";
 
-const orderSchema = new Schema(
+const sellSchema = new Schema(
   {
     quantity: Number,
-    total_amount: Number,
     price: Number,
     message: String,
     date: Date,
+    mileage: Number,
+    fuel_price: Number,
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
   },
   {
@@ -15,6 +16,6 @@ const orderSchema = new Schema(
   }
 );
 
-const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
+const Sell = mongoose.models.Sell || mongoose.model("Sell", sellSchema);
 
-export default Order;
+export default Sell;

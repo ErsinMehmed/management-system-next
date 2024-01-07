@@ -14,6 +14,10 @@ const productSchema = new Schema(
     count: Number,
     availability: Number,
     price: Number,
+    sell_prices: {
+      type: [Number],
+      required: true,
+    },
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
   },
   {

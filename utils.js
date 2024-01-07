@@ -5,6 +5,25 @@ export function validateFields(object, fieldRules) {
     const rules = fieldRules[field];
     const value = object[field];
 
+    if (
+      rules.required &&
+      Array.isArray(value) &&
+      !value.every((element) => Boolean(element))
+    ) {
+      const emptyPositions = [];
+
+      value.forEach((element, index) => {
+        if (!Boolean(element)) {
+          emptyPositions.push(index);
+        }
+      });
+
+      errors[field] = {
+        message: "Полето трябва да съдържа стойност.",
+        positions: emptyPositions,
+      };
+    }
+
     if (field.toLowerCase() === "email" && value) {
       validateEmail(field, value, errors);
     }
@@ -39,7 +58,11 @@ export function validateFields(object, fieldRules) {
       errors[field] = `Полето трябва да бъде от тип ${rules.type}.`;
     }
 
-    if (rules.required && (value === "" || value === null)) {
+    if (
+      rules.required &&
+      !Array.isArray(value) &&
+      (value === "" || value === null)
+    ) {
       errors[field] = "Полето е задължително.";
     }
   }

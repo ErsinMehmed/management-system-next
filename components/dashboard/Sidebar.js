@@ -16,6 +16,7 @@ const SideBar = (props) => {
           {dashboardLinks.map((item, index) => (
             <li key={index}>
               <Link
+                title={item.text}
                 href={item.link}
                 className={`flex items-center ${
                   props.show && "justify-center"

@@ -1,14 +1,15 @@
 import { makeObservable, observable, action } from "mobx";
-import orderAction from "@/actions/orderAction";
+import sellAction from "@/actions/sellAction";
 import { validateFields } from "@/utils";
-import { orderRules as getOrderRules } from "@/rules/order";
+import { sellRules as getSellRules } from "@/rules/sell";
 import commonStore from "./commonStore";
 
-class Order {
-  orders = [];
-  orderData = {
+class Sell {
+  sells = [];
+  sellData = {
     quantity: null,
-    total_amount: null,
+    mileage: null,
+    fuel: null,
     price: null,
     date: "",
     product: "",
@@ -29,16 +30,16 @@ class Order {
 
   constructor() {
     makeObservable(this, {
-      orders: observable,
-      orderData: observable,
+      sells: observable,
+      sellData: observable,
       currentPage: observable,
       perPage: observable,
       isLoading: observable,
       searchText: observable,
       filterData: observable,
       showFilter: observable,
-      setOrders: action,
-      setOrderData: action,
+      setSells: action,
+      setSellData: action,
       setCurrentPage: action,
       setPerPage: action,
       setIsLoading: action,
@@ -48,12 +49,12 @@ class Order {
     });
   }
 
-  setOrders = (data) => {
-    this.orders = data;
+  setSells = (data) => {
+    this.sells = data;
   };
 
-  setOrderData = (data) => {
-    this.orderData = data;
+  setSellData = (data) => {
+    this.sellData = data;
   };
 
   setCurrentPage = (data) => {
@@ -64,14 +65,14 @@ class Order {
     this.perPage = perPage;
 
     const newTotalPages = Math.ceil(
-      this.orders.pagination?.total_results / perPage
+      this.sells.pagination?.total_results / perPage
     );
 
     this.setCurrentPage(
       this.currentPage > newTotalPages ? newTotalPages : this.currentPage
     );
 
-    this.loadOrders(
+    this.loadSells(
       this.currentPage > newTotalPages ? newTotalPages : this.currentPage
     );
   };
@@ -83,7 +84,7 @@ class Order {
   setSearchText = (data) => {
     this.searchText = data;
     this.setCurrentPage(1);
-    this.loadOrders();
+    this.loadSells();
   };
 
   setFilterData = (data) => {
@@ -94,9 +95,9 @@ class Order {
     this.showFilter = data;
   };
 
-  loadOrders = async (newPage) => {
-    this.setOrders(
-      await orderAction.getOrders(
+  loadSells = async (newPage) => {
+    this.setSells(
+      await sellAction.getSells(
         newPage ?? this.currentPage,
         this.perPage,
         this.searchText,
@@ -107,8 +108,8 @@ class Order {
     this.setIsLoading(false);
   };
 
-  clearOrderData = () => {
-    this.orderData = {
+  clearSellData = () => {
+    this.sellData = {
       quantity: null,
       total_amount: null,
       price: null,
@@ -117,25 +118,25 @@ class Order {
     };
   };
 
-  createOrder = async () => {
+  createSell = async () => {
     commonStore.setErrorFields({});
     commonStore.setErrorMessage("");
     commonStore.setSuccessMessage("");
 
-    const orderRules = getOrderRules();
-    const errorFields = validateFields(this.orderData, orderRules);
+    const sellRules = getSellRules();
+    const errorFields = validateFields(this.sellData, sellRules);
 
     if (errorFields) {
       commonStore.setErrorFields(errorFields);
       return false;
     }
 
-    const response = await orderAction.createOrder(this.orderData);
+    const response = await sellAction.createSell(this.sellData);
 
     if (response.status) {
       commonStore.setSuccessMessage(response.message);
-      this.clearOrderData();
-      this.loadOrders();
+      this.clearSellData();
+      this.loadSells();
 
       return true;
     }
@@ -147,28 +148,28 @@ class Order {
     const newPage =
       direction === "next" ? this.currentPage + 1 : this.currentPage - 1;
     this.setCurrentPage(newPage);
-    this.loadOrders();
+    this.loadSells();
   };
 
   handlePageClick = (page) => {
     this.setCurrentPage(page);
-    this.loadOrders();
+    this.loadSells();
   };
 
   searchProducts = () => {
     this.setSearchText("");
     this.setCurrentPage(1);
-    this.loadOrders();
+    this.loadSells();
   };
 
   deleteProduct = async (id) => {
-    const response = await orderAction.deleteOrder(id);
+    const response = await sellAction.deleteSell(id);
 
     if (response.status) {
       commonStore.setSuccessMessage(response.message);
-      this.loadOrders();
+      this.loadSells();
     }
   };
 }
 
-export default new Order();
+export default new Sell();

@@ -33,7 +33,7 @@ const DashboardOrders = () => {
     deleteProduct,
     setShowFilter,
   } = orderStore;
-  const { products, loadProducts } = productStore;
+  const { products } = productStore;
   const { errorFields } = commonStore;
 
   const handleDeleteProduct = (id) => {
@@ -41,12 +41,13 @@ const DashboardOrders = () => {
   };
 
   const filteredProducts = orders?.orders?.map(
-    ({ _id, product, quantity, price, total_amount, message }) => ({
+    ({ _id, product, quantity, price, total_amount, date, message }) => ({
       _id,
       product,
       quantity,
       price,
       total_amount,
+      date,
       message,
     })
   );
@@ -54,10 +55,6 @@ const DashboardOrders = () => {
   useEffect(() => {
     loadOrders();
   }, [loadOrders]);
-
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
 
   const updatedProducts = useMemo(() => {
     return products.map((product) => ({
@@ -98,46 +95,53 @@ const DashboardOrders = () => {
 
   const modal = (
     <Modal
+      isButton={true}
       errorFields={errorFields}
       saveBtnAction={createOrder}
-      openBtnText="Добави"
-      title="Добави поръчка"
-    >
-      <div className="space-y-3.5">
+      openBtnText='Добави'
+      title='Добави поръчка'>
+      <div className='space-y-3.5'>
         <Select
           items={updatedProducts}
-          label="Избери продукт"
+          label='Избери продукт'
           value={orderData.product || ""}
           errorMessage={errorFields.product}
           onChange={(value) => handleInputChange("product", value)}
         />
 
         <Input
-          type="text"
-          label="Количество"
+          type='text'
+          label='Количество'
           value={orderData.quantity || ""}
           disabled={!orderData.product}
           errorMessage={errorFields.quantity}
           onChange={(value) => handleInputChange("quantity", value)}
         />
 
+        <Input
+          type='date'
+          label='Дата'
+          value={orderData.date || ""}
+          onChange={(value) => handleInputChange("date", value)}
+        />
+
         <Textarea
-          label="Съобщение"
+          label='Съобщение'
           value={orderData.message || ""}
           onChange={(value) => handleInputChange("message", value)}
         />
 
-        <div className="grid grid-cols-2 gap-3.5">
-          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
-            <div className="text-sm">Единична цена</div>
+        <div className='grid grid-cols-2 gap-3.5'>
+          <div className='bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold'>
+            <div className='text-sm'>Единична цена</div>
 
             <div>
               {orderData.price ? orderData.price.toFixed(2) + "лв." : "0.00лв."}
             </div>
           </div>
 
-          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
-            <div className="text-sm">Обща сума</div>
+          <div className='bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold'>
+            <div className='text-sm'>Обща сума</div>
 
             <div>
               {orderData.total_amount
@@ -152,11 +156,17 @@ const DashboardOrders = () => {
 
   return (
     <Layout>
-      <div className="flex items-center min-h-screen 2xl:px-10">
+      <div className='flex items-center min-h-screen 2xl:px-10'>
         <Table
-          title="Заявки"
-          data={filteredProducts}
-          columns={["име на продукт", "количество", "ед. цена", "обща сума"]}
+          title='Заявки'
+          data={filteredProducts?.reverse()}
+          columns={[
+            "име на продукт",
+            "количество",
+            "ед. цена",
+            "обща сума",
+            "дата",
+          ]}
           delete={handleDeleteProduct}
           perPage={perPage}
           filterSearchOnClick={searchProducts}
@@ -169,12 +179,11 @@ const DashboardOrders = () => {
           isLoading={isLoading}
           setPerPage={setPerPage}
           searchBarButton={modal}
-          searchBarPlaceholder="име на продукт"
+          searchBarPlaceholder='име на продукт'
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
           filterSection={true}
-          editButtonLink="/dashboard/ads/edit/"
-        >
+          editButtonLink='/dashboard/ads/edit/'>
           <Pagination
             isLoading={isLoading}
             currentPage={orders.pagination?.current_page}

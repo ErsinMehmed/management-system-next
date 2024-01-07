@@ -9,7 +9,10 @@ export async function PUT(request, { params }) {
   await connectMongoDB();
   await Product.findByIdAndUpdate(id, data);
 
-  return NextResponse.json({ message: "Product updated" }, { status: 200 });
+  return NextResponse.json(
+    { message: "Продуктът е обновен", status: true },
+    { status: 200 }
+  );
 }
 
 export async function GET(request, { params }) {
@@ -17,7 +20,9 @@ export async function GET(request, { params }) {
 
   await connectMongoDB();
 
-  const product = await Product.findOne({ _id: id });
+  const product = await Product.findOne({ _id: id }).select(
+    "name weight flavor price availability count sell_prices category"
+  );
 
   return NextResponse.json(product);
 }

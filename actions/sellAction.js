@@ -1,7 +1,7 @@
-class Product {
-  createProduct = async (data) => {
+class Sell {
+  createSell = async (data) => {
     try {
-      const response = await fetch("/api/products", {
+      const response = await fetch("/api/sells", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -15,35 +15,13 @@ class Product {
     }
   };
 
-  updateProduct = async (id, data) => {
+  getSells = async (page, perPage, searchText, filterData) => {
     try {
-      const response = await fetch(`/api/products/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      let url = `/api/sells?page=${page ?? 1}&per_page=${perPage ?? 10}`;
 
-      return response.json();
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  getProduct = async (id) => {
-    const response = await fetch(`/api/products/${id}`);
-
-    return response.json();
-  };
-
-  getProducts = async () => {
-    try {
-      let url = `/api/products`;
-
-      //   if (searchText) {
-      //     url += `&search=${searchText}`;
-      //   }
+      if (searchText) {
+        url += `&search=${searchText}`;
+      }
 
       //   if (filterData?.dateFrom) {
       //     url += `&date_from=${filterData.dateFrom}`;
@@ -82,6 +60,22 @@ class Product {
       throw error;
     }
   };
+
+  deleteSell = async (id) => {
+    try {
+      const response = await fetch(`/api/sells?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
-export default new Product();
+export default new Sell();

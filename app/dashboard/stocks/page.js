@@ -1,105 +1,125 @@
 "use client";
-import React, { useEffect } from "react";
 import { observer } from "mobx-react-lite";
+import { BsTrash3 } from "react-icons/bs";
+import { HiOutlinePlus } from "react-icons/hi2";
 import Layout from "@/components/layout/Dashboard";
-import Image from "next/image";
-import BalloonsImg from "@/public/images/Balloons.png";
-import Exotic640Img from "@/public/images/ExoticWhip-640G.png";
-import Exotic2000Img from "@/public/images/ExoticWhip-2000G.webp";
-import Miami2000Img from "@/public/images/MiamiMagic-2000G.webp";
-import GreatWhip640Img from "@/public/images/GreatWhip-640G.webp";
-import SilentBlueberryImg from "@/public/images/Silent-Nozzle-Blueberry.png";
-import SilentPineappleImg from "@/public/images/Silent-Nozzle-Pineapple.png";
-import SilentStrawberryImg from "@/public/images/Silent-Nozzle-Strawberry.png";
-import SilentWatermelonImg from "@/public/images/Silent-Nozzle-Watermelon.png";
-import { productStore } from "@/stores/useStore";
+import Modal from "@/components/Modal";
+import Box from "@/components/product/Box";
+import { commonStore, productStore } from "@/stores/useStore";
+import productAction from "@/actions/productAction";
+import Input from "@/components/html/Input";
 
 const DashboardStocks = () => {
-  const { products, loadProducts } = productStore;
+  const { products, productData, updateProduct, setProductData } = productStore;
+  const { errorFields } = commonStore;
 
-  useEffect(() => {
-    loadProducts(false);
-  }, [loadProducts]);
+  const handleInputChange = (name, value, index) => {
+    let updatedData = { ...productData };
 
-  const getProductImage = (name, weight, flavor) => {
-    switch (name) {
-      case "Exotic Whip":
-        return weight === 640 ? Exotic640Img : Exotic2000Img;
-      case "Great Whip":
-        return GreatWhip640Img;
-      case "Miami Magic":
-        return Miami2000Img;
-      case "Балони":
-        return BalloonsImg;
-      case "Накрайник с вкус":
-        switch (flavor) {
-          case "Ананас":
-            return SilentPineappleImg;
-          case "Боровинка":
-            return SilentBlueberryImg;
-          case "Диня":
-            return SilentWatermelonImg;
-          case "Ягода":
-            return SilentStrawberryImg;
-        }
+    if (name === "sell_prices") {
+      updatedData[name][index] = value;
+    } else {
+      updatedData = { ...updatedData, [name]: value };
     }
+
+    setProductData(updatedData);
   };
 
-  const productTitle = (product) => {
-    switch (product.name) {
-      case "Exotic Whip":
-      case "Great Whip":
-      case "Miami Magic":
-        return `${product.name} ${product.weight}гр.`;
-      case "Балони":
-        return `${product.name} пакет ${product.count}бр.`;
-      case "Накрайник с вкус":
-        return `${product.name} ${product.flavor}`;
-      default:
-        return product.name;
-    }
+  const fetchProductData = async (id) => {
+    const data = await productAction.getProduct(id);
+
+    setProductData(data);
+  };
+
+  const removeData = (index) => {
+    const updatedData = { ...productData };
+    updatedData.sell_prices.splice(index, 1);
+
+    setProductData(updatedData);
+  };
+
+  const addData = () => {
+    const updatedData = { ...productData };
+    updatedData.sell_prices.push("");
+
+    setProductData(updatedData);
   };
 
   return (
     <Layout>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 p-8">
-        {products.map((product) => (
-          <div
-            key={product._id}
-            className="py-2.5 rounded-lg bg-white shadow-md duration-300 hover:shadow-xl border border-transparent hover:border-gray-200 cursor-pointer"
-          >
-            <Image
-              src={getProductImage(
-                product.name,
-                product?.weight,
-                product.flavor
-              )}
-              className="sm:h-56 xl:h-64 w-full object-cover object-center border-b px-2.5"
-              alt={`Picture of ${product.name}`}
-              width={"100%"}
-              height={"100%"}
-            />
+      <div className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 p-8'>
+        {products.map((product, index) => (
+          <Modal
+            key={index}
+            title='Редактирай продукт'
+            saveBtnAction={() => {
+              return updateProduct(product._id, productData);
+            }}
+            openButton={
+              <Box
+                onClick={() => {
+                  fetchProductData(product._id);
+                }}
+                data={product}
+              />
+            }>
+            <div className='border-b pb-6'>
+              <div className='text-slate-800 font-semibold mb-2'>
+                Цена за зареждане
+              </div>
 
-            <div className="p-3.5">
-              <h2 className="mb-2 text-lg text-gray-800 font-semibold">
-                {productTitle(product)}
-              </h2>
+              <Input
+                type='text'
+                label='Цена на зареждане'
+                value={productData.price || ""}
+                errorMessage={errorFields.price}
+                onChange={(value) => handleInputChange("price", value)}
+              />
+            </div>
 
-              <p className="mb-2 text-base text-gray-700 flex">
-                Наличност:{" "}
-                <div className="bg-blue-400 text-white h-6 w-10 ml-2 mr-1 rounded flex items-center justify-center font-semibold shadow-md">
-                  {product.availability}
-                </div>{" "}
-                бр.
-              </p>
+            <div className='pt-1 space-y-2'>
+              <div className='text-slate-800 font-semibold'>
+                Цена за продажба
+              </div>
 
-              <div className="flex items-center">
-                <p className="mr-2 text-lg font-semibold text-gray-900">
-                  {product.price.toFixed(2)}лв.
-                </p>
+              <div className='space-y-3.5'>
+                {productData.sell_prices?.map((price, index) => (
+                  <div
+                    key={index}
+                    className='flex items-center'>
+                    {productData.sell_prices.length > 1 && (
+                      <button
+                        className='rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95 mr-2'
+                        onClick={() => removeData(index)}>
+                        <BsTrash3 />
+                      </button>
+                    )}
+
+                    <Input
+                      type='text'
+                      label={`Цена за ${index + 1}бр.`}
+                      value={price || ""}
+                      errorMessage={
+                        errorFields.sell_prices?.positions.includes(index) &&
+                        errorFields.sell_prices?.message
+                      }
+                      onChange={(value) =>
+                        handleInputChange("sell_prices", value, index)
+                      }
+                    />
+                  </div>
+                ))}
+
+                <div className='flex justify-center mt-4 w-full'>
+                  <button
+                    className='rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95'
+                    onClick={addData}>
+                    <HiOutlinePlus />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </Modal>
         ))}
       </div>
     </Layout>

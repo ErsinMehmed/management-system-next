@@ -1,5 +1,5 @@
 import connectMongoDB from "@/libs/mongodb";
-import Order from "@/models/order";
+import Sell from "@/models/sell";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 
@@ -22,20 +22,20 @@ export async function POST(request) {
       );
     }
 
-    product.availability += data.quantity;
+    product.availability -= data.quantity;
 
     await product.save();
 
-    await Order.create(data);
+    await Sell.create(data);
 
     return NextResponse.json(
-      { message: "Поръчката е добавена успешно", status: true },
+      { message: "Прождабата е добавена успешно", status: true },
       { status: 201 }
     );
   } catch (error) {
     return NextResponse.json(
       {
-        message: "Грешка при обработка на поръчката",
+        message: "Грешка при обработка на продажбата",
         error: error,
         status: false,
       },
@@ -52,7 +52,7 @@ export async function GET(request) {
 
   await connectMongoDB();
 
-  let queryBuilder = Order.find();
+  let queryBuilder = Sell.find();
 
   if (searchText?.length > 0) {
     const productIds = await Product.find({
@@ -62,8 +62,8 @@ export async function GET(request) {
     queryBuilder = queryBuilder.where("product").in(productIds);
   }
 
-  const totalOrders = await Order.countDocuments(queryBuilder);
-  const orders = await queryBuilder
+  const totalSells = await Sell.countDocuments(queryBuilder);
+  const sells = await queryBuilder
     .populate({
       path: "product",
       select: "name weight flavor price availability count category",
@@ -77,12 +77,12 @@ export async function GET(request) {
 
   const pagination = {
     current_page: parseInt(page),
-    total_pages: Math.ceil(totalOrders / perPage),
-    total_results: totalOrders,
+    total_pages: Math.ceil(totalSells / perPage),
+    total_results: totalSells,
     per_page: parseInt(perPage),
   };
 
-  return NextResponse.json({ orders, pagination });
+  return NextResponse.json({ sells, pagination });
 }
 
 export async function DELETE(request) {
