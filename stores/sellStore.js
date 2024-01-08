@@ -5,14 +5,15 @@ import { sellRules as getSellRules } from "@/rules/sell";
 import commonStore from "./commonStore";
 
 class Sell {
-  sells = [];
+  sales = [];
   sellData = {
     quantity: null,
     mileage: null,
     fuel: null,
     price: null,
-    diesel_price: null,
-    fuel_consumption: null,
+    diesel_price: 2.6,
+    fuel_consumption: 6.5,
+    additional_costs: null,
     date: "",
     product: "",
     message: "",
@@ -32,7 +33,7 @@ class Sell {
 
   constructor() {
     makeObservable(this, {
-      sells: observable,
+      sales: observable,
       sellData: observable,
       currentPage: observable,
       perPage: observable,
@@ -40,7 +41,7 @@ class Sell {
       searchText: observable,
       filterData: observable,
       showFilter: observable,
-      setSells: action,
+      setSales: action,
       setSellData: action,
       setCurrentPage: action,
       setPerPage: action,
@@ -51,8 +52,8 @@ class Sell {
     });
   }
 
-  setSells = (data) => {
-    this.sells = data;
+  setSales = (data) => {
+    this.sales = data;
   };
 
   setSellData = (data) => {
@@ -67,14 +68,14 @@ class Sell {
     this.perPage = perPage;
 
     const newTotalPages = Math.ceil(
-      this.sells.pagination?.total_results / perPage
+      this.sales.pagination?.total_results / perPage
     );
 
     this.setCurrentPage(
       this.currentPage > newTotalPages ? newTotalPages : this.currentPage
     );
 
-    this.loadSells(
+    this.loadSales(
       this.currentPage > newTotalPages ? newTotalPages : this.currentPage
     );
   };
@@ -86,7 +87,7 @@ class Sell {
   setSearchText = (data) => {
     this.searchText = data;
     this.setCurrentPage(1);
-    this.loadSells();
+    this.loadSales();
   };
 
   setFilterData = (data) => {
@@ -97,9 +98,9 @@ class Sell {
     this.showFilter = data;
   };
 
-  loadSells = async (newPage) => {
-    this.setSells(
-      await sellAction.getSells(
+  loadSales = async (newPage) => {
+    this.setSales(
+      await sellAction.getSales(
         newPage ?? this.currentPage,
         this.perPage,
         this.searchText,
@@ -113,11 +114,12 @@ class Sell {
   clearSellData = () => {
     this.sellData = {
       quantity: null,
-      mileage: null,
+      mileage: 6,
       fuel: null,
       price: null,
-      diesel_price: null,
-      fuel_consumption: null,
+      diesel_price: 2.6,
+      fuel_consumption: 6.5,
+      additional_costs: null,
       date: "",
       product: "",
       message: "",
@@ -142,7 +144,7 @@ class Sell {
     if (response.status) {
       commonStore.setSuccessMessage(response.message);
       this.clearSellData();
-      this.loadSells();
+      this.loadSales();
 
       return true;
     } else if (!response.status) {
@@ -158,18 +160,18 @@ class Sell {
     const newPage =
       direction === "next" ? this.currentPage + 1 : this.currentPage - 1;
     this.setCurrentPage(newPage);
-    this.loadSells();
+    this.loadSales();
   };
 
   handlePageClick = (page) => {
     this.setCurrentPage(page);
-    this.loadSells();
+    this.loadSales();
   };
 
-  searchSells = () => {
+  searchSales = () => {
     this.setSearchText("");
     this.setCurrentPage(1);
-    this.loadSells();
+    this.loadSales();
   };
 
   deleteSell = async (id) => {
@@ -177,7 +179,7 @@ class Sell {
 
     if (response.status) {
       commonStore.setSuccessMessage(response.message);
-      this.loadSells();
+      this.loadSales();
     }
   };
 }

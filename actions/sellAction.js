@@ -1,7 +1,7 @@
 class Sell {
   createSell = async (data) => {
     try {
-      const response = await fetch("/api/sells", {
+      const response = await fetch("/api/sales", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -15,9 +15,9 @@ class Sell {
     }
   };
 
-  getSells = async (page, perPage, searchText, filterData) => {
+  getSales = async (page, perPage, searchText, filterData) => {
     try {
-      let url = `/api/sells?page=${page ?? 1}&per_page=${perPage ?? 10}`;
+      let url = `/api/sales?page=${page ?? 1}&per_page=${perPage ?? 10}`;
 
       if (searchText) {
         url += `&search=${searchText}`;
@@ -63,7 +63,7 @@ class Sell {
 
   deleteSell = async (id) => {
     try {
-      const response = await fetch(`/api/sells?id=${id}`, {
+      const response = await fetch(`/api/sales?id=${id}`, {
         method: "DELETE",
       });
 

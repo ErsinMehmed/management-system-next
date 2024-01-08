@@ -8,6 +8,7 @@ const sellSchema = new Schema(
     message: String,
     date: Date,
     mileage: Number,
+    additional_costs: Number,
     fuel_consumption: Number,
     diesel_price: Number,
     fuel_price: Number,

@@ -72,6 +72,7 @@ export async function GET(request) {
         select: "name",
       },
     })
+    .sort({ _id: -1 })
     .skip((page - 1) * perPage)
     .limit(perPage);
 

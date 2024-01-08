@@ -72,8 +72,8 @@ export async function GET(request) {
     queryBuilder = queryBuilder.where("product").in(productIds);
   }
 
-  const totalSells = await Sell.countDocuments(queryBuilder);
-  const sells = await queryBuilder
+  const totalSales = await Sell.countDocuments(queryBuilder);
+  const sales = await queryBuilder
     .populate({
       path: "product",
       select:
@@ -83,17 +83,18 @@ export async function GET(request) {
         select: "name",
       },
     })
+    .sort({ _id: -1 })
     .skip((page - 1) * perPage)
     .limit(perPage);
 
   const pagination = {
     current_page: parseInt(page),
-    total_pages: Math.ceil(totalSells / perPage),
-    total_results: totalSells,
+    total_pages: Math.ceil(totalSales / perPage),
+    total_results: totalSales,
     per_page: parseInt(perPage),
   };
 
-  return NextResponse.json({ sells, pagination });
+  return NextResponse.json({ sales, pagination });
 }
 
 export async function DELETE(request) {
