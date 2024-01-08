@@ -155,13 +155,13 @@ class Order {
     this.loadOrders();
   };
 
-  searchProducts = () => {
+  searchOrders = () => {
     this.setSearchText("");
     this.setCurrentPage(1);
     this.loadOrders();
   };
 
-  deleteProduct = async (id) => {
+  deleteOrder = async (id) => {
     const response = await orderAction.deleteOrder(id);
 
     if (response.status) {

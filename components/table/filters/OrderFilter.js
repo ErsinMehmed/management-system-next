@@ -10,7 +10,7 @@ function OrderFilter(props) {
   const handleInputChange = (name, value) => {
     props.setData({ ...props.data, [name]: value });
   };
-  console.log(props.data);
+
   const updatedProducts = useMemo(() => {
     return products.map((product) => ({
       ...product,

@@ -8,7 +8,10 @@ const sellSchema = new Schema(
     message: String,
     date: Date,
     mileage: Number,
+    fuel_consumption: Number,
+    diesel_price: Number,
     fuel_price: Number,
+
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
   },
   {

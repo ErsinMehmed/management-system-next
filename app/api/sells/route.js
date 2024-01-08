@@ -22,6 +22,16 @@ export async function POST(request) {
       );
     }
 
+    if (product.availability <= 0 || product.availability < data.quantity) {
+      return NextResponse.json(
+        {
+          message: "Недостатъчна наличност от продукта",
+          status: false,
+        },
+        { status: 400 }
+      );
+    }
+
     product.availability -= data.quantity;
 
     await product.save();
@@ -66,7 +76,8 @@ export async function GET(request) {
   const sells = await queryBuilder
     .populate({
       path: "product",
-      select: "name weight flavor price availability count category",
+      select:
+        "name weight flavor price availability sell_prices count category",
       populate: {
         path: "category",
         select: "name",
@@ -91,16 +102,16 @@ export async function DELETE(request) {
   await connectMongoDB();
 
   try {
-    const orderToDelete = await Order.findById(id);
+    const sellToDelete = await Sell.findById(id);
 
-    if (!orderToDelete) {
+    if (!sellToDelete) {
       return NextResponse.json(
-        { message: "Поръчката не беше намерена", status: false },
+        { message: "Продажбата не беше намерена", status: false },
         { status: 404 }
       );
     }
 
-    const product = await Product.findById(orderToDelete.product);
+    const product = await Product.findById(sellToDelete.product);
 
     if (!product) {
       return NextResponse.json(
@@ -109,20 +120,20 @@ export async function DELETE(request) {
       );
     }
 
-    product.availability -= orderToDelete.quantity;
+    product.availability += sellToDelete.quantity;
 
     await product.save();
 
-    await Order.findByIdAndDelete(id);
+    await Sell.findByIdAndDelete(id);
 
     return NextResponse.json(
-      { message: "Поръчката е изтрита успешно", status: true },
+      { message: "Продажбата е изтрита успешно", status: true },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
       {
-        message: "Грешка при изтриване на поръчката",
+        message: "Грешка при изтриване на продажбата",
         error: error,
         status: false,
       },

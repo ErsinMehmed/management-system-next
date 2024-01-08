@@ -2,9 +2,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HiMiniXMark, HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { GrPowerReset } from "react-icons/gr";
 import { objectHasValues } from "@/utils";
+import { usePathname } from "next/navigation";
 import OrderFilter from "@/components/table/filters/OrderFilter";
 
 function Filter(props) {
+  const pathname = usePathname();
+
   return (
     <AnimatePresence>
       {props.show && (
@@ -35,7 +38,9 @@ function Filter(props) {
           </div>
 
           <div className="sm:grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 pt-4 pb-6">
-            <OrderFilter data={props.data} setData={props.setData} />
+            {pathname.includes("/orders") && (
+              <OrderFilter data={props.data} setData={props.setData} />
+            )}
 
             <div className="px-3 sm:pr-2 md:px-3 lg:px-4 col-span-1 mt-1 sm:mt-4 flex items-center space-x-4">
               <button

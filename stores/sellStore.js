@@ -11,6 +11,8 @@ class Sell {
     mileage: null,
     fuel: null,
     price: null,
+    diesel_price: null,
+    fuel_consumption: null,
     date: "",
     product: "",
     message: "",
@@ -111,8 +113,12 @@ class Sell {
   clearSellData = () => {
     this.sellData = {
       quantity: null,
-      total_amount: null,
+      mileage: null,
+      fuel: null,
       price: null,
+      diesel_price: null,
+      fuel_consumption: null,
+      date: "",
       product: "",
       message: "",
     };
@@ -139,6 +145,10 @@ class Sell {
       this.loadSells();
 
       return true;
+    } else if (!response.status) {
+      commonStore.setErrorMessage(response.message);
+
+      return false;
     }
 
     return false;
@@ -156,13 +166,13 @@ class Sell {
     this.loadSells();
   };
 
-  searchProducts = () => {
+  searchSells = () => {
     this.setSearchText("");
     this.setCurrentPage(1);
     this.loadSells();
   };
 
-  deleteProduct = async (id) => {
+  deleteSell = async (id) => {
     const response = await sellAction.deleteSell(id);
 
     if (response.status) {
