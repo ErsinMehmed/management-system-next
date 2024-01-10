@@ -1,5 +1,6 @@
 import Provider from "@/providers/MainProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import Colors from "@/components/Colors";
 import "./globals.css";
 
 export const metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <Provider>{children}</Provider>
+          <Colors />
         </AuthProvider>
       </body>
     </html>

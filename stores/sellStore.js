@@ -6,13 +6,14 @@ import commonStore from "./commonStore";
 
 class Sell {
   sales = [];
+  sellStats = [];
   sellData = {
     quantity: null,
     mileage: null,
     fuel: null,
     price: null,
-    diesel_price: 2.6,
-    fuel_consumption: 6.5,
+    diesel_price: null,
+    fuel_consumption: null,
     additional_costs: null,
     date: "",
     product: "",
@@ -30,6 +31,7 @@ class Sell {
     minQuantity: "",
     maxQuantity: "",
   };
+  pieChartPeriod = "Последният месец";
 
   constructor() {
     makeObservable(this, {
@@ -41,6 +43,8 @@ class Sell {
       searchText: observable,
       filterData: observable,
       showFilter: observable,
+      sellStats: observable,
+      pieChartPeriod: observable,
       setSales: action,
       setSellData: action,
       setCurrentPage: action,
@@ -49,6 +53,8 @@ class Sell {
       setSearchText: action,
       setFilterData: action,
       setShowFilter: action,
+      setSellStats: action,
+      setPieChartPeriod: action,
     });
   }
 
@@ -98,6 +104,23 @@ class Sell {
     this.showFilter = data;
   };
 
+  setSellStats = (data) => {
+    this.sellStats = data;
+  };
+
+  setPieChartPeriod = (data) => {
+    this.pieChartPeriod = data;
+    this.loadSaleStats(data);
+  };
+
+  loadSaleStats = async (period) => {
+    this.setSellStats(
+      await sellAction.getStats(period?.currentKey ?? this.pieChartPeriod)
+    );
+
+    this.setIsLoading(false);
+  };
+
   loadSales = async (newPage) => {
     this.setSales(
       await sellAction.getSales(
@@ -114,11 +137,11 @@ class Sell {
   clearSellData = () => {
     this.sellData = {
       quantity: null,
-      mileage: 6,
+      mileage: null,
       fuel: null,
       price: null,
-      diesel_price: 2.6,
-      fuel_consumption: 6.5,
+      diesel_price: null,
+      fuel_consumption: null,
       additional_costs: null,
       date: "",
       product: "",

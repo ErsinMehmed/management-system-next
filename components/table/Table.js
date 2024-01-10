@@ -47,7 +47,7 @@ const Table = (props) => {
       case "fuel_price":
       case "price":
       case "total_amount":
-        return `${value.toFixed(2)} лв.`;
+        return `${value?.toFixed(2)} лв.`;
       default:
         return value;
     }
