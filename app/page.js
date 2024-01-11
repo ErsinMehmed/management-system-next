@@ -82,7 +82,7 @@ const Login = () => {
                 Нямате профил все още?{" "}
                 <Link
                   className='ml-1 hover:underline text-blue-500'
-                  href='/register'>
+                  href='/'>
                   Регистрация
                 </Link>
               </p>
