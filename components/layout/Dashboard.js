@@ -35,7 +35,7 @@ const DashboardLayout = (props) => {
           <Navbar onMenuClick={toggleMenu} show={isVisible} />
 
           <div className="mt-16">
-            <div className="p-5 text-2xl font-semibold text-slate-600 border-b border-gray-300">
+            <div className="p-5 text-xl 2xl:text-2xl font-semibold text-slate-600 border-b border-gray-300">
               {props.title}
             </div>
 

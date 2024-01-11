@@ -106,7 +106,7 @@ class Sell {
           break;
       }
 
-      const response = await fetch(`/api/sale-stats?period=${period}`);
+      const response = await fetch(`/api/sales-stats?period=${period}`);
 
       return await response.json();
     } catch (error) {

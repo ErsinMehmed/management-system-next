@@ -1,7 +1,6 @@
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
 import Order from "@/models/order";
-import Product from "@/models/product";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
@@ -43,7 +42,7 @@ export async function GET(request) {
       startDate = new Date(0);
   }
 
-  const totalFuelAmountArray = await Sell.aggregate([
+  const totalIncomesArray = await Sell.aggregate([
     {
       $match: {
         date: { $gte: startDate },
@@ -52,26 +51,12 @@ export async function GET(request) {
     {
       $group: {
         _id: null,
-        total_fuel_price: { $sum: "$fuel_price" },
+        incomes: { $sum: "$price" },
       },
     },
   ]);
 
-  const totalOrderAmountArray = await Order.aggregate([
-    {
-      $match: {
-        date: { $gte: startDate },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        total_amount: { $sum: "$total_amount" },
-      },
-    },
-  ]);
-
-  const expensesByProductArray = await Order.aggregate([
+  const incomesByProductArray = await Sell.aggregate([
     {
       $match: {
         date: { $gte: startDate },
@@ -81,7 +66,7 @@ export async function GET(request) {
       $group: {
         _id: "$product",
         quantity: { $sum: "$quantity" },
-        total_expenses: { $sum: "$total_amount" },
+        total_incomes: { $sum: "$price" },
       },
     },
     {
@@ -115,24 +100,17 @@ export async function GET(request) {
         count: "$product.count",
         category: "$category.name",
         quantity: 1,
-        total_expenses: 1,
+        total_incomes: 1,
       },
     },
   ]);
 
-  const totalFuelAmount =
-    totalFuelAmountArray.length > 0
-      ? totalFuelAmountArray[0].total_fuel_price
-      : 0;
-  const totalOrderAmount =
-    totalOrderAmountArray.length > 0
-      ? totalOrderAmountArray[0].total_amount
-      : 0;
+  const totalIncomes =
+    totalIncomesArray.length > 0 ? totalIncomesArray[0].incomes : 0;
 
   return NextResponse.json({
-    total_order_expenses: totalOrderAmount,
-    total_fuel_expenses: totalFuelAmount,
-    expenses_by_products: expensesByProductArray,
+    incomes: totalIncomes,
+    incomes_by_products: incomesByProductArray,
     status: true,
   });
 }

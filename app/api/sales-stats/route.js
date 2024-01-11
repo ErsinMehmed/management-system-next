@@ -105,5 +105,8 @@ export async function GET(request) {
     });
   }
 
-  return NextResponse.json({ sales: sales, status: true });
+  return NextResponse.json({
+    sales: sales,
+    status: true,
+  });
 }
