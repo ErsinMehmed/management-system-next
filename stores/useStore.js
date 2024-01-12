@@ -4,6 +4,7 @@ import order from "./orderStore";
 import product from "./productStore";
 import sell from "./sellStore";
 import expense from "./expenseStore";
+import income from "./incomeStore";
 
 const commonStore = common;
 const authStore = auth;
@@ -11,6 +12,7 @@ const orderStore = order;
 const productStore = product;
 const sellStore = sell;
 const expenseStore = expense;
+const incomeStore = income;
 
 export {
   commonStore,
@@ -19,4 +21,5 @@ export {
   productStore,
   sellStore,
   expenseStore,
+  incomeStore,
 };

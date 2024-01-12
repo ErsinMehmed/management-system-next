@@ -3,14 +3,11 @@ import expenseAction from "@/actions/expenseAction";
 
 class Expense {
   expenses = [];
-  expensePeriod = ["Последният месец"];
 
   constructor() {
     makeObservable(this, {
       expenses: observable,
-      expensePeriod: observable,
       setExpenses: action,
-      setExpensePeriod: action,
     });
   }
 
@@ -18,15 +15,8 @@ class Expense {
     this.expenses = data;
   };
 
-  setExpensePeriod = (data) => {
-    this.expensePeriod = data;
-    this.loadExpenses(data);
-  };
-
   loadExpenses = async (period) => {
-    this.setExpenses(
-      await expenseAction.getExpenses(period?.currentKey ?? this.expensePeriod)
-    );
+    this.setExpenses(await expenseAction.getExpenses(period));
   };
 }
 

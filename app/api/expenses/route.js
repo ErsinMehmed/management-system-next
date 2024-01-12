@@ -8,60 +8,103 @@ export async function GET(request) {
   await connectMongoDB();
 
   let startDate;
+  let endDate;
+  let dateCondition = {};
 
-  switch (request.nextUrl.searchParams.get("period")) {
-    case "today":
-      startDate = new Date();
-      startDate.setHours(0, 0, 0, 0);
-      break;
-    case "yesterday":
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - 1);
-      startDate.setHours(0, 0, 0, 0);
-      break;
-    case "last7days":
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - 7);
-      break;
-    case "lastMonth":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 1);
-      break;
-    case "last3Months":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 3);
-      break;
-    case "last6Months":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 6);
-      break;
-    case "lastYear":
-      startDate = new Date();
-      startDate.setFullYear(startDate.getFullYear() - 1);
-      break;
-    default:
-      startDate = new Date(0);
+  const dateFrom = request.nextUrl.searchParams.get("dateFrom");
+  const dateTo = request.nextUrl.searchParams.get("dateTo");
+
+  if (dateFrom && dateTo) {
+    startDate = new Date(dateFrom);
+    endDate = new Date(dateTo);
+
+    dateCondition = {
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    };
+
+    if (startDate > endDate) {
+      return NextResponse.json({
+        status: false,
+        error: "Невалиден период от време",
+      });
+    }
+  } else if (dateFrom) {
+    startDate = new Date(dateFrom);
+
+    dateCondition = {
+      date: {
+        $gte: startDate,
+      },
+    };
+  } else if (dateTo) {
+    endDate = new Date(dateTo);
+
+    dateCondition = {
+      date: {
+        $lte: endDate,
+      },
+    };
+  } else {
+    switch (request.nextUrl.searchParams.get("period")) {
+      case "today":
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "yesterday":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 1);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "last7days":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case "lastMonth":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case "last3Months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case "last6Months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 6);
+        break;
+      case "lastYear":
+        startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        startDate = new Date(0);
+    }
+
+    dateCondition = {
+      date: {
+        $gte: startDate,
+      },
+    };
   }
 
   const totalFuelAmountArray = await Sell.aggregate([
     {
-      $match: {
-        date: { $gte: startDate },
-      },
+      $match: dateCondition,
     },
     {
       $group: {
         _id: null,
         total_fuel_price: { $sum: "$fuel_price" },
+        additional_costs: { $sum: "$additional_costs" },
       },
     },
   ]);
 
   const totalOrderAmountArray = await Order.aggregate([
     {
-      $match: {
-        date: { $gte: startDate },
-      },
+      $match: dateCondition,
     },
     {
       $group: {
@@ -73,9 +116,7 @@ export async function GET(request) {
 
   const expensesByProductArray = await Order.aggregate([
     {
-      $match: {
-        date: { $gte: startDate },
-      },
+      $match: dateCondition,
     },
     {
       $group: {
@@ -124,6 +165,10 @@ export async function GET(request) {
     totalFuelAmountArray.length > 0
       ? totalFuelAmountArray[0].total_fuel_price
       : 0;
+  const additionalCosts =
+    totalFuelAmountArray.length > 0
+      ? totalFuelAmountArray[0].additional_costs
+      : 0;
   const totalOrderAmount =
     totalOrderAmountArray.length > 0
       ? totalOrderAmountArray[0].total_amount
@@ -132,6 +177,7 @@ export async function GET(request) {
   return NextResponse.json({
     total_order_expenses: totalOrderAmount,
     total_fuel_expenses: totalFuelAmount,
+    total_additional_expenses: additionalCosts,
     expenses_by_products: expensesByProductArray,
     status: true,
   });

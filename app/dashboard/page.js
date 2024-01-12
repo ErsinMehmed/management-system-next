@@ -1,18 +1,26 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { sellStore, expenseStore } from "@/stores/useStore";
+import {
+  sellStore,
+  expenseStore,
+  incomeStore,
+  commonStore,
+} from "@/stores/useStore";
 import { MdAttachMoney } from "react-icons/md";
 import { TbMoneybag } from "react-icons/tb";
 import { Tabs, Tab } from "@nextui-org/react";
 import Layout from "@/components/layout/Dashboard";
 import PieChart from "@/components/charts/PieChart";
+import Select from "@/components/html/Select";
 import Box from "@/components/dashboard/Box";
+import { categories, periods } from "@/data";
 
 const Dashboard = () => {
   const { sellStats, loadSaleStats } = sellStore;
-  const { expensePeriod, expenses, setExpensePeriod, loadExpenses } =
-    expenseStore;
+  const { expenses, loadExpenses } = expenseStore;
+  const { incomes, loadIncomes } = incomeStore;
+  const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
 
   useEffect(() => {
@@ -21,7 +29,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadExpenses();
-  }, [loadExpenses]);
+    loadIncomes();
+  }, [loadExpenses, loadIncomes]);
 
   const filteredExpenses = expenses.expenses_by_products?.filter(
     (expense) => expense.category === selectedCategory
@@ -44,6 +53,10 @@ const Dashboard = () => {
               } py-2.5 px-3 text-sm`}
             >
               <dt className="text-gray-500 font-semibold">{exprence.name}</dt>
+
+              <dt className="text-gray-500 font-semibold">
+                {exprence.quantity} бр.
+              </dt>
 
               <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
                 {exprence.total_expenses.toFixed(2)} лв.
@@ -69,39 +82,156 @@ const Dashboard = () => {
     </div>
   );
 
+  const filteredIncomes = incomes.incomes_by_products?.filter(
+    (income) => income.category === selectedCategory
+  );
+
+  const totalIncomesByCategory = filteredIncomes?.reduce(
+    (accumulator, stat) => accumulator + stat.total_incomes,
+    0
+  );
+
+  const incomeSection = (
+    <div className="bg-gray-50 rounded-lg">
+      {filteredIncomes?.length > 0 ? (
+        <>
+          {filteredIncomes?.map((income, index) => (
+            <dl
+              key={index}
+              className={`flex items-center justify-between ${
+                index > 0 && "border-t"
+              } py-2.5 px-3 text-sm`}
+            >
+              <dt className="text-gray-500 font-semibold">{income.name}</dt>
+
+              <dt className="text-gray-500 font-semibold">
+                {income.quantity} бр.
+              </dt>
+
+              <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
+                {income.total_incomes.toFixed(2)} лв.
+              </dd>
+            </dl>
+          ))}
+
+          {filteredIncomes?.length > 1 && (
+            <dl className="flex items-center justify-between py-2.5 px-3 text-sm border-t">
+              <dt />
+
+              <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold">
+                {totalIncomesByCategory.toFixed(2)} лв.
+              </dd>
+            </dl>
+          )}
+        </>
+      ) : (
+        <div className="text-gray-500 text-center py-3 font-semibold text-sm">
+          Няма налични данни
+        </div>
+      )}
+    </div>
+  );
+
+  const handleInputChange = (name, value) => {
+    setDashboardBoxPeriod({ ...dashboardBoxPeriod, [name]: value });
+  };
+
   return (
     <Layout title="Администраторско табло">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+      <div>
+        <Select
+          items={periods}
+          label="Избери период"
+          value={dashboardBoxPeriod.period || ""}
+          onChange={(value) => handleInputChange("period", value)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
         <Box
-          title="Разходи"
-          period={expensePeriod}
-          setPeriod={setExpensePeriod}
+          title="Приходи"
+          period={dashboardBoxPeriod.period}
           modalContent={
             <Tabs
               aria-label="Options"
               selectedKey={selectedCategory}
               onSelectionChange={setSelectedCategory}
             >
-              <Tab key="Бутилки" title="Бутилки">
-                {expenseSection}
-              </Tab>
-              <Tab key="Балони" title="Балони">
-                {expenseSection}
-              </Tab>
-              <Tab key="Накрайници" title="Накрайници">
-                {expenseSection}
+              {categories.map((category) => (
+                <Tab key={category} title={category}>
+                  {incomeSection}
+                </Tab>
+              ))}
+            </Tabs>
+          }
+          value={incomes.incomes?.toFixed(2)}
+          icon={<MdAttachMoney className="w-6 h-6" />}
+          modalTitle="Приходи по категории"
+          modal={true}
+        />
+
+        <Box
+          title="Разходи"
+          period={dashboardBoxPeriod.period}
+          modalContent={
+            <Tabs
+              aria-label="Options"
+              selectedKey={selectedCategory}
+              onSelectionChange={setSelectedCategory}
+            >
+              {categories.map((category) => (
+                <Tab key={category} title={category}>
+                  {expenseSection}
+                </Tab>
+              ))}
+
+              <Tab key="Други" title="Други">
+                <div className="bg-gray-50 rounded-lg">
+                  <dl className="flex items-center justify-between py-2.5 px-3 text-sm">
+                    <dt className="text-gray-500 font-semibold">Гориво</dt>
+
+                    <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
+                      {expenses.total_fuel_expenses?.toFixed(2)} лв.
+                    </dd>
+                  </dl>
+
+                  <dl className="flex items-center justify-between py-2.5 px-3 text-sm border-t">
+                    <dt className="text-gray-500 font-semibold">
+                      Допълнителни (външни поръчки)
+                    </dt>
+
+                    <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
+                      {expenses.total_additional_expenses?.toFixed(2)} лв.
+                    </dd>
+                  </dl>
+                </div>
               </Tab>
             </Tabs>
           }
           value={(
-            expenses.total_order_expenses + expenses.total_fuel_expenses
+            expenses.total_order_expenses +
+            expenses.total_fuel_expenses +
+            expenses.total_additional_expenses
           ).toFixed(2)}
           icon={<MdAttachMoney className="w-6 h-6" />}
           modalTitle="Разходи по категории"
           modal={true}
         />
-        {/* <Box title="Приходи" icon={<MdAttachMoney className="w-6 h-6" />} />
-        <Box title="Печалба" icon={<TbMoneybag className="w-6 h-6" />} /> */}
+
+        <Box
+          title="Печалба"
+          period={dashboardBoxPeriod.period}
+          value={(
+            incomes.incomes?.toFixed(2) -
+            (
+              expenses.total_order_expenses +
+              expenses.total_fuel_expenses +
+              expenses.total_additional_expenses
+            ).toFixed(2)
+          ).toFixed(2)}
+          icon={<TbMoneybag className="w-6 h-6" />}
+          modal={false}
+        />
       </div>
 
       <PieChart

@@ -78,6 +78,22 @@ const DashboardStocks = () => {
               />
             </div>
 
+            {productData.name == "Балони" && (
+              <div className="border-b pb-6">
+                <div className="text-slate-800 font-semibold mb-2">
+                  Наличност
+                </div>
+
+                <Input
+                  type="text"
+                  label="Начличност на проддукта"
+                  value={productData.availability || ""}
+                  errorMessage={errorFields.availability}
+                  onChange={(value) => handleInputChange("availability", value)}
+                />
+              </div>
+            )}
+
             <div className="pt-1 space-y-2">
               <div className="text-slate-800 font-semibold">
                 Цена за продажба

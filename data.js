@@ -3,14 +3,16 @@ import { BsBox, BsCart2, BsTruck, BsHouse, BsMegaphone } from "react-icons/bs";
 const perPageResult = [5, 10, 15, 20];
 
 const periods = [
-  "Днес",
-  "Вчера",
-  "Последните 7 дни",
-  "Последният месец",
-  "Последните 3 месеца",
-  "Последните 6 месеца",
-  "Последната година",
+  { value: "Днес" },
+  { value: "Вчера" },
+  { value: "Последните 7 дни" },
+  { value: "Последният месец" },
+  { value: "Последните 3 месеца" },
+  { value: "Последните 6 месеца" },
+  { value: "Последната година" },
 ];
+
+const categories = ["Бутилки", "Балони", "Накрайници"];
 
 const dashboardLinks = [
   {
@@ -40,4 +42,4 @@ const dashboardLinks = [
   },
 ];
 
-export { periods, perPageResult, dashboardLinks };
+export { periods, perPageResult, dashboardLinks, categories };

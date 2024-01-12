@@ -1,5 +1,5 @@
-class Expense {
-  getExpenses = async (period) => {
+class Income {
+  getIncomes = async (period) => {
     try {
       let periodParam;
 
@@ -34,7 +34,7 @@ class Expense {
         }
       }
 
-      const response = await fetch(`/api/expenses?${periodParam}`);
+      const response = await fetch(`/api/incomes?${periodParam}`);
 
       return await response.json();
     } catch (error) {
@@ -43,4 +43,4 @@ class Expense {
   };
 }
 
-export default new Expense();
+export default new Income();

@@ -121,7 +121,7 @@ const Pie = (props) => {
   };
 
   return (
-    <div className="md:max-w-lg w-full bg-white rounded-md shadow-md p-4 md:p-5">
+    <div className="lg:max-w-lg w-full bg-white rounded-md shadow-md p-4 md:p-5">
       <div className="flex justify-between items-start w-full mb-5">
         <div className="flex-col items-center w-full">
           <div className="flex items-center mb-1">
@@ -145,6 +145,7 @@ const Pie = (props) => {
                     >
                       {stat.total_quantity}
                     </dt>
+
                     <dd
                       className={`text-${pieChartBoxColor[index]}-600 text-sm font-semibold`}
                     >
@@ -175,6 +176,17 @@ const Pie = (props) => {
                       {totalSalesCount}
                     </dd>
                   </dl>
+
+                  <dl className="flex items-center justify-between font-medium">
+                    <dt className="text-gray-500 text-sm">
+                      Брой продадени кашона:
+                    </dt>
+
+                    <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
+                      {(totalBottleCount / 6).toFixed(1)}
+                    </dd>
+                  </dl>
+
                   <dl className="flex items-center justify-between font-medium">
                     <dt className="text-gray-500 text-sm">
                       Брой продадени бутилки:
