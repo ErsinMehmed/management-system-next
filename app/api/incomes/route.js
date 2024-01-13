@@ -7,46 +7,94 @@ export async function GET(request) {
   await connectMongoDB();
 
   let startDate;
+  let endDate;
+  let dateCondition = {};
 
-  switch (request.nextUrl.searchParams.get("period")) {
-    case "today":
-      startDate = new Date();
-      startDate.setHours(0, 0, 0, 0);
-      break;
-    case "yesterday":
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - 1);
-      startDate.setHours(0, 0, 0, 0);
-      break;
-    case "last7days":
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - 7);
-      break;
-    case "lastMonth":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 1);
-      break;
-    case "last3Months":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 3);
-      break;
-    case "last6Months":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 6);
-      break;
-    case "lastYear":
-      startDate = new Date();
-      startDate.setFullYear(startDate.getFullYear() - 1);
-      break;
-    default:
-      startDate = new Date(0);
+  const dateFrom = request.nextUrl.searchParams.get("dateFrom");
+  const dateTo = request.nextUrl.searchParams.get("dateTo");
+
+  if (dateFrom && dateTo) {
+    startDate = new Date(dateFrom);
+    endDate = new Date(dateTo);
+
+    dateCondition = {
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    };
+
+    if (startDate > endDate) {
+      return NextResponse.json({
+        status: false,
+        error: "Невалиден период от време",
+      });
+    }
+  } else if (dateFrom) {
+    startDate = new Date(dateFrom);
+
+    dateCondition = {
+      date: {
+        $gte: startDate,
+      },
+    };
+  } else if (dateTo) {
+    endDate = new Date(dateTo);
+
+    dateCondition = {
+      date: {
+        $lte: endDate,
+      },
+    };
+  } else {
+    switch (request.nextUrl.searchParams.get("period")) {
+      case "today":
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "yesterday":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 1);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "last7days":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case "lastMonth":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case "last3Months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case "last6Months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 6);
+        break;
+      case "lastYear":
+        startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        startDate = new Date(0);
+    }
+
+    dateCondition = {
+      date:
+        request.nextUrl.searchParams.get("period") === "yesterday"
+          ? {
+              $gte: startDate,
+              $lt: new Date(startDate.getTime() + 24 * 60 * 60 * 1000),
+            }
+          : { $gte: startDate },
+    };
   }
 
   const totalIncomesArray = await Sell.aggregate([
     {
-      $match: {
-        date: { $gte: startDate },
-      },
+      $match: dateCondition,
     },
     {
       $group: {
@@ -58,9 +106,7 @@ export async function GET(request) {
 
   const incomesByProductArray = await Sell.aggregate([
     {
-      $match: {
-        date: { $gte: startDate },
-      },
+      $match: dateCondition,
     },
     {
       $group: {

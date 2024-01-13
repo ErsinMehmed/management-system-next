@@ -83,9 +83,13 @@ export async function GET(request) {
     }
 
     dateCondition = {
-      date: {
-        $gte: startDate,
-      },
+      date:
+        request.nextUrl.searchParams.get("period") === "yesterday"
+          ? {
+              $gte: startDate,
+              $lt: new Date(startDate.getTime() + 24 * 60 * 60 * 1000),
+            }
+          : { $gte: startDate },
     };
   }
 
