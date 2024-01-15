@@ -4,6 +4,7 @@ import BalloonsImg from "@/public/images/Balloons.png";
 import Exotic640Img from "@/public/images/ExoticWhip-640G.png";
 import Exotic2000Img from "@/public/images/ExoticWhip-2000G.webp";
 import Miami3300Img from "@/public/images/MiamiMagic-3300G.webp";
+import BakingBad2200Img from "@/public/images/BakingBad-2200G.jpg";
 import GreatWhip640Img from "@/public/images/GreatWhip-640G.webp";
 import SilentBlueberryImg from "@/public/images/Silent-Nozzle-Blueberry.png";
 import SilentPineappleImg from "@/public/images/Silent-Nozzle-Pineapple.png";
@@ -20,6 +21,8 @@ const Box = (props) => {
         return GreatWhip640Img;
       case "Miami Magic":
         return Miami3300Img;
+      case "Baking Bad":
+        return BakingBad2200Img;
       case "Балони":
         return BalloonsImg;
       case "Накрайник с вкус":

@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
+import { MdAttachMoney } from "react-icons/md";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
@@ -20,6 +21,8 @@ const DashboardSales = () => {
     searchText,
     filterData,
     showFilter,
+    fuelConsumption,
+    dieselPrice,
     handlePageChange,
     handlePageClick,
     setPerPage,
@@ -33,9 +36,12 @@ const DashboardSales = () => {
     deleteSell,
     setShowFilter,
     loadValues,
+    setFuelConsumption,
+    setDieselPrice,
+    updateValues,
   } = sellStore;
   const { products } = productStore;
-  const { errorFields, errorMessage } = commonStore;
+  const { errorFields, successMessage, errorMessage } = commonStore;
 
   useEffect(() => {
     loadSales();
@@ -43,7 +49,7 @@ const DashboardSales = () => {
 
   useEffect(() => {
     loadValues();
-  }, [loadSales]);
+  }, [loadValues]);
 
   const handleDeleteSell = (id) => {
     deleteSell(id);
@@ -117,21 +123,20 @@ const DashboardSales = () => {
       isButton={true}
       errorFields={errorFields}
       saveBtnAction={createSell}
-      openBtnText="Добави"
-      title="Дoбави продажба"
-    >
-      <div className="space-y-3.5">
+      openBtnText='Добави'
+      title='Дoбави продажба'>
+      <div className='space-y-3.5'>
         <Select
           items={updatedProducts}
-          label="Избери продукт"
+          label='Избери продукт'
           value={sellData.product || ""}
           errorMessage={errorFields.product}
           onChange={(value) => handleInputChange("product", value)}
         />
 
         <Input
-          type="text"
-          label="Количество"
+          type='text'
+          label='Количество'
           value={sellData.quantity || ""}
           disabled={!sellData.product}
           errorMessage={errorFields.quantity}
@@ -139,26 +144,26 @@ const DashboardSales = () => {
         />
 
         <Input
-          type="text"
-          label="Цена"
+          type='text'
+          label='Цена'
           value={sellData.price || ""}
           disabled={!sellData.quantity}
           errorMessage={errorFields.price}
           onChange={(value) => handleInputChange("price", value)}
         />
 
-        <div className="grid grid-cols-2 gap-3.5">
+        <div className='grid grid-cols-2 gap-3.5'>
           <Input
-            type="text"
-            label="Разход на 100км"
+            type='text'
+            label='Разход на 100км'
             value={sellData.fuel_consumption || ""}
             errorMessage={errorFields.fuel_consumption}
             onChange={(value) => handleInputChange("fuel_consumption", value)}
           />
 
           <Input
-            type="text"
-            label="Цена на дизела"
+            type='text'
+            label='Цена на дизела'
             value={sellData.diesel_price || ""}
             errorMessage={errorFields.diesel_price}
             onChange={(value) => handleInputChange("diesel_price", value)}
@@ -166,8 +171,8 @@ const DashboardSales = () => {
         </div>
 
         <Input
-          type="text"
-          label="Изминати километри"
+          type='text'
+          label='Изминати километри'
           value={sellData.mileage || ""}
           disabled={!sellData.diesel_price && !sellData.fuel_consumption}
           errorMessage={errorFields.mileage}
@@ -175,36 +180,36 @@ const DashboardSales = () => {
         />
 
         <Input
-          type="text"
-          label="Допълнителни разходи"
+          type='text'
+          label='Допълнителни разходи'
           value={sellData.additional_costs || ""}
           onChange={(value) => handleInputChange("additional_costs", value)}
         />
 
         <Input
-          type="date"
-          label="Дата"
+          type='date'
+          label='Дата'
           value={sellData.date || ""}
           onChange={(value) => handleInputChange("date", value)}
         />
 
         <Textarea
-          label="Съобщение"
+          label='Съобщение'
           value={sellData.message || ""}
           onChange={(value) => handleInputChange("message", value)}
         />
 
-        <div className="grid grid-cols-2 gap-3.5">
-          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
-            <div className="text-sm">Продажна цена</div>
+        <div className='grid grid-cols-2 gap-3.5'>
+          <div className='bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold'>
+            <div className='text-sm'>Продажна цена</div>
 
             <div>
               {sellData.price ? sellData.price.toFixed(2) + "лв." : "0.00лв."}
             </div>
           </div>
 
-          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
-            <div className="text-sm">Разходи за гориво</div>
+          <div className='bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold'>
+            <div className='text-sm'>Разходи за гориво</div>
 
             <div>
               {sellData.fuel_price
@@ -218,10 +223,50 @@ const DashboardSales = () => {
   );
 
   return (
-    <Layout title="Продажби">
-      <div className="min-h-screen 2xl:px-10">
+    <Layout title='Продажби'>
+      <Modal
+        title='Редактирай стойности'
+        saveBtnAction={() => {
+          return updateValues("65a551bbacc139606ddbb3ec", {
+            diesel_price: dieselPrice,
+            fuel_consumption: fuelConsumption,
+          });
+        }}
+        openButton={
+          <button
+            className={`${
+              showFilter ? "top-[22.6rem]" : "top-20"
+            } text-white absolute top-20 right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90`}>
+            <span className='hidden sm:block'>Стойности</span>
+
+            <MdAttachMoney className='w-5 h-5 sm:hidden' />
+          </button>
+        }>
+        <div className='border-b pb-6'>
+          <div className='text-slate-800 font-semibold mb-2'>Константи</div>
+
+          <div className='space-y-3.5'>
+            <Input
+              type='text'
+              label='Цена на гориво'
+              value={dieselPrice || ""}
+              errorMessage={errorFields.diesel_price}
+              onChange={(value) => setDieselPrice(value)}
+            />
+            <Input
+              type='text'
+              label='Разход на 100км.'
+              value={fuelConsumption || ""}
+              errorMessage={errorFields.fuel_consumption}
+              onChange={(value) => setFuelConsumption(value)}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      <div className='min-h-screen 2xl:px-10'>
         <Table
-          title="Продажби"
+          title='Продажби'
           data={filteredSales}
           columns={["продукт", "количество", "цена", "гориво", "дата"]}
           delete={handleDeleteSell}
@@ -236,7 +281,7 @@ const DashboardSales = () => {
           isLoading={isLoading}
           setPerPage={setPerPage}
           searchBarButton={modal}
-          searchBarPlaceholder="име на продукт"
+          searchBarPlaceholder='име на продукт'
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
           filterSection={true}

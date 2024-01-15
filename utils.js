@@ -116,6 +116,7 @@ export function productTitle(product) {
     case "Exotic Whip":
     case "Great Whip":
     case "Miami Magic":
+    case "Baking Bad":
       return `${product.name} ${product.weight}гр.`;
     case "Балони":
       return `${product.name} пакет ${product.count}бр.`;

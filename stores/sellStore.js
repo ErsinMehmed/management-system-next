@@ -2,6 +2,7 @@ import { makeObservable, observable, action } from "mobx";
 import sellAction from "@/actions/sellAction";
 import { validateFields } from "@/utils";
 import { sellRules as getSellRules } from "@/rules/sell";
+import { valueRules as getValueRules } from "@/rules/values";
 import commonStore from "./commonStore";
 
 class Sell {
@@ -231,6 +232,31 @@ class Sell {
       commonStore.setSuccessMessage(response.message);
       this.loadSales();
     }
+  };
+
+  updateValues = async (id, data) => {
+    commonStore.setErrorFields({});
+    commonStore.setErrorMessage(null);
+    commonStore.setSuccessMessage(null);
+
+    const valueRules = getValueRules();
+    const errorFields = validateFields(data, valueRules);
+
+    if (errorFields) {
+      commonStore.setErrorFields(errorFields);
+      return false;
+    }
+
+    const response = await sellAction.updateValue(id, data);
+
+    if (response.status) {
+      commonStore.setSuccessMessage(response.message);
+      this.loadValues();
+
+      return true;
+    }
+
+    return false;
   };
 }
 
