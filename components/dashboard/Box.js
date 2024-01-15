@@ -20,12 +20,20 @@ const Box = (props) => {
             </h2>
 
             <div className="text-xs font-semibold text-slate-400 uppercase mb-3">
-              {props.period}
+              {props.period.dateFrom && props.period.dateTo
+                ? `${moment(props.period.dateFrom).format(
+                    "DD.MM.YYYY"
+                  )} - ${moment(props.period.dateTo).format("DD.MM.YYYY")}`
+                : props.period.dateFrom
+                ? `От ${moment(props.period.dateFrom).format("DD.MM.YYYY")}`
+                : props.period.dateTo
+                ? `До ${moment(props.period.dateTo).format("DD.MM.YYYY")}`
+                : props.period.period}
             </div>
           </div>
         </div>
         <div className="text-3xl font-bold text-slate-800 mr-2">
-          {props.value}лв.
+          {isNaN(props.value) ? "00.00" : props.value}лв.
         </div>
       </div>
     </div>

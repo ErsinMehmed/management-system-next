@@ -16,7 +16,10 @@ export async function GET(request) {
 
   if (dateFrom && dateTo) {
     startDate = new Date(dateFrom);
+    startDate.setHours(0, 0, 0, 0);
+
     endDate = new Date(dateTo);
+    endDate.setHours(23, 59, 59, 999);
 
     dateCondition = {
       date: {

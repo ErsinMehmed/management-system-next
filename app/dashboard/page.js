@@ -13,6 +13,7 @@ import { Tabs, Tab } from "@nextui-org/react";
 import Layout from "@/components/layout/Dashboard";
 import PieChart from "@/components/charts/PieChart";
 import Select from "@/components/html/Select";
+import Input from "@/components/html/Input";
 import Box from "@/components/dashboard/Box";
 import { categories, periods } from "@/data";
 
@@ -22,6 +23,7 @@ const Dashboard = () => {
   const { incomes, loadIncomes } = incomeStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
+  const [showBoxFilter, setShowBoxFilter] = useState(false);
 
   useEffect(() => {
     loadSaleStats();
@@ -133,24 +135,62 @@ const Dashboard = () => {
   );
 
   const handleInputChange = (name, value) => {
-    setDashboardBoxPeriod({ ...dashboardBoxPeriod, [name]: value });
+    if (name === "period") {
+      setDashboardBoxPeriod({
+        ...dashboardBoxPeriod,
+        [name]: value,
+        dateFrom: "",
+        dateTo: "",
+      });
+    } else {
+      setDashboardBoxPeriod({ ...dashboardBoxPeriod, [name]: value });
+    }
+  };
+
+  const handleBoxFilter = () => {
+    setShowBoxFilter(!showBoxFilter);
   };
 
   return (
     <Layout title="Администраторско табло">
-      <div>
-        <Select
-          items={periods}
-          label="Избери период"
-          value={dashboardBoxPeriod.period || ""}
-          onChange={(value) => handleInputChange("period", value)}
-        />
+      <div className="md:flex items-center justify-between">
+        <button
+          onClick={handleBoxFilter}
+          className="text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 md:px-4 2xl:px-6 py-2.5 mb-4 md:mb-0 md:py-1.5 2xl:py-2.5 md:-mt-3 text-center transition-all active:scale-95 w-full md:w-auto"
+        >
+          Покажи филтрите
+        </button>
+
+        {showBoxFilter && (
+          <div className="flex flex-col md:flex-row items-center bg-white p-3 gap-3.5 w-full md:w-4/6 2xl:w-3/5 rounded-md shadow-md mb-5">
+            <Input
+              type="date"
+              label="От"
+              value={dashboardBoxPeriod.dateFrom || ""}
+              onChange={(value) => handleInputChange("dateFrom", value)}
+            />
+
+            <Input
+              type="date"
+              label="До"
+              value={dashboardBoxPeriod.dateTo || ""}
+              onChange={(value) => handleInputChange("dateTo", value)}
+            />
+
+            <Select
+              items={periods}
+              label="Избери период"
+              value={dashboardBoxPeriod.period || ""}
+              onChange={(value) => handleInputChange("period", value)}
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
         <Box
           title="Приходи"
-          period={dashboardBoxPeriod.period}
+          period={dashboardBoxPeriod}
           modalContent={
             <Tabs
               aria-label="Options"
@@ -172,7 +212,7 @@ const Dashboard = () => {
 
         <Box
           title="Разходи"
-          period={dashboardBoxPeriod.period}
+          period={dashboardBoxPeriod}
           modalContent={
             <Tabs
               aria-label="Options"
@@ -220,7 +260,7 @@ const Dashboard = () => {
 
         <Box
           title="Печалба"
-          period={dashboardBoxPeriod.period}
+          period={dashboardBoxPeriod}
           value={(
             incomes.incomes?.toFixed(2) -
             (

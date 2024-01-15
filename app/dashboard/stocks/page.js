@@ -47,7 +47,7 @@ const DashboardStocks = () => {
 
   return (
     <Layout title="Наличности">
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 p-8">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8">
         {products.map((product, index) => (
           <Modal
             key={index}

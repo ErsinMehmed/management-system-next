@@ -75,7 +75,7 @@ const DashboardSales = () => {
 
         break;
       case "quantity":
-        value = parseInt(value, 10);
+        value = Number(value);
 
         const selectedProduct = products.find(
           (product) => product._id === sellData.product
@@ -83,14 +83,20 @@ const DashboardSales = () => {
 
         updatedData.price = selectedProduct.sell_prices[value - 1];
         break;
-      case "mileage":
-        value = parseInt(value, 10);
-
+      case "diesel_price":
         updatedData.fuel_price =
-          (value / 100) * sellData.fuel_consumption * sellData.diesel_price;
+          (sellData.mileage / 100) * sellData.fuel_consumption * Number(value);
+      case "fuel_consumption":
+        updatedData.fuel_price =
+          (sellData.mileage / 100) * Number(value) * sellData.diesel_price;
+      case "mileage":
+        updatedData.fuel_price =
+          (Number(value) / 100) *
+          sellData.fuel_consumption *
+          sellData.diesel_price;
         break;
       case "price":
-        value = parseInt(value, 10);
+        value = Number(value);
 
         updatedData.price = sellData.quantity * value;
         break;
