@@ -15,7 +15,6 @@ import SearchBar from "./SearchBar";
 import Filter from "./Filter";
 import Loader from "./Loader";
 import Select from "./Select";
-import Link from "next/link";
 
 const Table = (props) => {
   const [rowId, setRowId] = useState(null);

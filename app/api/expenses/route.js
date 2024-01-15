@@ -31,7 +31,7 @@ export async function GET(request) {
     if (startDate > endDate) {
       return NextResponse.json({
         status: false,
-        error: "Невалиден период от време",
+        message: "Невалиден период от време",
       });
     }
   } else if (dateFrom) {

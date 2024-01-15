@@ -113,6 +113,16 @@ class Sell {
       throw error;
     }
   };
+
+  getValues = async () => {
+    try {
+      const response = await fetch("/api/values");
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
 export default new Sell();

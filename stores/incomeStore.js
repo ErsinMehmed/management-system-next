@@ -1,5 +1,6 @@
 import { makeObservable, observable, action } from "mobx";
 import incomeAction from "@/actions/incomeAction";
+import commonStore from "./commonStore";
 
 class Income {
   incomes = [];
@@ -16,7 +17,13 @@ class Income {
   };
 
   loadIncomes = async (period) => {
-    this.setIncomes(await incomeAction.getIncomes(period));
+    const response = await incomeAction.getIncomes(period);
+
+    if (response.status) {
+      this.setIncomes(response);
+    } else {
+      commonStore.setErrorMessage(response.message);
+    }
   };
 }
 

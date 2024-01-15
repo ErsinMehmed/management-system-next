@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
@@ -32,12 +32,17 @@ const DashboardSales = () => {
     loadSales,
     deleteSell,
     setShowFilter,
+    loadValues,
   } = sellStore;
   const { products } = productStore;
   const { errorFields, errorMessage } = commonStore;
 
   useEffect(() => {
     loadSales();
+  }, [loadSales]);
+
+  useEffect(() => {
+    loadValues();
   }, [loadSales]);
 
   const handleDeleteSell = (id) => {

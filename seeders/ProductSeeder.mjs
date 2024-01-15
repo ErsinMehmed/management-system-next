@@ -15,7 +15,7 @@ const data = [
   {
     name: "Exotic Whip",
     weight: 640,
-    price: 27.5,
+    price: 27,
     sell_prices: [60, 115, 155, 200, 235, 270],
     category: "65932958c886e9d1f6c951e2",
     availability: 0,

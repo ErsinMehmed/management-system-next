@@ -20,6 +20,8 @@ class Sell {
     message: "",
   };
   currentPage = 1;
+  fuelConsumption = null;
+  dieselPrice = null;
   perPage = 10;
   isLoading = true;
   searchText = "";
@@ -45,6 +47,8 @@ class Sell {
       showFilter: observable,
       sellStats: observable,
       pieChartPeriod: observable,
+      fuelConsumption: observable,
+      dieselPrice: observable,
       setSales: action,
       setSellData: action,
       setCurrentPage: action,
@@ -55,6 +59,8 @@ class Sell {
       setShowFilter: action,
       setSellStats: action,
       setPieChartPeriod: action,
+      setFuelConsumption: action,
+      setDieselPrice: action,
     });
   }
 
@@ -108,6 +114,14 @@ class Sell {
     this.sellStats = data;
   };
 
+  setDieselPrice = (data) => {
+    this.dieselPrice = data;
+  };
+
+  setFuelConsumption = (data) => {
+    this.fuelConsumption = data;
+  };
+
   setPieChartPeriod = (data) => {
     this.pieChartPeriod = data;
     this.loadSaleStats(data);
@@ -119,6 +133,19 @@ class Sell {
     );
 
     this.setIsLoading(false);
+  };
+
+  loadValues = async () => {
+    const response = await sellAction.getValues();
+
+    this.setFuelConsumption(response[0].fuel_consumption);
+    this.setDieselPrice(response[0].diesel_price);
+
+    this.sellData = {
+      ...this.sellData,
+      diesel_price: response[0].diesel_price,
+      fuel_consumption: response[0].fuel_consumption,
+    };
   };
 
   loadSales = async (newPage) => {
@@ -140,8 +167,8 @@ class Sell {
       mileage: null,
       fuel: null,
       price: null,
-      diesel_price: null,
-      fuel_consumption: null,
+      diesel_price: this.dieselPrice,
+      fuel_consumption: this.fuelConsumption,
       additional_costs: null,
       date: "",
       product: "",
