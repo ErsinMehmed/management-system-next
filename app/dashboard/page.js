@@ -23,7 +23,6 @@ const Dashboard = () => {
   const { incomes, loadIncomes } = incomeStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
-  const [showBoxFilter, setShowBoxFilter] = useState(false);
 
   useEffect(() => {
     loadSaleStats();
@@ -147,44 +146,29 @@ const Dashboard = () => {
     }
   };
 
-  const handleBoxFilter = () => {
-    setShowBoxFilter(!showBoxFilter);
-  };
-
   return (
     <Layout title="Администраторско табло">
-      <div className="md:flex items-center justify-between">
-        <button
-          onClick={handleBoxFilter}
-          className="text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 md:px-4 2xl:px-6 py-2.5 mb-4 md:mb-0 md:py-1.5 2xl:py-2.5 md:-mt-3 text-center transition-all active:scale-95 w-full md:w-auto"
-        >
-          Покажи филтрите
-        </button>
+      <div className="flex flex-col lg:flex-row items-center bg-white p-3 gap-3.5 w-full lg:w-4/6 2xl:w-3/5 rounded-md shadow-md mb-5 ml-auto">
+        <Input
+          type="date"
+          label="От"
+          value={dashboardBoxPeriod.dateFrom || ""}
+          onChange={(value) => handleInputChange("dateFrom", value)}
+        />
 
-        {showBoxFilter && (
-          <div className="flex flex-col md:flex-row items-center bg-white p-3 gap-3.5 w-full md:w-4/6 2xl:w-3/5 rounded-md shadow-md mb-5">
-            <Input
-              type="date"
-              label="От"
-              value={dashboardBoxPeriod.dateFrom || ""}
-              onChange={(value) => handleInputChange("dateFrom", value)}
-            />
+        <Input
+          type="date"
+          label="До"
+          value={dashboardBoxPeriod.dateTo || ""}
+          onChange={(value) => handleInputChange("dateTo", value)}
+        />
 
-            <Input
-              type="date"
-              label="До"
-              value={dashboardBoxPeriod.dateTo || ""}
-              onChange={(value) => handleInputChange("dateTo", value)}
-            />
-
-            <Select
-              items={periods}
-              label="Избери период"
-              value={dashboardBoxPeriod.period || ""}
-              onChange={(value) => handleInputChange("period", value)}
-            />
-          </div>
-        )}
+        <Select
+          items={periods}
+          label="Избери период"
+          value={dashboardBoxPeriod.period || ""}
+          onChange={(value) => handleInputChange("period", value)}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
@@ -274,11 +258,13 @@ const Dashboard = () => {
         />
       </div>
 
-      <PieChart
-        data={sellStats.sales}
-        status={sellStats.status}
-        message={sellStats.message}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <PieChart
+          data={sellStats.sales}
+          status={sellStats.status}
+          message={sellStats.message}
+        />
+      </div>
     </Layout>
   );
 };
