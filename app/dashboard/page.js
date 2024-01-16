@@ -6,6 +6,7 @@ import {
   expenseStore,
   incomeStore,
   commonStore,
+  productStore,
 } from "@/stores/useStore";
 import { MdAttachMoney } from "react-icons/md";
 import { TbMoneybag } from "react-icons/tb";
@@ -14,6 +15,7 @@ import Layout from "@/components/layout/Dashboard";
 import PieChart from "@/components/charts/PieChart";
 import Select from "@/components/html/Select";
 import Input from "@/components/html/Input";
+import Table from "@/components/dashboard/Table";
 import Box from "@/components/dashboard/Box";
 import { categories, periods } from "@/data";
 
@@ -21,12 +23,14 @@ const Dashboard = () => {
   const { sellStats, loadSaleStats } = sellStore;
   const { expenses, loadExpenses } = expenseStore;
   const { incomes, loadIncomes } = incomeStore;
+  const { productAvailabilities, loadProductAvailabilities } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
 
   useEffect(() => {
     loadSaleStats();
-  }, [loadSaleStats]);
+    loadProductAvailabilities();
+  }, [loadSaleStats, loadProductAvailabilities]);
 
   useEffect(() => {
     loadExpenses();
@@ -133,7 +137,7 @@ const Dashboard = () => {
     </div>
   );
 
-  const handleInputChange = (name, value) => {
+  const handleFieldChange = (name, value) => {
     if (name === "period") {
       setDashboardBoxPeriod({
         ...dashboardBoxPeriod,
@@ -146,6 +150,18 @@ const Dashboard = () => {
     }
   };
 
+  const filteredProductAvailabilities = productAvailabilities?.map(
+    ({ name, weight, availability, price }) => ({
+      name: name + " " + weight + "гр.",
+      carton: (name === "Baking Bad" && weight === 2200
+        ? availability / 4
+        : availability / 6
+      ).toFixed(1),
+      availability,
+      price: price * availability,
+    })
+  );
+
   return (
     <Layout title="Администраторско табло">
       <div className="flex flex-col lg:flex-row items-center bg-white p-3 gap-3.5 w-full lg:w-4/6 2xl:w-3/5 rounded-md shadow-md mb-5 ml-auto">
@@ -153,21 +169,21 @@ const Dashboard = () => {
           type="date"
           label="От"
           value={dashboardBoxPeriod.dateFrom || ""}
-          onChange={(value) => handleInputChange("dateFrom", value)}
+          onChange={(value) => handleFieldChange("dateFrom", value)}
         />
 
         <Input
           type="date"
           label="До"
           value={dashboardBoxPeriod.dateTo || ""}
-          onChange={(value) => handleInputChange("dateTo", value)}
+          onChange={(value) => handleFieldChange("dateTo", value)}
         />
 
         <Select
           items={periods}
           label="Избери период"
           value={dashboardBoxPeriod.period || ""}
-          onChange={(value) => handleInputChange("period", value)}
+          onChange={(value) => handleFieldChange("period", value)}
         />
       </div>
 
@@ -258,12 +274,20 @@ const Dashboard = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-5 sm:gap-5">
         <PieChart
           data={sellStats.sales}
           status={sellStats.status}
           message={sellStats.message}
         />
+
+        <div className="col-span-2">
+          <Table
+            title="Наличност на бутилки"
+            data={filteredProductAvailabilities}
+            columns={["продукт", "кашони", "бутилки", "стойност"]}
+          />
+        </div>
       </div>
     </Layout>
   );

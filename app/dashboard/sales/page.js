@@ -74,7 +74,7 @@ const DashboardSales = () => {
     }));
   }, [products]);
 
-  const handleInputChange = (name, value) => {
+  const handleFieldChange = (name, value) => {
     let updatedData = { ...sellData };
 
     switch (name) {
@@ -123,93 +123,94 @@ const DashboardSales = () => {
       isButton={true}
       errorFields={errorFields}
       saveBtnAction={createSell}
-      openBtnText='Добави'
-      title='Дoбави продажба'>
-      <div className='space-y-3.5'>
+      openBtnText="Добави"
+      title="Дoбави продажба"
+    >
+      <div className="space-y-3.5">
         <Select
           items={updatedProducts}
-          label='Избери продукт'
+          label="Избери продукт"
           value={sellData.product || ""}
           errorMessage={errorFields.product}
-          onChange={(value) => handleInputChange("product", value)}
+          onChange={(value) => handleFieldChange("product", value)}
         />
 
         <Input
-          type='text'
-          label='Количество'
+          type="text"
+          label="Количество"
           value={sellData.quantity || ""}
           disabled={!sellData.product}
           errorMessage={errorFields.quantity}
-          onChange={(value) => handleInputChange("quantity", value)}
+          onChange={(value) => handleFieldChange("quantity", value)}
         />
 
         <Input
-          type='text'
-          label='Цена'
+          type="text"
+          label="Цена"
           value={sellData.price || ""}
           disabled={!sellData.quantity}
           errorMessage={errorFields.price}
-          onChange={(value) => handleInputChange("price", value)}
+          onChange={(value) => handleFieldChange("price", value)}
         />
 
-        <div className='grid grid-cols-2 gap-3.5'>
+        <div className="grid grid-cols-2 gap-3.5">
           <Input
-            type='text'
-            label='Разход на 100км'
+            type="text"
+            label="Разход на 100км"
             value={sellData.fuel_consumption || ""}
             errorMessage={errorFields.fuel_consumption}
-            onChange={(value) => handleInputChange("fuel_consumption", value)}
+            onChange={(value) => handleFieldChange("fuel_consumption", value)}
           />
 
           <Input
-            type='text'
-            label='Цена на дизела'
+            type="text"
+            label="Цена на дизела"
             value={sellData.diesel_price || ""}
             errorMessage={errorFields.diesel_price}
-            onChange={(value) => handleInputChange("diesel_price", value)}
+            onChange={(value) => handleFieldChange("diesel_price", value)}
           />
         </div>
 
         <Input
-          type='text'
-          label='Изминати километри'
+          type="text"
+          label="Изминати километри"
           value={sellData.mileage || ""}
           disabled={!sellData.diesel_price && !sellData.fuel_consumption}
           errorMessage={errorFields.mileage}
-          onChange={(value) => handleInputChange("mileage", value)}
+          onChange={(value) => handleFieldChange("mileage", value)}
         />
 
         <Input
-          type='text'
-          label='Допълнителни разходи'
+          type="text"
+          label="Допълнителни разходи"
           value={sellData.additional_costs || ""}
-          onChange={(value) => handleInputChange("additional_costs", value)}
+          onChange={(value) => handleFieldChange("additional_costs", value)}
         />
 
         <Input
-          type='date'
-          label='Дата'
+          type="date"
+          label="Дата"
           value={sellData.date || ""}
-          onChange={(value) => handleInputChange("date", value)}
+          onChange={(value) => handleFieldChange("date", value)}
         />
 
         <Textarea
-          label='Съобщение'
+          label="Съобщение"
           value={sellData.message || ""}
-          onChange={(value) => handleInputChange("message", value)}
+          onChange={(value) => handleFieldChange("message", value)}
         />
 
-        <div className='grid grid-cols-2 gap-3.5'>
-          <div className='bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold'>
-            <div className='text-sm'>Продажна цена</div>
+        <div className="grid grid-cols-2 gap-3.5">
+          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
+            <div className="text-sm">Продажна цена</div>
 
             <div>
               {sellData.price ? sellData.price.toFixed(2) + "лв." : "0.00лв."}
             </div>
           </div>
 
-          <div className='bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold'>
-            <div className='text-sm'>Разходи за гориво</div>
+          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
+            <div className="text-sm">Разходи за гориво</div>
 
             <div>
               {sellData.fuel_price
@@ -223,9 +224,9 @@ const DashboardSales = () => {
   );
 
   return (
-    <Layout title='Продажби'>
+    <Layout title="Продажби">
       <Modal
-        title='Редактирай стойности'
+        title="Редактирай стойности"
         saveBtnAction={() => {
           return updateValues("65a551bbacc139606ddbb3ec", {
             diesel_price: dieselPrice,
@@ -233,29 +234,27 @@ const DashboardSales = () => {
           });
         }}
         openButton={
-          <button
-            className={`${
-              showFilter ? "top-[22.6rem]" : "top-20"
-            } text-white absolute top-20 right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90`}>
-            <span className='hidden sm:block'>Стойности</span>
+          <button className="text-white absolute -top-[4.1rem]  sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
+            <span className="hidden sm:block">Стойности</span>
 
-            <MdAttachMoney className='w-5 h-5 sm:hidden' />
+            <MdAttachMoney className="w-5 h-5 sm:hidden" />
           </button>
-        }>
-        <div className='border-b pb-6'>
-          <div className='text-slate-800 font-semibold mb-2'>Константи</div>
+        }
+      >
+        <div className="border-b pb-6">
+          <div className="text-slate-800 font-semibold mb-2">Константи</div>
 
-          <div className='space-y-3.5'>
+          <div className="space-y-3.5">
             <Input
-              type='text'
-              label='Цена на гориво'
+              type="text"
+              label="Цена на гориво"
               value={dieselPrice || ""}
               errorMessage={errorFields.diesel_price}
               onChange={(value) => setDieselPrice(value)}
             />
             <Input
-              type='text'
-              label='Разход на 100км.'
+              type="text"
+              label="Разход на 100км."
               value={fuelConsumption || ""}
               errorMessage={errorFields.fuel_consumption}
               onChange={(value) => setFuelConsumption(value)}
@@ -264,9 +263,9 @@ const DashboardSales = () => {
         </div>
       </Modal>
 
-      <div className='min-h-screen 2xl:px-10'>
+      <div className="min-h-screen 2xl:px-10">
         <Table
-          title='Продажби'
+          title="Продажби"
           data={filteredSales}
           columns={["продукт", "количество", "цена", "гориво", "дата"]}
           delete={handleDeleteSell}
@@ -281,7 +280,7 @@ const DashboardSales = () => {
           isLoading={isLoading}
           setPerPage={setPerPage}
           searchBarButton={modal}
-          searchBarPlaceholder='име на продукт'
+          searchBarPlaceholder="име на продукт"
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
           filterSection={true}

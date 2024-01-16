@@ -8,6 +8,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Spinner,
 } from "@nextui-org/react";
 import { dropdownPeriods } from "@/data";
 import dynamic from "next/dynamic";
@@ -121,7 +122,7 @@ const Pie = (props) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-md shadow-md p-4 md:p-5">
+    <div className="bg-white rounded-md shadow-md p-4 md:p-5">
       <div className="flex justify-between items-start w-full mb-5">
         <div className="flex-col items-center w-full">
           <div className="flex items-center mb-1">
@@ -204,11 +205,15 @@ const Pie = (props) => {
       </div>
 
       <div className={props.status ? "h-80" : "h-[28.4rem]"}>
-        {props.status ? (
+        {props.data?.length > 0 ? (
           chartComponent
-        ) : (
+        ) : !props.data?.length && !props.status && props.message ? (
           <div className="h-full w-full flex items-center justify-center font-semibold text-slate-700 text-center">
             {props.message}
+          </div>
+        ) : (
+          <div className="h-full w-full flex items-center justify-center font-semibold text-slate-700 text-center">
+            <Spinner classNames={{ wrapper: "w-20 h-20" }} />
           </div>
         )}
       </div>

@@ -82,6 +82,18 @@ class Product {
       throw error;
     }
   };
+
+  getProductAvailabilities = async () => {
+    try {
+      const response = await fetch("/api/product-availabilities");
+
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
 export default new Product();

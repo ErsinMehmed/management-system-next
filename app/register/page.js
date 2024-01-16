@@ -19,7 +19,7 @@ const Register = () => {
   //       router.push("/dashboard");
   //     }
   //   }, [session, router]);
-  //   const handleInputChange = (name, value) => {
+  //   const handleFieldChange = (name, value) => {
   //     setUserData({ ...userData, [name]: value });
   //   };
   //   return (
@@ -37,28 +37,28 @@ const Register = () => {
   //                 label='Име'
   //                 value={userData.name}
   //                 errorMessage={errorFields.name}
-  //                 onChange={(value) => handleInputChange("name", value)}
+  //                 onChange={(value) => handleFieldChange("name", value)}
   //               />
   //               <Input
   //                 type='email'
   //                 label='Имейл'
   //                 value={userData.email}
   //                 errorMessage={errorFields.email}
-  //                 onChange={(value) => handleInputChange("email", value)}
+  //                 onChange={(value) => handleFieldChange("email", value)}
   //               />
   //               <Input
   //                 label='Парола'
   //                 type={"password"}
   //                 value={userData.password}
   //                 errorMessage={errorFields.password}
-  //                 onChange={(value) => handleInputChange("password", value)}
+  //                 onChange={(value) => handleFieldChange("password", value)}
   //               />
   //               <Input
   //                 label='Потвърди парола'
   //                 type={"password"}
   //                 value={userData.passwordRep}
   //                 errorMessage={errorFields.passwordRep}
-  //                 onChange={(value) => handleInputChange("passwordRep", value)}
+  //                 onChange={(value) => handleFieldChange("passwordRep", value)}
   //               />
   //               <Button
   //                 className='w-full'

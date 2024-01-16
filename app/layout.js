@@ -11,17 +11,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang='en'>
+    <html lang="bg" className="light">
       <head>
-        <link
-          rel='icon'
-          sizes='32x32'
-          href='/images/logo.svg'
-        />
-        <meta
-          name='viewport'
-          content='width=device-width, initial-scale=1'
-        />
+        <link rel="icon" sizes="32x32" href="/images/logo.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
 
       <body>

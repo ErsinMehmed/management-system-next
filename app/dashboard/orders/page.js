@@ -63,7 +63,7 @@ const DashboardOrders = () => {
     }));
   }, [products]);
 
-  const handleInputChange = (name, value) => {
+  const handleFieldChange = (name, value) => {
     let updatedData = { ...orderData };
 
     switch (name) {
@@ -107,7 +107,7 @@ const DashboardOrders = () => {
           label="Избери продукт"
           value={orderData.product || ""}
           errorMessage={errorFields.product}
-          onChange={(value) => handleInputChange("product", value)}
+          onChange={(value) => handleFieldChange("product", value)}
         />
 
         <Input
@@ -116,20 +116,20 @@ const DashboardOrders = () => {
           value={orderData.quantity || ""}
           disabled={!orderData.product}
           errorMessage={errorFields.quantity}
-          onChange={(value) => handleInputChange("quantity", value)}
+          onChange={(value) => handleFieldChange("quantity", value)}
         />
 
         <Input
           type="date"
           label="Дата"
           value={orderData.date || ""}
-          onChange={(value) => handleInputChange("date", value)}
+          onChange={(value) => handleFieldChange("date", value)}
         />
 
         <Textarea
           label="Съобщение"
           value={orderData.message || ""}
-          onChange={(value) => handleInputChange("message", value)}
+          onChange={(value) => handleFieldChange("message", value)}
         />
 
         <div className="grid grid-cols-2 gap-3.5">
