@@ -36,8 +36,8 @@ const dashboardLinks = [
     icon: <BsTruck className='w-5 h-5' />,
   },
   {
-    link: "/dashboard/stocks",
-    text: "Наличности",
+    link: "/dashboard/products",
+    text: "Продукти",
     icon: <BsBox className='w-5 h-5' />,
   },
   {

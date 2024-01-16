@@ -1,3 +1,15 @@
+import BalloonsImg from "@/public/images/Balloons.png";
+import Exotic640Img from "@/public/images/ExoticWhip-640G.png";
+import Exotic2000Img from "@/public/images/ExoticWhip-2000G.webp";
+import Miami3300Img from "@/public/images/MiamiMagic-3300G.webp";
+import BakingBad640Img from "@/public/images/BakingBad-640G.webp";
+import BakingBad2200Img from "@/public/images/BakingBad-2200G.jpg";
+import GreatWhip640Img from "@/public/images/GreatWhip-640G.webp";
+import SilentBlueberryImg from "@/public/images/Silent-Nozzle-Blueberry.png";
+import SilentPineappleImg from "@/public/images/Silent-Nozzle-Pineapple.png";
+import SilentStrawberryImg from "@/public/images/Silent-Nozzle-Strawberry.png";
+import SilentWatermelonImg from "@/public/images/Silent-Nozzle-Watermelon.png";
+
 export function validateFields(object, fieldRules) {
   const errors = {};
 
@@ -124,5 +136,31 @@ export function productTitle(product) {
       return `${product.name} ${product.flavor}`;
     default:
       return product?.name;
+  }
+}
+
+export function getProductImage(name, weight, flavor) {
+  switch (name) {
+    case "Exotic Whip":
+      return weight === 640 ? Exotic640Img : Exotic2000Img;
+    case "Great Whip":
+      return GreatWhip640Img;
+    case "Miami Magic":
+      return Miami3300Img;
+    case "Baking Bad":
+      return weight === 640 ? BakingBad640Img : BakingBad2200Img;
+    case "Балони":
+      return BalloonsImg;
+    case "Накрайник с вкус":
+      switch (flavor) {
+        case "Ананас":
+          return SilentPineappleImg;
+        case "Боровинка":
+          return SilentBlueberryImg;
+        case "Диня":
+          return SilentWatermelonImg;
+        case "Ягода":
+          return SilentStrawberryImg;
+      }
   }
 }

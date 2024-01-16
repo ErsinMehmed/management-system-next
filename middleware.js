@@ -25,6 +25,7 @@ export const config = {
     "/dashboard",
     "/dashboard/orders",
     "/dashboard/sales",
-    "/dashboard/stocks",
+    "/dashboard/products",
+    "/dashboard/ads",
   ],
 };
