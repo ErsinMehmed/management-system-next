@@ -135,7 +135,10 @@ const Pie = (props) => {
 
           {props.status && (
             <div className='bg-gray-50 p-3 rounded-lg'>
-              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2`}>
+              <div
+                className={`grid ${
+                  props.data.length > 1 && "sm:grid-cols-2"
+                } grid-cols-1  gap-3 mb-2`}>
                 {props.data.map((stat, index) => (
                   <dl
                     key={index}

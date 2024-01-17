@@ -4,6 +4,7 @@ import { validateFields } from "@/utils";
 import { sellRules as getSellRules } from "@/rules/sell";
 import { valueRules as getValueRules } from "@/rules/values";
 import commonStore from "./commonStore";
+import productStore from "./productStore";
 
 class Sell {
   sales = [];
@@ -196,6 +197,7 @@ class Sell {
       commonStore.setSuccessMessage(response.message);
       this.clearSellData();
       this.loadSales();
+      productStore.loadProductAvailabilities();
 
       return true;
     } else if (!response.status) {

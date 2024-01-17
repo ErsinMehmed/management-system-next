@@ -53,7 +53,7 @@ const data = [
     availability: 0,
   },
   {
-    name: "Накрайник с вкус",
+    name: "Накрайник",
     flavor: "Ананас",
     price: 3,
     sell_prices: [5],
@@ -61,7 +61,7 @@ const data = [
     availability: 0,
   },
   {
-    name: "Накрайник с вкус",
+    name: "Накрайник",
     flavor: "Боровинка",
     price: 3,
     sell_prices: [5],
@@ -69,7 +69,7 @@ const data = [
     availability: 0,
   },
   {
-    name: "Накрайник с вкус",
+    name: "Накрайник",
     flavor: "Диня",
     price: 3,
     sell_prices: [5],
@@ -77,7 +77,7 @@ const data = [
     availability: 0,
   },
   {
-    name: "Накрайник с вкус",
+    name: "Накрайник",
     flavor: "Ягода",
     price: 3,
     sell_prices: [5],

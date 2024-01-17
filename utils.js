@@ -132,7 +132,7 @@ export function productTitle(product) {
       return `${product.name} ${product.weight}гр.`;
     case "Балони":
       return `${product.name} пакет ${product.count}бр.`;
-    case "Накрайник с вкус":
+    case "Накрайник":
       return `${product.name} ${product.flavor}`;
     default:
       return product?.name;
@@ -151,7 +151,7 @@ export function getProductImage(name, weight, flavor) {
       return weight === 640 ? BakingBad640Img : BakingBad2200Img;
     case "Балони":
       return BalloonsImg;
-    case "Накрайник с вкус":
+    case "Накрайник":
       switch (flavor) {
         case "Ананас":
           return SilentPineappleImg;
@@ -162,5 +162,18 @@ export function getProductImage(name, weight, flavor) {
         case "Ягода":
           return SilentStrawberryImg;
       }
+  }
+}
+
+export function getProductImageByWeight(name) {
+  switch (name) {
+    case "Exotic Whip 640гр.":
+      return Exotic640Img;
+    case "Great Whip 640гр.":
+      return GreatWhip640Img;
+    case "Baking Bad 640гр.":
+      return BakingBad640Img;
+    case "Baking Bad 2200гр.":
+      return BakingBad2200Img;
   }
 }
