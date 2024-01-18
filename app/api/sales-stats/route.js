@@ -59,7 +59,6 @@ export async function GET(request) {
         _id: "$product",
         sales_count: { $sum: 1 },
         total_quantity: { $sum: "$quantity" },
-        total_price: { $sum: "$price" },
       },
     },
     {
@@ -94,7 +93,6 @@ export async function GET(request) {
         category: "$category.name",
         total_quantity: 1,
         sales_count: 1,
-        total_price: 1,
       },
     },
     {

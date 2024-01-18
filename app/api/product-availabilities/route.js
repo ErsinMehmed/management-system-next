@@ -24,8 +24,6 @@ export async function GET() {
         weight: "$weight",
         price: "$price",
         availability: "$availability",
-        sell_prices: "$sell_prices",
-        count: "$count",
         category: "$category.name",
       },
     },

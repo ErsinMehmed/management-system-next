@@ -21,7 +21,7 @@ export async function GET(request, { params }) {
   await connectMongoDB();
 
   const product = await Product.findOne({ _id: id }).select(
-    "name weight flavor price availability count sell_prices category"
+    "price availability sell_prices"
   );
 
   return NextResponse.json(product);

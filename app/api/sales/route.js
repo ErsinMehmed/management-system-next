@@ -76,13 +76,13 @@ export async function GET(request) {
   const sales = await queryBuilder
     .populate({
       path: "product",
-      select:
-        "name weight flavor price availability sell_prices count category",
-      populate: {
-        path: "category",
-        select: "name",
-      },
+      select: "name weight flavor count",
+      // populate: {
+      //   path: "category",
+      //   select: "name",
+      // },
     })
+    .select("quantity price message date fuel_price product")
     .sort({ _id: -1 })
     .skip((page - 1) * perPage)
     .limit(perPage);
