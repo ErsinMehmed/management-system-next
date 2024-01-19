@@ -1,5 +1,3 @@
-import React from "react";
-
 const Loader = (props) => {
   const skeletonRows = [];
   const skeletonHead = [];

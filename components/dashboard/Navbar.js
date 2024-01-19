@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import { HiMenuAlt1 } from "react-icons/hi";
 import { IoNotificationsOutline } from "react-icons/io5";

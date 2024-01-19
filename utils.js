@@ -177,3 +177,110 @@ export function getProductImageByWeight(name) {
       return BakingBad2200Img;
   }
 }
+
+export function getPeriodParam(period) {
+  if (period?.dateFrom || period?.dateTo) {
+    return `dateFrom=${period.dateFrom}&dateTo=${period.dateTo}`;
+  }
+
+  switch (period?.period) {
+    case "Днес":
+      return "period=today";
+    case "Вчера":
+      return "period=yesterday";
+    case "Последните 7 дни":
+      return "period=last7days";
+    case "Последният месец":
+      return "period=lastMonth";
+    case "Последните 3 месеца":
+      return "period=last3Months";
+    case "Последните 6 месеца":
+      return "period=last6Months";
+    case "Последната година":
+      return "period=lastYear";
+    default:
+      return "period=lastMonth";
+  }
+}
+
+export function getDateCondition(dateFrom, dateTo, period) {
+  let startDate;
+  let endDate;
+
+  if (dateFrom && dateTo) {
+    startDate = new Date(dateFrom);
+    startDate.setHours(0, 0, 0, 0);
+
+    endDate = new Date(dateTo);
+    endDate.setHours(23, 59, 59, 999);
+
+    if (startDate > endDate) {
+      throw new Error("Невалиден период от време");
+    }
+
+    return {
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    };
+  } else if (dateFrom) {
+    startDate = new Date(dateFrom);
+    return {
+      date: {
+        $gte: startDate,
+      },
+    };
+  } else if (dateTo) {
+    endDate = new Date(dateTo);
+    return {
+      date: {
+        $lte: endDate,
+      },
+    };
+  } else {
+    switch (period) {
+      case "today":
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "yesterday":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 1);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "last7days":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case "lastMonth":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case "last3Months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case "last6Months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 6);
+        break;
+      case "lastYear":
+        startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        startDate = new Date(0);
+    }
+
+    return {
+      date:
+        period === "yesterday"
+          ? {
+              $gte: startDate,
+              $lt: new Date(startDate.getTime() + 24 * 60 * 60 * 1000),
+            }
+          : { $gte: startDate },
+    };
+  }
+}

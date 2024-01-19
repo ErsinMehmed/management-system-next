@@ -16,7 +16,7 @@ const Box = (props) => {
           </span>
 
           <div>
-            <h2 className="text-lg font-semibold text-slate-800 mb-1">
+            <h2 className="text-lg font-semibold text-slate-800 mb-0.5">
               {props.title}
             </h2>
 

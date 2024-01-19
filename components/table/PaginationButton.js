@@ -1,4 +1,3 @@
-import React from "react";
 import { MdOutlineKeyboardDoubleArrowLeft } from "react-icons/md";
 import { MdOutlineKeyboardDoubleArrowRight } from "react-icons/md";
 
@@ -10,16 +9,17 @@ const PaginationButton = (props) => {
           ? "text-blue-400 bg-[#ebf4ff]"
           : "bg-[#f4f4f5] hover:bg-[#e6e6e7] text-gray-500 transition-all"
       }`}
-      onClick={props.onClick}>
+      onClick={props.onClick}
+    >
       {props.dotsButton ? (
         <>
-          <span className='group-hover:hidden'>...</span>
+          <span className="group-hover:hidden">...</span>
 
-          <span className='hidden group-hover:block'>
+          <span className="hidden group-hover:block">
             {props.dotsButton === "right" ? (
-              <MdOutlineKeyboardDoubleArrowRight className='h-5 w-5' />
+              <MdOutlineKeyboardDoubleArrowRight className="h-5 w-5" />
             ) : (
-              <MdOutlineKeyboardDoubleArrowLeft className='h-5 w-5' />
+              <MdOutlineKeyboardDoubleArrowLeft className="h-5 w-5" />
             )}
           </span>
         </>
