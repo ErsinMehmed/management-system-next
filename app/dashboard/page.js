@@ -296,7 +296,7 @@ const Dashboard = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-5 sm:gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-5 lg:gap-5">
         <PieChart
           data={sellStats.sales}
           status={sellStats.status}

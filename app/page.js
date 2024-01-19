@@ -49,6 +49,7 @@ const Login = () => {
                 label="Имейл"
                 errorMessage={errorFields.error}
                 onChange={(value) => handleFieldChange("email", value)}
+                onEnterPress={login}
               />
 
               <Input
@@ -56,6 +57,7 @@ const Login = () => {
                 type={"password"}
                 errorMessage={errorFields.error}
                 onChange={(value) => handleFieldChange("password", value)}
+                onEnterPress={login}
               />
 
               <div className="flex items-center justify-between space-x-10 sm:space-x-28">

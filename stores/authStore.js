@@ -104,9 +104,7 @@ class Auth {
     };
   };
 
-  login = async (e) => {
-    e.preventDefault();
-
+  login = async () => {
     commonStore.setIsLoading(true);
 
     const res = await authAction.login(this.loginData);

@@ -16,6 +16,12 @@ const InputComponent = (props) => {
     setIsVisible(!isVisible);
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" && props.onEnterPress) {
+      props.onEnterPress();
+    }
+  };
+
   return (
     <Input
       size={"sm"}
@@ -33,6 +39,7 @@ const InputComponent = (props) => {
       errorMessage={props.errorMessage}
       placeholder={props.placeholder}
       onChange={handleChange}
+      onKeyDown={handleKeyDown}
       endContent={
         props.type == "password" && (
           <button
