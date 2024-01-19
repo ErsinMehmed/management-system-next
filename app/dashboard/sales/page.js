@@ -4,11 +4,10 @@ import { MdAttachMoney } from "react-icons/md";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
-import Textarea from "@/components/html/Textarea";
-import Select from "@/components/html/Select";
 import Input from "@/components/html/Input";
 import Table from "@/components/table/Table";
 import Pagination from "@/components/table/Pagination";
+import SalesForm from "@/components/forms/Sales";
 import { productTitle } from "@/utils";
 import { commonStore, sellStore, productStore } from "@/stores/useStore";
 
@@ -126,100 +125,12 @@ const DashboardSales = () => {
       openBtnText="Добави"
       title="Дoбави продажба"
     >
-      <div className="space-y-3.5">
-        <Select
-          items={updatedProducts}
-          label="Избери продукт"
-          value={sellData.product || ""}
-          errorMessage={errorFields.product}
-          onChange={(value) => handleFieldChange("product", value)}
-        />
-
-        <Input
-          type="text"
-          label="Количество"
-          value={sellData.quantity || ""}
-          disabled={!sellData.product}
-          errorMessage={errorFields.quantity}
-          onChange={(value) => handleFieldChange("quantity", value)}
-        />
-
-        <Input
-          type="text"
-          label="Цена"
-          value={sellData.price || ""}
-          disabled={!sellData.quantity}
-          errorMessage={errorFields.price}
-          onChange={(value) => handleFieldChange("price", value)}
-        />
-
-        <div className="grid grid-cols-2 gap-3.5">
-          <Input
-            type="text"
-            label="Разход на 100км"
-            value={sellData.fuel_consumption || ""}
-            errorMessage={errorFields.fuel_consumption}
-            onChange={(value) => handleFieldChange("fuel_consumption", value)}
-          />
-
-          <Input
-            type="text"
-            label="Цена на дизела"
-            value={sellData.diesel_price || ""}
-            errorMessage={errorFields.diesel_price}
-            onChange={(value) => handleFieldChange("diesel_price", value)}
-          />
-        </div>
-
-        <Input
-          type="text"
-          label="Изминати километри"
-          value={sellData.mileage || ""}
-          disabled={!sellData.diesel_price && !sellData.fuel_consumption}
-          errorMessage={errorFields.mileage}
-          onChange={(value) => handleFieldChange("mileage", value)}
-        />
-
-        <Input
-          type="text"
-          label="Допълнителни разходи"
-          value={sellData.additional_costs || ""}
-          onChange={(value) => handleFieldChange("additional_costs", value)}
-        />
-
-        <Input
-          type="date"
-          label="Дата"
-          value={sellData.date || ""}
-          onChange={(value) => handleFieldChange("date", value)}
-        />
-
-        <Textarea
-          label="Съобщение"
-          value={sellData.message || ""}
-          onChange={(value) => handleFieldChange("message", value)}
-        />
-
-        <div className="grid grid-cols-2 gap-3.5">
-          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
-            <div className="text-sm">Продажна цена</div>
-
-            <div>
-              {sellData.price ? sellData.price.toFixed(2) + "лв." : "0.00лв."}
-            </div>
-          </div>
-
-          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
-            <div className="text-sm">Разходи за гориво</div>
-
-            <div>
-              {sellData.fuel_price
-                ? sellData.fuel_price.toFixed(2) + "лв."
-                : "0.00лв."}
-            </div>
-          </div>
-        </div>
-      </div>
+      <SalesForm
+        data={sellData}
+        errorFields={errorFields}
+        updatedProducts={updatedProducts}
+        handleFieldChange={handleFieldChange}
+      />
     </Modal>
   );
 
@@ -234,7 +145,7 @@ const DashboardSales = () => {
           });
         }}
         openButton={
-          <button className="text-white absolute -top-[4.1rem]  sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
+          <button className="text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
             <span className="hidden sm:block">Стойности</span>
 
             <MdAttachMoney className="w-5 h-5 sm:hidden" />
@@ -252,6 +163,7 @@ const DashboardSales = () => {
               errorMessage={errorFields.diesel_price}
               onChange={(value) => setDieselPrice(value)}
             />
+
             <Input
               type="text"
               label="Разход на 100км."
@@ -284,7 +196,6 @@ const DashboardSales = () => {
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
           filterSection={true}
-          //editButtonLink="/dashboard/ads/edit/"
         >
           <Pagination
             isLoading={isLoading}

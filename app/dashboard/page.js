@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import {
   sellStore,
@@ -15,6 +15,7 @@ import Layout from "@/components/layout/Dashboard";
 import PieChart from "@/components/charts/PieChart";
 import Select from "@/components/html/Select";
 import Input from "@/components/html/Input";
+import TabSection from "@/components/dashboard/TabSection";
 import Table from "@/components/dashboard/Table";
 import Box from "@/components/dashboard/Box";
 import { categories, periods } from "@/data";
@@ -30,112 +31,9 @@ const Dashboard = () => {
   useEffect(() => {
     loadSaleStats();
     loadProductAvailabilities();
-  }, [loadSaleStats, loadProductAvailabilities]);
-
-  useEffect(() => {
     loadExpenses();
     loadIncomes();
-  }, [loadExpenses, loadIncomes]);
-
-  const filteredExpenses = expenses.expenses_by_products?.filter(
-    (expense) => expense.category === selectedCategory
-  );
-
-  const totalExpensesByCategory = filteredExpenses?.reduce(
-    (accumulator, stat) => accumulator + stat.total_expenses,
-    0
-  );
-
-  const expenseSection = (
-    <div className="bg-gray-50 rounded-lg">
-      {filteredExpenses?.length > 0 ? (
-        <>
-          {filteredExpenses?.map((exprence, index) => (
-            <dl
-              key={index}
-              className={`flex items-center justify-between ${
-                index > 0 && "border-t"
-              } py-2.5 px-3 text-sm`}
-            >
-              <dt className="text-gray-500 font-semibold">{exprence.name}</dt>
-
-              <dt className="text-gray-500 font-semibold">
-                {exprence.quantity} бр.
-              </dt>
-
-              <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
-                {exprence.total_expenses.toFixed(2)} лв.
-              </dd>
-            </dl>
-          ))}
-
-          {filteredExpenses?.length > 1 && (
-            <dl className="flex items-center justify-between py-2.5 px-3 text-sm border-t">
-              <dt />
-
-              <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold">
-                {totalExpensesByCategory.toFixed(2)} лв.
-              </dd>
-            </dl>
-          )}
-        </>
-      ) : (
-        <div className="text-gray-500 text-center py-3 font-semibold text-sm">
-          Няма налични данни
-        </div>
-      )}
-    </div>
-  );
-
-  const filteredIncomes = incomes.incomes_by_products?.filter(
-    (income) => income.category === selectedCategory
-  );
-
-  const totalIncomesByCategory = filteredIncomes?.reduce(
-    (accumulator, stat) => accumulator + stat.total_incomes,
-    0
-  );
-
-  const incomeSection = (
-    <div className="bg-gray-50 rounded-lg">
-      {filteredIncomes?.length > 0 ? (
-        <>
-          {filteredIncomes?.map((income, index) => (
-            <dl
-              key={index}
-              className={`flex items-center justify-between ${
-                index > 0 && "border-t"
-              } py-2.5 px-3 text-sm`}
-            >
-              <dt className="text-gray-500 font-semibold">{income.name}</dt>
-
-              <dt className="text-gray-500 font-semibold">
-                {income.quantity} бр.
-              </dt>
-
-              <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
-                {income.total_incomes.toFixed(2)} лв.
-              </dd>
-            </dl>
-          ))}
-
-          {filteredIncomes?.length > 1 && (
-            <dl className="flex items-center justify-between py-2.5 px-3 text-sm border-t">
-              <dt />
-
-              <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold">
-                {totalIncomesByCategory.toFixed(2)} лв.
-              </dd>
-            </dl>
-          )}
-        </>
-      ) : (
-        <div className="text-gray-500 text-center py-3 font-semibold text-sm">
-          Няма налични данни
-        </div>
-      )}
-    </div>
-  );
+  }, [loadSaleStats, loadProductAvailabilities, loadExpenses, loadIncomes]);
 
   const handleFieldChange = (name, value) => {
     if (name === "period") {
@@ -150,17 +48,19 @@ const Dashboard = () => {
     }
   };
 
-  const filteredProductAvailabilities = productAvailabilities?.map(
-    ({ name, weight, availability, price }) => ({
-      name: name + " " + weight + "гр.",
-      carton: (name === "Baking Bad" && weight === 2200
-        ? availability / 4
-        : availability / 6
-      ).toFixed(1),
-      availability,
-      price: price * availability,
-    })
-  );
+  const filteredProductAvailabilities = useMemo(() => {
+    return productAvailabilities?.map(
+      ({ name, weight, availability, price }) => ({
+        name: name + " " + weight + "гр.",
+        carton: (name === "Baking Bad" && weight === 2200
+          ? availability / 4
+          : availability / 6
+        ).toFixed(1),
+        availability,
+        price: price * availability,
+      })
+    );
+  }, [productAvailabilities]);
 
   return (
     <Layout title="Администраторско табло">
@@ -199,7 +99,12 @@ const Dashboard = () => {
             >
               {categories.map((category) => (
                 <Tab key={category} title={category}>
-                  {incomeSection}
+                  <TabSection
+                    data={incomes}
+                    kind="incomes"
+                    category={category}
+                    totalKey="total_incomes"
+                  />
                 </Tab>
               ))}
             </Tabs>
@@ -221,7 +126,12 @@ const Dashboard = () => {
             >
               {categories.map((category) => (
                 <Tab key={category} title={category}>
-                  {expenseSection}
+                  <TabSection
+                    data={expenses}
+                    kind="expenses"
+                    category={category}
+                    totalKey="total_expenses"
+                  />
                 </Tab>
               ))}
 
@@ -253,9 +163,7 @@ const Dashboard = () => {
 
                     {(expenses.total_fuel_expenses > 0 ||
                       expenses.total_additional_expenses > 0) && (
-                      <dl className="flex items-center justify-between py-2.5 px-3 text-sm border-t">
-                        <dt />
-
+                      <dl className="flex items-center justify-end py-2.5 px-3 text-sm border-t">
                         <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold">
                           {(
                             expenses.total_fuel_expenses +

@@ -12,7 +12,6 @@ class Sell {
   sellData = {
     quantity: null,
     mileage: null,
-    fuel: null,
     price: null,
     diesel_price: null,
     fuel_consumption: null,
@@ -167,7 +166,6 @@ class Sell {
     this.sellData = {
       quantity: null,
       mileage: null,
-      fuel: null,
       price: null,
       diesel_price: this.dieselPrice,
       fuel_consumption: this.fuelConsumption,

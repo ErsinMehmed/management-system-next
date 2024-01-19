@@ -3,10 +3,8 @@ import React, { useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
-import Textarea from "@/components/html/Textarea";
-import Select from "@/components/html/Select";
-import Input from "@/components/html/Input";
 import Table from "@/components/table/Table";
+import OrdersForm from "@/components/forms/Orders";
 import Pagination from "@/components/table/Pagination";
 import { productTitle } from "@/utils";
 import { commonStore, orderStore, productStore } from "@/stores/useStore";
@@ -101,57 +99,12 @@ const DashboardOrders = () => {
       openBtnText="Добави"
       title="Добави поръчка"
     >
-      <div className="space-y-3.5">
-        <Select
-          items={updatedProducts}
-          label="Избери продукт"
-          value={orderData.product || ""}
-          errorMessage={errorFields.product}
-          onChange={(value) => handleFieldChange("product", value)}
-        />
-
-        <Input
-          type="text"
-          label="Количество"
-          value={orderData.quantity || ""}
-          disabled={!orderData.product}
-          errorMessage={errorFields.quantity}
-          onChange={(value) => handleFieldChange("quantity", value)}
-        />
-
-        <Input
-          type="date"
-          label="Дата"
-          value={orderData.date || ""}
-          onChange={(value) => handleFieldChange("date", value)}
-        />
-
-        <Textarea
-          label="Съобщение"
-          value={orderData.message || ""}
-          onChange={(value) => handleFieldChange("message", value)}
-        />
-
-        <div className="grid grid-cols-2 gap-3.5">
-          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
-            <div className="text-sm">Единична цена</div>
-
-            <div>
-              {orderData.price ? orderData.price.toFixed(2) + "лв." : "0.00лв."}
-            </div>
-          </div>
-
-          <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
-            <div className="text-sm">Обща сума</div>
-
-            <div>
-              {orderData.total_amount
-                ? orderData.total_amount.toFixed(2) + "лв."
-                : "0.00лв."}
-            </div>
-          </div>
-        </div>
-      </div>
+      <OrdersForm
+        data={orderData}
+        errorFields={errorFields}
+        updatedProducts={updatedProducts}
+        handleFieldChange={handleFieldChange}
+      />
     </Modal>
   );
 
@@ -184,7 +137,6 @@ const DashboardOrders = () => {
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
           filterSection={true}
-          //editButtonLink="/dashboard/ads/edit/"
         >
           <Pagination
             isLoading={isLoading}
