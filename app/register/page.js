@@ -48,14 +48,14 @@ const Register = () => {
   //               />
   //               <Input
   //                 label='Парола'
-  //                 type={"password"}
+  //                 type="password"
   //                 value={userData.password}
   //                 errorMessage={errorFields.password}
   //                 onChange={(value) => handleFieldChange("password", value)}
   //               />
   //               <Input
   //                 label='Потвърди парола'
-  //                 type={"password"}
+  //                 type="password"
   //                 value={userData.passwordRep}
   //                 errorMessage={errorFields.passwordRep}
   //                 onChange={(value) => handleFieldChange("passwordRep", value)}

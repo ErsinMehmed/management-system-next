@@ -7,7 +7,7 @@ import Modal from "@/components/Modal";
 import Input from "@/components/html/Input";
 import Table from "@/components/table/Table";
 import Pagination from "@/components/table/Pagination";
-import SalesForm from "@/components/forms/Sales";
+import SellForm from "@/components/forms/Sell";
 import { productTitle } from "@/utils";
 import { commonStore, sellStore, productStore } from "@/stores/useStore";
 
@@ -122,10 +122,9 @@ const DashboardSales = () => {
       isButton={true}
       errorFields={errorFields}
       saveBtnAction={createSell}
-      openBtnText="Добави"
-      title="Дoбави продажба"
-    >
-      <SalesForm
+      openBtnText='Добави'
+      title='Дoбави продажба'>
+      <SellForm
         data={sellData}
         errorFields={errorFields}
         updatedProducts={updatedProducts}
@@ -135,9 +134,9 @@ const DashboardSales = () => {
   );
 
   return (
-    <Layout title="Продажби">
+    <Layout title='Продажби'>
       <Modal
-        title="Редактирай стойности"
+        title='Редактирай стойности'
         saveBtnAction={() => {
           return updateValues("65a551bbacc139606ddbb3ec", {
             diesel_price: dieselPrice,
@@ -145,28 +144,27 @@ const DashboardSales = () => {
           });
         }}
         openButton={
-          <button className="text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
-            <span className="hidden sm:block">Стойности</span>
+          <button className='text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
+            <span className='hidden sm:block'>Стойности</span>
 
-            <MdAttachMoney className="w-5 h-5 sm:hidden" />
+            <MdAttachMoney className='w-5 h-5 sm:hidden' />
           </button>
-        }
-      >
-        <div className="border-b pb-6">
-          <div className="text-slate-800 font-semibold mb-2">Константи</div>
+        }>
+        <div className='border-b pb-6'>
+          <div className='text-slate-800 font-semibold mb-2'>Константи</div>
 
-          <div className="space-y-3.5">
+          <div className='space-y-3.5'>
             <Input
-              type="text"
-              label="Цена на гориво"
+              type='text'
+              label='Цена на гориво'
               value={dieselPrice || ""}
               errorMessage={errorFields.diesel_price}
               onChange={(value) => setDieselPrice(value)}
             />
 
             <Input
-              type="text"
-              label="Разход на 100км."
+              type='text'
+              label='Разход на 100км.'
               value={fuelConsumption || ""}
               errorMessage={errorFields.fuel_consumption}
               onChange={(value) => setFuelConsumption(value)}
@@ -175,9 +173,9 @@ const DashboardSales = () => {
         </div>
       </Modal>
 
-      <div className="min-h-screen 2xl:px-10">
+      <div className='min-h-screen 2xl:px-10'>
         <Table
-          title="Продажби"
+          title='Продажби'
           data={filteredSales}
           columns={["продукт", "количество", "цена", "гориво", "дата"]}
           delete={handleDeleteSell}
@@ -192,11 +190,10 @@ const DashboardSales = () => {
           isLoading={isLoading}
           setPerPage={setPerPage}
           searchBarButton={modal}
-          searchBarPlaceholder="име на продукт"
+          searchBarPlaceholder='име на продукт'
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
-          filterSection={true}
-        >
+          filterSection={true}>
           <Pagination
             isLoading={isLoading}
             currentPage={sales.pagination?.current_page}

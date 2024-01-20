@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
 import Table from "@/components/table/Table";
-import OrdersForm from "@/components/forms/Orders";
+import OrderForm from "@/components/forms/Order";
 import Pagination from "@/components/table/Pagination";
 import { productTitle } from "@/utils";
 import { commonStore, orderStore, productStore } from "@/stores/useStore";
@@ -96,10 +96,9 @@ const DashboardOrders = () => {
       isButton={true}
       errorFields={errorFields}
       saveBtnAction={createOrder}
-      openBtnText="Добави"
-      title="Добави поръчка"
-    >
-      <OrdersForm
+      openBtnText='Добави'
+      title='Добави поръчка'>
+      <OrderForm
         data={orderData}
         errorFields={errorFields}
         updatedProducts={updatedProducts}
@@ -109,10 +108,10 @@ const DashboardOrders = () => {
   );
 
   return (
-    <Layout title="Поръчки">
-      <div className="min-h-screen 2xl:px-10">
+    <Layout title='Поръчки'>
+      <div className='min-h-screen 2xl:px-10'>
         <Table
-          title="Заявки"
+          title='Заявки'
           data={filteredOrders}
           columns={[
             "име на продукт",
@@ -133,11 +132,10 @@ const DashboardOrders = () => {
           isLoading={isLoading}
           setPerPage={setPerPage}
           searchBarButton={modal}
-          searchBarPlaceholder="име на продукт"
+          searchBarPlaceholder='име на продукт'
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
-          filterSection={true}
-        >
+          filterSection={true}>
           <Pagination
             isLoading={isLoading}
             currentPage={orders.pagination?.current_page}

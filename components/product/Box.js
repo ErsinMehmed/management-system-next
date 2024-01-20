@@ -19,7 +19,7 @@ const Box = (props) => {
         height={"100%"}
       />
 
-      <div className='absolute top-2.5 right-2.5 rounded-lg font-semibold text-sm bg-blue-400 text-white px-2 py-0.5'>
+      <div className='absolute top-4 right-4 sm:top-2.5 sm:right-2.5 rounded-lg font-semibold sm:text-sm bg-blue-400 text-white px-2 py-0.5'>
         {props.data.category.name}
       </div>
 

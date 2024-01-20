@@ -85,7 +85,7 @@ class Product {
 
   getProductAvailabilities = async () => {
     try {
-      const response = await fetch("/api/product-availabilities");
+      const response = await fetch("/api/availabilities");
 
       const data = await response.json();
 

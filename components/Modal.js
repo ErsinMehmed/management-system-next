@@ -38,6 +38,7 @@ const ModalComponent = (props) => {
         isOpen={isOpen}
         scrollBehavior='inside'
         classNames={{
+          base: "mx-5 sm:mx-0",
           header: "border-b border-gray-300",
         }}
         onOpenChange={onOpenChange}>
