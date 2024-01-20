@@ -48,19 +48,17 @@ const Dashboard = () => {
     }
   };
 
-  const filteredProductAvailabilities = () => {
-    return productAvailabilities?.map(
-      ({ name, weight, availability, price }) => ({
-        name: name + " " + weight + "гр.",
-        carton: (name === "Baking Bad" && weight === 2200
-          ? availability / 4
-          : availability / 6
-        ).toFixed(1),
-        availability,
-        price: price * availability,
-      })
-    );
-  };
+  const filteredProductAvailabilities = productAvailabilities?.map(
+    ({ name, weight, availability, price }) => ({
+      name: name + " " + weight + "гр.",
+      carton: (name === "Baking Bad" && weight === 2200
+        ? availability / 4
+        : availability / 6
+      ).toFixed(1),
+      availability,
+      price: price * availability,
+    })
+  );
 
   return (
     <Layout title='Администраторско табло'>
