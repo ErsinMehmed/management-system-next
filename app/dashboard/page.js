@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import {
   sellStore,
@@ -48,7 +48,7 @@ const Dashboard = () => {
     }
   };
 
-  const filteredProductAvailabilities = useMemo(() => {
+  const filteredProductAvailabilities = () => {
     return productAvailabilities?.map(
       ({ name, weight, availability, price }) => ({
         name: name + " " + weight + "гр.",
@@ -60,7 +60,7 @@ const Dashboard = () => {
         price: price * availability,
       })
     );
-  }, [productAvailabilities]);
+  };
 
   return (
     <Layout title='Администраторско табло'>
