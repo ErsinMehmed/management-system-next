@@ -2,6 +2,8 @@ import { BsBox, BsCart2, BsTruck, BsHouse, BsMegaphone } from "react-icons/bs";
 
 const perPageResult = [5, 10, 15, 20];
 
+const socialPlatforms = [{ value: "Facebook" }, { value: "Instagram" }];
+
 const periods = [
   { value: "Днес" },
   { value: "Вчера" },
@@ -52,4 +54,11 @@ const dashboardLinks = [
   },
 ];
 
-export { periods, dropdownPeriods, perPageResult, dashboardLinks, categories };
+export {
+  periods,
+  dropdownPeriods,
+  perPageResult,
+  dashboardLinks,
+  categories,
+  socialPlatforms,
+};

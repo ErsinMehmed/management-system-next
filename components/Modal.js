@@ -38,8 +38,9 @@ const ModalComponent = (props) => {
         isOpen={isOpen}
         scrollBehavior='inside'
         classNames={{
+          body: "px-3.5",
           base: "mx-5 sm:mx-0",
-          header: "border-b border-gray-300",
+          header: "border-b border-gray-300 px-4",
         }}
         onOpenChange={onOpenChange}>
         <ModalContent>

@@ -66,7 +66,7 @@ export async function GET(request) {
   const orders = await queryBuilder
     .populate({
       path: "product",
-      select: "name weight count category",
+      select: "name weight flavor count category",
     })
     .sort({ _id: -1 })
     .skip((page - 1) * perPage)
