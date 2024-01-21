@@ -19,3 +19,27 @@ export async function GET() {
 
   return NextResponse.json(ads);
 }
+
+export async function DELETE(request) {
+  const id = request.nextUrl.searchParams.get("id");
+
+  await connectMongoDB();
+
+  try {
+    await Ad.findByIdAndDelete(id);
+
+    return NextResponse.json(
+      { message: "Рекламата е изтрита успешно", status: true },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message: "Грешка при изтриване на рекламата",
+        error: error,
+        status: false,
+      },
+      { status: 500 }
+    );
+  }
+}

@@ -165,18 +165,18 @@ const Dashboard = () => {
                       </dl>
                     )}
 
-                    {(expenses.total_fuel_expenses > 0 ||
-                      expenses.total_additional_expenses > 0) && (
-                      <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t'>
-                        <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
-                          {(
-                            expenses.total_fuel_expenses +
-                            expenses.total_additional_expenses
-                          ).toFixed(2)}
-                          лв.
-                        </dd>
-                      </dl>
-                    )}
+                    {expenses.total_fuel_expenses > 0 &&
+                      expenses.total_additional_expenses > 0 && (
+                        <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t'>
+                          <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
+                            {(
+                              expenses.total_fuel_expenses +
+                              expenses.total_additional_expenses
+                            ).toFixed(2)}
+                            лв.
+                          </dd>
+                        </dl>
+                      )}
                   </div>
                 </Tab>
               )}

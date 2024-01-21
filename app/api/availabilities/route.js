@@ -35,9 +35,5 @@ export async function GET() {
     },
   ]);
 
-  return NextResponse.json(products, {
-    headers: {
-      "Cache-Control": "no-store",
-    },
-  });
+  return NextResponse.json(products);
 }

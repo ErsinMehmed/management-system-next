@@ -28,16 +28,18 @@ const TabSection = (props) => {
           {filteredData?.map((item, index) => (
             <dl
               key={index}
-              className={`flex items-center justify-between ${
+              className={`grid grid-cols-3 ${
                 index > 0 && "border-t"
               } py-2.5 px-3 text-sm`}>
               <dt className='text-gray-500 font-semibold'>
                 {getProductName(item)}
               </dt>
-              <dt className='text-gray-500 font-semibold'>
+
+              <dt className='text-gray-500 font-semibold text-center'>
                 {item.quantity} бр.
               </dt>
-              <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
+
+              <dd className='bg-gray-100 w-fit h-fit text-gray-800 px-2.5 py-1 rounded-md font-medium ml-auto'>
                 {item[props.totalKey].toFixed(2)} лв.
               </dd>
             </dl>
