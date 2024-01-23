@@ -6,8 +6,13 @@ import {
   ModalHeader,
   ModalBody,
   useDisclosure,
+  Tooltip,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
 } from "@nextui-org/react";
 import moment from "moment";
+import { FaCircleInfo } from "react-icons/fa6";
 import { productTitle } from "@/utils";
 import { perPageResult } from "@/data";
 import SearchBar from "./SearchBar";
@@ -170,6 +175,27 @@ const Table = (props) => {
                               key={cellIndex}
                             >
                               {renderCellValue(key, value)}
+
+                              {row.message && key === "product" && (
+                                <>
+                                  <Tooltip content={row.message}>
+                                    <button className="text-slate-600 ml-1.5 invisible sm:visible">
+                                      <FaCircleInfo />
+                                    </button>
+                                  </Tooltip>
+
+                                  <Popover placement="right">
+                                    <PopoverTrigger>
+                                      <button className="text-slate-600 -ml-3 sm:hidden">
+                                        <FaCircleInfo />
+                                      </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent>
+                                      {row.message}
+                                    </PopoverContent>
+                                  </Popover>
+                                </>
+                              )}
                             </td>
                           )
                       )}
