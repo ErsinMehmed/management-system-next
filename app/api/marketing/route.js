@@ -9,7 +9,10 @@ export async function POST(request) {
 
   await Ad.create(data);
 
-  return NextResponse.json({ message: "Ad Created" }, { status: 201 });
+  return NextResponse.json(
+    { message: "Рекламата е създадена успешно", status: true },
+    { status: 201 }
+  );
 }
 
 export async function GET() {

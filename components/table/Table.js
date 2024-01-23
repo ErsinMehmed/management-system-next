@@ -53,15 +53,18 @@ const Table = (props) => {
 
   return (
     <div className="sm:container sm:mx-auto sm:px-8 2xl:px-0">
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal placement="center" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1 text-2xl mt-3">
-                Изтрий обявата
+                Изтрий {props.title === "Заявки" ? "заявката" : "продажбата"}
               </ModalHeader>
               <ModalBody>
-                <div>Сигурни ли сте, че искате да изтриете обявата ?</div>
+                <div>
+                  Сигурни ли сте, че искате да изтриете{" "}
+                  {props.title === "Заявки" ? "заявката" : "продажбата"} ?
+                </div>
 
                 <div className="flex flex-row mt-3 mb-4 space-x-3 justify-evenly">
                   <button

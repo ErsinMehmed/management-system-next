@@ -1,6 +1,7 @@
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
 import Order from "@/models/order";
+import Ad from "@/models/ad";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
@@ -13,6 +14,18 @@ export async function GET(request) {
   const period = request.nextUrl.searchParams.get("period");
 
   const dateCondition = getDateCondition(dateFrom, dateTo, period);
+
+  const totalAdAmountArray = await Ad.aggregate([
+    {
+      $match: dateCondition,
+    },
+    {
+      $group: {
+        _id: null,
+        total_ad_price: { $sum: "$amount" },
+      },
+    },
+  ]);
 
   const totalFuelAmountArray = await Sell.aggregate([
     {
@@ -86,6 +99,8 @@ export async function GET(request) {
     },
   ]);
 
+  const totalAdAmount =
+    totalAdAmountArray.length > 0 ? totalAdAmountArray[0].total_ad_price : 0;
   const totalFuelAmount =
     totalFuelAmountArray.length > 0
       ? totalFuelAmountArray[0].total_fuel_price
@@ -100,6 +115,7 @@ export async function GET(request) {
       : 0;
 
   return NextResponse.json({
+    total_ad_expenses: totalAdAmount,
     total_order_expenses: totalOrderAmount,
     total_fuel_expenses: totalFuelAmount,
     total_additional_expenses: additionalCosts,

@@ -195,7 +195,6 @@ class Sell {
       commonStore.setSuccessMessage(response.message);
       this.clearSellData();
       this.loadSales();
-      productStore.loadProductAvailabilities();
 
       return true;
     } else if (!response.status) {

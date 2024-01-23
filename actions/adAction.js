@@ -15,7 +15,7 @@ class Ad {
     }
   };
 
-  getAd = async () => {
+  getAds = async () => {
     try {
       const response = await fetch("/api/marketing");
 
