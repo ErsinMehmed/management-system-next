@@ -7,7 +7,7 @@ const Loader = (props) => {
 
     for (let j = 0; j < props.cellCount; j++) {
       cells.push(
-        <td key={j} className="px-4 py-[18px] border-b border-[#ebf4ff]">
+        <td key={j} className="px-4 py-4 border-b border-[#ebf4ff]">
           <div className="h-1.5 animate-pulse bg-gray-200 rounded-full w-10/12 mb-2" />
           <div className="h-1.5 animate-pulse bg-gray-200 rounded-full" />
         </td>

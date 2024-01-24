@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { observer } from "mobx-react-lite";
 import {
   sellStore,
@@ -24,8 +24,7 @@ const Dashboard = () => {
   const { sellStats, loadSaleStats } = sellStore;
   const { expenses, loadExpenses } = expenseStore;
   const { incomes, loadIncomes } = incomeStore;
-  const { productAvailabilities, loadProductAvailabilities, test } =
-    productStore;
+  const { productAvailabilities, loadProductAvailabilities } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
 
@@ -34,31 +33,27 @@ const Dashboard = () => {
     loadProductAvailabilities();
     loadExpenses();
     loadIncomes();
-    test();
-  }, [
-    loadSaleStats,
-    loadProductAvailabilities,
-    loadExpenses,
-    loadIncomes,
-    test,
-  ]);
+  }, [loadSaleStats, loadProductAvailabilities, loadExpenses, loadIncomes]);
 
-  const handleFieldChange = (name, value) => {
-    if (name === "period") {
-      setDashboardBoxPeriod({
-        ...dashboardBoxPeriod,
-        [name]: value,
-        dateFrom: "",
-        dateTo: "",
-      });
-    } else {
-      setDashboardBoxPeriod({ ...dashboardBoxPeriod, [name]: value });
-    }
-  };
+  const handleFieldChange = useCallback(
+    (name, value) => {
+      if (name === "period") {
+        setDashboardBoxPeriod({
+          ...dashboardBoxPeriod,
+          [name]: value,
+          dateFrom: "",
+          dateTo: "",
+        });
+      } else {
+        setDashboardBoxPeriod({ ...dashboardBoxPeriod, [name]: value });
+      }
+    },
+    [dashboardBoxPeriod]
+  );
 
   const filteredProductAvailabilities = productAvailabilities?.map(
     ({ name, weight, availability, price }) => ({
-      name: name + " " + weight + "гр.",
+      name: `${name} ${weight}гр.`,
       carton: (name === "Baking Bad" && weight === 2200
         ? availability / 4
         : availability / 6
@@ -235,7 +230,7 @@ const Dashboard = () => {
           message={sellStats.message}
         />
 
-        <div className="col-span-2">
+        <div className="col-span-2 h-full">
           <Table
             title="Наличност на бутилки"
             data={filteredProductAvailabilities}

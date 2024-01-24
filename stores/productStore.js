@@ -32,10 +32,6 @@ class Product {
     this.productAvailabilities = data;
   };
 
-  test = async () => {
-    await productAction.getTest();
-  };
-
   loadProductAvailabilities = async () => {
     this.setProductAvailabilities(
       await productAction.getProductAvailabilities()

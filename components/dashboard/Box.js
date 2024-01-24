@@ -33,9 +33,16 @@ const Box = (props) => {
             </div>
           </div>
         </div>
-        <div className="text-3xl font-bold text-slate-800 mr-2">
-          {isNaN(props.value) ? "00.00" : props.value}лв.
-        </div>
+        {props.value === undefined || isNaN(props.value) ? (
+          <>
+            <div className="h-2 animate-pulse bg-gray-200 rounded-full w-10/12 my-2.5" />
+            <div className="h-2 animate-pulse bg-gray-200 rounded-full" />
+          </>
+        ) : (
+          <div className="text-3xl font-bold text-slate-800 mr-2">
+            {isNaN(props.value) ? "00.00" : props.value}лв.
+          </div>
+        )}
       </div>
     </div>
   );

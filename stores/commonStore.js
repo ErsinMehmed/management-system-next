@@ -1,6 +1,7 @@
 import { makeObservable, observable, action } from "mobx";
 import incomeStore from "./incomeStore";
 import expenseStore from "./expenseStore";
+import sellStore from "./sellStore";
 
 class Common {
   errorFields = {};
@@ -46,6 +47,8 @@ class Common {
 
   setDashboardBoxPeriod = (data) => {
     this.dashboardBoxPeriod = data;
+    incomeStore.setIncomes([]);
+    expenseStore.setExpenses([]);
     incomeStore.loadIncomes(data);
     expenseStore.loadExpenses(data);
   };
