@@ -190,6 +190,7 @@ const Table = (props) => {
                                         <FaCircleInfo />
                                       </button>
                                     </PopoverTrigger>
+
                                     <PopoverContent>
                                       {row.message}
                                     </PopoverContent>
