@@ -83,6 +83,18 @@ class Product {
     }
   };
 
+  getTest = async () => {
+    try {
+      const response = await fetch("/api/test-product");
+
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   getProductAvailabilities = async () => {
     try {
       const response = await fetch("/api/availabilities");

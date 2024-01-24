@@ -24,7 +24,8 @@ const Dashboard = () => {
   const { sellStats, loadSaleStats } = sellStore;
   const { expenses, loadExpenses } = expenseStore;
   const { incomes, loadIncomes } = incomeStore;
-  const { productAvailabilities, loadProductAvailabilities } = productStore;
+  const { productAvailabilities, loadProductAvailabilities, test } =
+    productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
 
@@ -33,7 +34,14 @@ const Dashboard = () => {
     loadProductAvailabilities();
     loadExpenses();
     loadIncomes();
-  }, [loadSaleStats, loadProductAvailabilities, loadExpenses, loadIncomes]);
+    test();
+  }, [
+    loadSaleStats,
+    loadProductAvailabilities,
+    loadExpenses,
+    loadIncomes,
+    test,
+  ]);
 
   const handleFieldChange = (name, value) => {
     if (name === "period") {

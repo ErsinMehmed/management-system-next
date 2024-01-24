@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
-import { sellStore, incomeStore } from "@/stores/useStore";
+import { sellStore, commonStore, incomeStore } from "@/stores/useStore";
 import { IoIosArrowDown } from "react-icons/io";
 import {
   Dropdown,
@@ -18,9 +18,16 @@ const Pie = (props) => {
   });
 
   const { incomes } = incomeStore;
+  const { dashboardBoxPeriod } = commonStore;
   const { pieChartPeriod, setPieChartPeriod } = sellStore;
 
-  const pieChartBoxColor = ["blue", "purple", "amber", "rose"];
+  let modifiedPieChartPeriod = "";
+
+  if (pieChartPeriod.data_ instanceof Set && pieChartPeriod.data_.size > 0) {
+    modifiedPieChartPeriod = pieChartPeriod.data_.values().next().value;
+  }
+
+  const pieChartBoxColors = ["blue", "amber", "emerald", "purple", "rose"];
 
   const seriesData = [];
   const labels = [];
@@ -49,7 +56,7 @@ const Pie = (props) => {
 
   const chartOptions = {
     series: seriesData,
-    colors: ["#60a5fa", "#c084fc", "#fbbf24", "#fb7185"],
+    colors: ["#60a5fa", "#fbbf24", "#34d399", "#c084fc", "#fb7185"],
     chart: {
       height: 420,
       width: "100%",
@@ -112,7 +119,7 @@ const Pie = (props) => {
     <div className="bg-white rounded-md shadow-md p-4 md:p-5">
       <div className="flex justify-between items-start w-full mb-5">
         <div className="flex-col items-center w-full">
-          <h5 className="text-xl font-bold leading-none text-gray-800 me-1 mb-1">
+          <h5 className="text-xl font-bold leading-none text-gray-800 me-1 mb-3">
             Продажби по бутилки
           </h5>
 
@@ -126,16 +133,16 @@ const Pie = (props) => {
                 {props.data.map((stat, index) => (
                   <dl
                     key={index}
-                    className={`bg-${pieChartBoxColor[index]}-50 rounded-lg flex flex-col items-center justify-center h-[78px]`}
+                    className={`bg-${pieChartBoxColors[index]}-50 rounded-lg flex flex-col items-center justify-center h-[78px]`}
                   >
                     <dt
-                      className={`w-8 h-8 rounded-full bg-${pieChartBoxColor[index]}-100 text-${pieChartBoxColor[index]}-600 text-sm font-semibold flex items-center justify-center mb-1`}
+                      className={`w-8 h-8 rounded-full bg-${pieChartBoxColors[index]}-100 text-${pieChartBoxColors[index]}-600 text-sm font-semibold flex items-center justify-center mb-1`}
                     >
                       {stat.total_quantity}
                     </dt>
 
                     <dd
-                      className={`text-${pieChartBoxColor[index]}-600 text-sm font-semibold`}
+                      className={`text-${pieChartBoxColors[index]}-600 text-sm font-semibold`}
                     >
                       {stat.name + " " + stat.weight + "гр."}
                     </dd>
@@ -185,15 +192,19 @@ const Pie = (props) => {
                     </dd>
                   </dl>
 
-                  <dl className="flex items-center justify-between font-medium">
-                    <dt className="text-gray-500 text-sm">
-                      Средна продажна цена на бутилка:
-                    </dt>
+                  {(modifiedPieChartPeriod
+                    ? modifiedPieChartPeriod
+                    : pieChartPeriod[0]) === dashboardBoxPeriod.period && (
+                    <dl className="flex items-center justify-between font-medium">
+                      <dt className="text-gray-500 text-sm">
+                        Средна продажна цена:
+                      </dt>
 
-                    <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
-                      {(incomes.incomes / totalBottleCount).toFixed(2)} лв.
-                    </dd>
-                  </dl>
+                      <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
+                        {(incomes.incomes / totalBottleCount).toFixed(2)} лв.
+                      </dd>
+                    </dl>
+                  )}
                 </div>
               )}
             </div>
