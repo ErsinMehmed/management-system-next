@@ -33,6 +33,7 @@ const Pie = (props) => {
   const labels = [];
   let totalSalesCount = null;
   let totalBottleCount = null;
+  let totalCartonCount = null;
 
   if (props.status) {
     props.data.forEach((item) => {
@@ -52,6 +53,15 @@ const Pie = (props) => {
       (accumulator, stat) => accumulator + stat.total_quantity,
       0
     );
+
+    totalCartonCount = props.data.reduce((accumulator, stat) => {
+      if (stat.name === "Baking Bad" && stat.weight === 2200) {
+        accumulator += stat.total_quantity / 4;
+      } else {
+        accumulator += stat.total_quantity / 6;
+      }
+      return accumulator;
+    }, 0);
   }
 
   const chartOptions = {
@@ -178,7 +188,7 @@ const Pie = (props) => {
                     </dt>
 
                     <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
-                      {(totalBottleCount / 6).toFixed(1)}
+                      {totalCartonCount.toFixed(1)}
                     </dd>
                   </dl>
 
