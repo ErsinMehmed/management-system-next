@@ -46,7 +46,13 @@ class Common {
   };
 
   setDashboardBoxPeriod = (data) => {
-    this.dashboardBoxPeriod = data;
+    const allKeysHaveValues = Object.values(data).every(
+      (value) => value === ""
+    );
+
+    this.dashboardBoxPeriod = allKeysHaveValues
+      ? { period: "Последният месец", dateFrom: "", dateTo: "" }
+      : data;
     incomeStore.setIncomes([]);
     expenseStore.setExpenses([]);
     incomeStore.loadIncomes(data);

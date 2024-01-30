@@ -48,7 +48,11 @@ export async function GET(request) {
   const page = request.nextUrl.searchParams.get("page") || 1;
   const perPage = request.nextUrl.searchParams.get("per_page") || 10;
   const searchText = request.nextUrl.searchParams.get("search");
-  const searchParam = request.nextUrl.searchParams.get("searchParam");
+  const dateFrom = request.nextUrl.searchParams.get("date_from");
+  const dateTo = request.nextUrl.searchParams.get("date_to");
+  const product = request.nextUrl.searchParams.get("product");
+  const minQuantity = request.nextUrl.searchParams.get("min_quantity");
+  const maxQuantity = request.nextUrl.searchParams.get("max_quantity");
 
   await connectMongoDB();
 
@@ -60,6 +64,26 @@ export async function GET(request) {
     }).distinct("_id");
 
     queryBuilder = queryBuilder.where("product").in(productIds);
+  }
+
+  if (dateFrom) {
+    queryBuilder = queryBuilder.where("date").gte(new Date(dateFrom));
+  }
+
+  if (dateTo) {
+    queryBuilder = queryBuilder.where("date").lte(new Date(dateTo));
+  }
+
+  if (product) {
+    queryBuilder.where("product").equals(product);
+  }
+
+  if (minQuantity) {
+    queryBuilder.where("quantity").gte(parseInt(minQuantity));
+  }
+
+  if (maxQuantity) {
+    queryBuilder.where("quantity").lte(parseInt(maxQuantity));
   }
 
   const totalOrders = await Order.countDocuments(queryBuilder);

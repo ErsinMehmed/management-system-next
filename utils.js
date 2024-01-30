@@ -1,6 +1,8 @@
 import BalloonsImg from "@/public/images/Balloons.png";
 import Exotic640Img from "@/public/images/ExoticWhip-640G.png";
 import Exotic2000Img from "@/public/images/ExoticWhip-2000G.webp";
+import FreshWhip615Img from "@/public/images/FreshWip-615G.png";
+import Miami615Img from "@/public/images/MiamiMagic-615G.webp";
 import Miami3300Img from "@/public/images/MiamiMagic-3300G.webp";
 import BakingBad640Img from "@/public/images/BakingBad-640G.webp";
 import BakingBad2200Img from "@/public/images/BakingBad-2200G.jpg";
@@ -127,6 +129,7 @@ export function productTitle(product) {
   switch (product?.name) {
     case "Exotic Whip":
     case "Great Whip":
+    case "Fresh Whip":
     case "Miami Magic":
     case "Baking Bad":
       return `${product.name} ${product.weight}гр.`;
@@ -146,9 +149,11 @@ export function getProductImage(name, weight, flavor) {
     case "Great Whip":
       return GreatWhip640Img;
     case "Miami Magic":
-      return Miami3300Img;
+      return weight === 615 ? Miami615Img : Miami3300Img;
+    case "Fresh Whip":
+      return FreshWhip615Img;
     case "Baking Bad":
-      return weight === 640 ? BakingBad640Img : BakingBad2200Img;
+      return weight === 615 ? BakingBad640Img : BakingBad2200Img;
     case "Балони":
       return BalloonsImg;
     case "Накрайник":
@@ -213,10 +218,6 @@ export function getDateCondition(dateFrom, dateTo, period) {
 
     endDate = new Date(dateTo);
     endDate.setHours(23, 59, 59, 999);
-
-    if (startDate > endDate) {
-      throw new Error("Невалиден период от време");
-    }
 
     return {
       date: {

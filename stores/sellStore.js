@@ -176,6 +176,18 @@ class Sell {
     };
   };
 
+  clearFilterData = () => {
+    this.setFilterData({
+      dateFrom: "",
+      dateTo: "",
+      product: "",
+      minQuantity: "",
+      maxQuantity: "",
+    });
+
+    this.loadSales();
+  };
+
   createSell = async () => {
     commonStore.setErrorFields({});
     commonStore.setErrorMessage("");
@@ -219,7 +231,27 @@ class Sell {
   };
 
   searchSales = () => {
+    commonStore.setErrorMessage("");
     this.setSearchText("");
+
+    if (
+      this.filterData?.minQuantity &&
+      this.filterData?.maxQuantity &&
+      this.filterData?.minQuantity > this.filterData?.maxQuantity
+    ) {
+      commonStore.setErrorMessage("Невалидено мин и макс количество");
+      return;
+    }
+
+    if (
+      this.filterData?.dateFrom &&
+      this.filterData?.dateTo &&
+      this.filterData?.dateFrom > this.filterData?.dateTo
+    ) {
+      commonStore.setErrorMessage("Невалиден период от време");
+      return;
+    }
+
     this.setCurrentPage(1);
     this.loadSales();
   };

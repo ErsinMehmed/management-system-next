@@ -26,6 +26,7 @@ const DashboardOrders = () => {
     searchOrders,
     setOrderData,
     clearOrderData,
+    clearFilterData,
     createOrder,
     loadOrders,
     deleteOrder,
@@ -96,8 +97,9 @@ const DashboardOrders = () => {
       isButton={true}
       errorFields={errorFields}
       saveBtnAction={createOrder}
-      openBtnText='Добави'
-      title='Добави поръчка'>
+      openBtnText="Добави"
+      title="Добави поръчка"
+    >
       <OrderForm
         data={orderData}
         errorFields={errorFields}
@@ -108,10 +110,10 @@ const DashboardOrders = () => {
   );
 
   return (
-    <Layout title='Поръчки'>
-      <div className='min-h-screen 2xl:px-10'>
+    <Layout title="Поръчки">
+      <div className="min-h-screen 2xl:px-10">
         <Table
-          title='Заявки'
+          title="Заявки"
           data={filteredOrders}
           columns={[
             "име на продукт",
@@ -123,7 +125,7 @@ const DashboardOrders = () => {
           delete={handleDeleteOrder}
           perPage={perPage}
           filterSearchOnClick={searchOrders}
-          //clearFilterData={clearFilterData}
+          clearFilterData={clearFilterData}
           filterData={filterData}
           showFilter={showFilter}
           setShowFilter={setShowFilter}
@@ -132,10 +134,11 @@ const DashboardOrders = () => {
           isLoading={isLoading}
           setPerPage={setPerPage}
           searchBarButton={modal}
-          searchBarPlaceholder='име на продукт'
+          searchBarPlaceholder="име на продукт"
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
-          filterSection={true}>
+          filterSection={true}
+        >
           <Pagination
             isLoading={isLoading}
             currentPage={orders.pagination?.current_page}

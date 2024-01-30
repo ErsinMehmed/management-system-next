@@ -23,33 +23,29 @@ class Sell {
         url += `&search=${searchText}`;
       }
 
-      //   if (filterData?.dateFrom) {
-      //     url += `&date_from=${filterData.dateFrom}`;
-      //   }
+      if (searchText) {
+        url += `&search=${searchText}`;
+      }
 
-      //   if (filterData?.dateTo) {
-      //     url += `&date_to=${filterData.dateTo}`;
-      //   }
+      if (filterData?.dateFrom) {
+        url += `&date_from=${filterData.dateFrom}`;
+      }
 
-      //   if (filterData?.status) {
-      //     url += `&status=${filterData.status}`;
-      //   }
+      if (filterData?.dateTo) {
+        url += `&date_to=${filterData.dateTo}`;
+      }
 
-      //   if (filterData?.field) {
-      //     url += `&field=${filterData.field}`;
-      //   }
+      if (filterData?.product) {
+        url += `&product=${filterData.product}`;
+      }
 
-      //   if (filterData?.employmentType) {
-      //     url += `&employment_type=${filterData.employmentType}`;
-      //   }
+      if (filterData?.minQuantity) {
+        url += `&min_quantity=${filterData.minQuantity}`;
+      }
 
-      //   if (filterData?.minSalary) {
-      //     url += `&min_salary=${filterData.minSalary}`;
-      //   }
-
-      //   if (filterData?.maxSalary) {
-      //     url += `&max_salary=${filterData.maxSalary}`;
-      //   }
+      if (filterData?.maxQuantity) {
+        url += `&max_quantity=${filterData.maxQuantity}`;
+      }
 
       const response = await fetch(url);
 

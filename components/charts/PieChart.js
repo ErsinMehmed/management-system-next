@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { sellStore, commonStore, incomeStore } from "@/stores/useStore";
 import { IoIosArrowDown } from "react-icons/io";
 import {
@@ -162,7 +163,9 @@ const Pie = (props) => {
 
               <button
                 onClick={handleShowSection}
-                className="hover:underline text-sm text-gray-500 font-medium inline-flex items-center transition-all"
+                className={`hover:underline text-sm text-gray-500 font-medium inline-flex items-center transition-all ${
+                  showSection && "mb-3.5"
+                }`}
               >
                 Покажи детайли{" "}
                 <IoIosArrowDown
@@ -172,51 +175,64 @@ const Pie = (props) => {
                 />
               </button>
 
-              {showSection && (
-                <div className="border-gray-200 border-t pt-3 mt-3 space-y-2">
-                  <dl className="flex items-center justify-between font-medium">
-                    <dt className="text-gray-500 text-sm">Брой доставки:</dt>
+              <AnimatePresence>
+                {showSection && (
+                  <motion.div
+                    key="content"
+                    initial="collapsed"
+                    animate="open"
+                    exit="collapsed"
+                    variants={{
+                      open: { opacity: 1, height: "auto" },
+                      collapsed: { opacity: 0, height: 0 },
+                    }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="border-gray-200 border-t pt-3 space-y-2 overflow-hidden"
+                  >
+                    <dl className="flex items-center justify-between font-medium">
+                      <dt className="text-gray-500 text-sm">Брой доставки:</dt>
 
-                    <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
-                      {totalSalesCount}
-                    </dd>
-                  </dl>
+                      <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
+                        {totalSalesCount}
+                      </dd>
+                    </dl>
 
-                  <dl className="flex items-center justify-between font-medium">
-                    <dt className="text-gray-500 text-sm">
-                      Брой продадени кашона:
-                    </dt>
-
-                    <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
-                      {totalCartonCount.toFixed(1)}
-                    </dd>
-                  </dl>
-
-                  <dl className="flex items-center justify-between font-medium">
-                    <dt className="text-gray-500 text-sm">
-                      Брой продадени бутилки:
-                    </dt>
-
-                    <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
-                      {totalBottleCount}
-                    </dd>
-                  </dl>
-
-                  {(modifiedPieChartPeriod
-                    ? modifiedPieChartPeriod
-                    : pieChartPeriod[0]) === dashboardBoxPeriod.period && (
                     <dl className="flex items-center justify-between font-medium">
                       <dt className="text-gray-500 text-sm">
-                        Средна продажна цена:
+                        Брой продадени кашона:
                       </dt>
 
                       <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
-                        {(incomes.incomes / totalBottleCount).toFixed(2)} лв.
+                        {totalCartonCount.toFixed(1)}
                       </dd>
                     </dl>
-                  )}
-                </div>
-              )}
+
+                    <dl className="flex items-center justify-between font-medium">
+                      <dt className="text-gray-500 text-sm">
+                        Брой продадени бутилки:
+                      </dt>
+
+                      <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
+                        {totalBottleCount}
+                      </dd>
+                    </dl>
+
+                    {(modifiedPieChartPeriod
+                      ? modifiedPieChartPeriod
+                      : pieChartPeriod[0]) === dashboardBoxPeriod.period && (
+                      <dl className="flex items-center justify-between font-medium">
+                        <dt className="text-gray-500 text-sm">
+                          Средна продажна цена:
+                        </dt>
+
+                        <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
+                          {(incomes.incomes / totalBottleCount).toFixed(2)} лв.
+                        </dd>
+                      </dl>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>

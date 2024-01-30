@@ -23,33 +23,25 @@ class Order {
         url += `&search=${searchText}`;
       }
 
-      //   if (filterData?.dateFrom) {
-      //     url += `&date_from=${filterData.dateFrom}`;
-      //   }
+      if (filterData?.dateFrom) {
+        url += `&date_from=${filterData.dateFrom}`;
+      }
 
-      //   if (filterData?.dateTo) {
-      //     url += `&date_to=${filterData.dateTo}`;
-      //   }
+      if (filterData?.dateTo) {
+        url += `&date_to=${filterData.dateTo}`;
+      }
 
-      //   if (filterData?.status) {
-      //     url += `&status=${filterData.status}`;
-      //   }
+      if (filterData?.product) {
+        url += `&product=${filterData.product}`;
+      }
 
-      //   if (filterData?.field) {
-      //     url += `&field=${filterData.field}`;
-      //   }
+      if (filterData?.minQuantity) {
+        url += `&min_quantity=${filterData.minQuantity}`;
+      }
 
-      //   if (filterData?.employmentType) {
-      //     url += `&employment_type=${filterData.employmentType}`;
-      //   }
-
-      //   if (filterData?.minSalary) {
-      //     url += `&min_salary=${filterData.minSalary}`;
-      //   }
-
-      //   if (filterData?.maxSalary) {
-      //     url += `&max_salary=${filterData.maxSalary}`;
-      //   }
+      if (filterData?.maxQuantity) {
+        url += `&max_quantity=${filterData.maxQuantity}`;
+      }
 
       const response = await fetch(url);
 

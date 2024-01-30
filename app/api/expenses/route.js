@@ -13,6 +13,13 @@ export async function GET(request) {
   const dateTo = request.nextUrl.searchParams.get("dateTo");
   const period = request.nextUrl.searchParams.get("period");
 
+  if (dateFrom && dateTo && dateFrom > dateTo) {
+    return NextResponse.json({
+      message: "Невалиден период от време",
+      status: false,
+    });
+  }
+
   const dateCondition = getDateCondition(dateFrom, dateTo, period);
 
   const totalAdAmountArray = await Ad.aggregate([
