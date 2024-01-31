@@ -34,6 +34,38 @@ const Table = (props) => {
     [props]
   );
 
+  const getColumnName = (columnName) => {
+    switch (columnName) {
+      case "продукт":
+        return "product";
+      case "количество":
+        return "quantity";
+      case "ед. цена":
+        return "price";
+      case "цена":
+        return "price";
+      case "обща сума":
+        return "total_amount";
+      case "дата":
+        return "date";
+      case "дата":
+        return "date";
+      case "гориво":
+        return "fuel_price";
+    }
+  };
+
+  const handleColumnClick = (columnName) => {
+    columnName = getColumnName(columnName);
+
+    if (props.orderColumn.name === columnName) {
+      const newOrder = props.orderColumn.order === "asc" ? "desc" : "asc";
+      props.setOrderColumn({ name: props.orderColumn.name, order: newOrder });
+    } else {
+      props.setOrderColumn({ name: columnName, order: "asc" });
+    }
+  };
+
   const handleFieldChange = useMemo(
     () => (value) => {
       props.setSearchBarText(value);
@@ -156,8 +188,9 @@ const Table = (props) => {
                   <tr>
                     {props.columns.map((column, index) => (
                       <th
-                        className="px-4 py-3.5 border-b-2 border-[#ebf4ff] bg-[#ebf4ff] text-left text-sm font-bold text-slate-700 uppercase tracking-wider"
+                        className="px-4 py-3.5 border-b-2 border-[#ebf4ff] bg-[#ebf4ff] text-left text-sm font-bold text-slate-700 uppercase tracking-wider cursor-pointer"
                         key={index}
+                        onClick={() => handleColumnClick(column)}
                       >
                         {column}
                       </th>

@@ -17,8 +17,15 @@ class Sell {
     }
   };
 
-  getSales = async (page, perPage, searchText, filterData) => {
-    return await fetchData("sales", page, perPage, searchText, filterData);
+  getSales = async (page, perPage, searchText, filterData, orderColumn) => {
+    return await fetchData(
+      "sales",
+      page,
+      perPage,
+      searchText,
+      filterData,
+      orderColumn
+    );
   };
 
   deleteSell = async (id) => {

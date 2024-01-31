@@ -18,8 +18,10 @@ const DashboardOrders = () => {
     searchText,
     filterData,
     showFilter,
+    orderColumn,
     handlePageChange,
     handlePageClick,
+    setOrderColumn,
     setPerPage,
     setSearchText,
     setFilterData,
@@ -115,15 +117,11 @@ const DashboardOrders = () => {
         <Table
           title="Заявки"
           data={filteredOrders}
-          columns={[
-            "име на продукт",
-            "количество",
-            "ед. цена",
-            "обща сума",
-            "дата",
-          ]}
+          columns={["продукт", "количество", "ед. цена", "обща сума", "дата"]}
           delete={handleDeleteOrder}
           perPage={perPage}
+          orderColumn={orderColumn}
+          setOrderColumn={setOrderColumn}
           filterSearchOnClick={searchOrders}
           clearFilterData={clearFilterData}
           filterData={filterData}

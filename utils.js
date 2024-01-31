@@ -213,7 +213,8 @@ export async function fetchData(
   page,
   perPage,
   searchText,
-  filterData
+  filterData,
+  orderColumn
 ) {
   try {
     const params = {
@@ -225,6 +226,8 @@ export async function fetchData(
       product: filterData?.product,
       min_quantity: filterData?.minQuantity,
       max_quantity: filterData?.maxQuantity,
+      sort_column: orderColumn?.name,
+      sort_order: orderColumn?.order,
     };
 
     const filteredParams = Object.fromEntries(

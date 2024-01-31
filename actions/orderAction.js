@@ -17,8 +17,15 @@ class Order {
     }
   };
 
-  getOrders = async (page, perPage, searchText, filterData) => {
-    return await fetchData("orders", page, perPage, searchText, filterData);
+  getOrders = async (page, perPage, searchText, filterData, orderColumn) => {
+    return await fetchData(
+      "orders",
+      page,
+      perPage,
+      searchText,
+      filterData,
+      orderColumn
+    );
   };
 
   deleteOrder = async (id) => {

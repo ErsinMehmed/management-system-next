@@ -22,9 +22,11 @@ const DashboardSales = () => {
     showFilter,
     fuelConsumption,
     dieselPrice,
+    orderColumn,
     handlePageChange,
     handlePageClick,
     setPerPage,
+    setOrderColumn,
     clearFilterData,
     setSearchText,
     setFilterData,
@@ -183,6 +185,8 @@ const DashboardSales = () => {
           columns={["продукт", "количество", "цена", "гориво", "дата"]}
           delete={handleDeleteSell}
           perPage={perPage}
+          orderColumn={orderColumn}
+          setOrderColumn={setOrderColumn}
           filterSearchOnClick={searchSales}
           clearFilterData={clearFilterData}
           filterData={filterData}

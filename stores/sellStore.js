@@ -20,6 +20,10 @@ class Sell {
     product: "",
     message: "",
   };
+  orderColumn = {
+    name: "",
+    order: "",
+  };
   currentPage = 1;
   fuelConsumption = null;
   dieselPrice = null;
@@ -50,6 +54,7 @@ class Sell {
       pieChartPeriod: observable,
       fuelConsumption: observable,
       dieselPrice: observable,
+      orderColumn: observable,
       setSales: action,
       setSellData: action,
       setCurrentPage: action,
@@ -62,6 +67,7 @@ class Sell {
       setPieChartPeriod: action,
       setFuelConsumption: action,
       setDieselPrice: action,
+      setOrderColumn: action,
     });
   }
 
@@ -91,6 +97,12 @@ class Sell {
     this.loadSales(
       this.currentPage > newTotalPages ? newTotalPages : this.currentPage
     );
+  };
+
+  setOrderColumn = (data) => {
+    this.orderColumn = data;
+
+    this.loadSales();
   };
 
   setIsLoading = (data) => {
@@ -155,7 +167,8 @@ class Sell {
         newPage ?? this.currentPage,
         this.perPage,
         this.searchText,
-        this.filterData
+        this.filterData,
+        this.orderColumn
       )
     );
 

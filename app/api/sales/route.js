@@ -63,6 +63,8 @@ export async function GET(request) {
   const product = request.nextUrl.searchParams.get("product");
   const minQuantity = request.nextUrl.searchParams.get("min_quantity");
   const maxQuantity = request.nextUrl.searchParams.get("max_quantity");
+  const sortColumn = request.nextUrl.searchParams.get("sort_column");
+  const sortOrder = request.nextUrl.searchParams.get("sort_order");
 
   await connectMongoDB();
 
@@ -96,6 +98,14 @@ export async function GET(request) {
     queryBuilder.where("quantity").lte(parseInt(maxQuantity));
   }
 
+  if (sortColumn && sortOrder) {
+    const sortObject = {};
+    sortObject[sortColumn] = sortOrder === "asc" ? 1 : -1;
+    queryBuilder = queryBuilder.sort(sortObject);
+  } else {
+    queryBuilder = queryBuilder.sort({ _id: -1 });
+  }
+
   const totalSales = await Sell.countDocuments(queryBuilder);
   const sales = await queryBuilder
     .populate({
@@ -103,7 +113,6 @@ export async function GET(request) {
       select: "name weight flavor count",
     })
     .select("quantity price message date fuel_price product")
-    .sort({ _id: -1 })
     .skip((page - 1) * perPage)
     .limit(perPage);
 

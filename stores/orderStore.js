@@ -14,6 +14,10 @@ class Order {
     product: "",
     message: "",
   };
+  orderColumn = {
+    name: "",
+    order: "",
+  };
   currentPage = 1;
   perPage = 10;
   isLoading = true;
@@ -37,6 +41,7 @@ class Order {
       searchText: observable,
       filterData: observable,
       showFilter: observable,
+      orderColumn: observable,
       setOrders: action,
       setOrderData: action,
       setCurrentPage: action,
@@ -45,6 +50,7 @@ class Order {
       setSearchText: action,
       setFilterData: action,
       setShowFilter: action,
+      setOrderColumn: action,
     });
   }
 
@@ -76,6 +82,12 @@ class Order {
     );
   };
 
+  setOrderColumn = (data) => {
+    this.orderColumn = data;
+
+    this.loadOrders();
+  };
+
   setIsLoading = (data) => {
     this.isLoading = data;
   };
@@ -100,7 +112,8 @@ class Order {
         newPage ?? this.currentPage,
         this.perPage,
         this.searchText,
-        this.filterData
+        this.filterData,
+        this.orderColumn
       )
     );
 
