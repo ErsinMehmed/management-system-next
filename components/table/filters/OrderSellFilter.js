@@ -20,7 +20,7 @@ function OrderSellFilter(props) {
 
   return (
     <>
-      <div className="px-3 lg:px-4 col-span-2">
+      <div className="px-2.5 col-span-2">
         <div className="font-semibold ml-0.5">Дата на добавяне</div>
         <div className="sm:flex space-y-4 sm:space-y-0 sm:space-x-3.5 mt-1.5">
           <Input
@@ -39,7 +39,7 @@ function OrderSellFilter(props) {
         </div>
       </div>
 
-      <div className="px-3 lg:px-4 col-span-2 mt-4 md:mt-0">
+      <div className="px-2.5 col-span-2 mt-4 md:mt-0">
         <div className="font-semibold ml-0.5">Количество</div>
         <div className="sm:flex space-y-4 sm:space-y-0 sm:space-x-3.5 mt-1.5">
           <Input
@@ -58,7 +58,7 @@ function OrderSellFilter(props) {
         </div>
       </div>
 
-      <div className="px-3 sm:pl-3 pr-2 md:px-3 lg:px-4 col-span-1 mt-4 lg:mt-0">
+      <div className="px-2.5 col-span-1 mt-4 lg:mt-0">
         <div className="font-semibold mb-1.5 ml-0.5">Продукт</div>
 
         <Select

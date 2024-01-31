@@ -208,6 +208,42 @@ export function getPeriodParam(period) {
   }
 }
 
+export async function fetchData(
+  resource,
+  page,
+  perPage,
+  searchText,
+  filterData
+) {
+  try {
+    const params = {
+      page: page || 1,
+      per_page: perPage || 10,
+      search: searchText,
+      date_from: filterData?.dateFrom,
+      date_to: filterData?.dateTo,
+      product: filterData?.product,
+      min_quantity: filterData?.minQuantity,
+      max_quantity: filterData?.maxQuantity,
+    };
+
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== "")
+    );
+
+    const urlParams = new URLSearchParams(filteredParams);
+    const url = `/api/${resource}${
+      urlParams.toString() ? `?${urlParams.toString()}` : ""
+    }`;
+
+    const response = await fetch(url);
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
 export function getDateCondition(dateFrom, dateTo, period) {
   let startDate;
   let endDate;

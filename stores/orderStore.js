@@ -174,7 +174,8 @@ class Order {
     if (
       this.filterData?.minQuantity &&
       this.filterData?.maxQuantity &&
-      this.filterData?.minQuantity > this.filterData?.maxQuantity
+      Number(this.filterData?.minQuantity) >
+        Number(this.filterData?.maxQuantity)
     ) {
       commonStore.setErrorMessage("Невалидено мин и макс количество");
       return;

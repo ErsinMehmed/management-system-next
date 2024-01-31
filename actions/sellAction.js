@@ -1,3 +1,5 @@
+import { fetchData } from "@/utils";
+
 class Sell {
   createSell = async (data) => {
     try {
@@ -16,45 +18,7 @@ class Sell {
   };
 
   getSales = async (page, perPage, searchText, filterData) => {
-    try {
-      let url = `/api/sales?page=${page ?? 1}&per_page=${perPage ?? 10}`;
-
-      if (searchText) {
-        url += `&search=${searchText}`;
-      }
-
-      if (searchText) {
-        url += `&search=${searchText}`;
-      }
-
-      if (filterData?.dateFrom) {
-        url += `&date_from=${filterData.dateFrom}`;
-      }
-
-      if (filterData?.dateTo) {
-        url += `&date_to=${filterData.dateTo}`;
-      }
-
-      if (filterData?.product) {
-        url += `&product=${filterData.product}`;
-      }
-
-      if (filterData?.minQuantity) {
-        url += `&min_quantity=${filterData.minQuantity}`;
-      }
-
-      if (filterData?.maxQuantity) {
-        url += `&max_quantity=${filterData.maxQuantity}`;
-      }
-
-      const response = await fetch(url);
-
-      const data = await response.json();
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    return await fetchData("sales", page, perPage, searchText, filterData);
   };
 
   deleteSell = async (id) => {

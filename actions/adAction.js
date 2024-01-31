@@ -19,9 +19,7 @@ class Ad {
     try {
       const response = await fetch("/api/marketing");
 
-      const data = await response.json();
-
-      return data;
+      return await response.json();
     } catch (error) {
       throw error;
     }

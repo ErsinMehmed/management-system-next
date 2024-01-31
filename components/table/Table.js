@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { MdDelete } from "react-icons/md";
 import {
   Modal,
@@ -23,38 +23,47 @@ import Select from "./Select";
 const Table = (props) => {
   const [rowId, setRowId] = useState(null);
 
-  const toggleFilterSection = () => {
+  const toggleFilterSection = useCallback(() => {
     props.setShowFilter(!props.showFilter);
-  };
+  }, [props.showFilter, props.setShowFilter]);
 
-  const handleDelete = (id) => {
-    props.delete(id);
-  };
+  const handleDelete = useMemo(
+    () => (id) => {
+      props.delete(id);
+    },
+    [props.delete]
+  );
 
-  const handleFieldChange = (value) => {
-    props.setSearchBarText(value);
-  };
+  const handleFieldChange = useMemo(
+    () => (value) => {
+      props.setSearchBarText(value);
+    },
+    [props.setSearchBarText]
+  );
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const renderCellValue = (key, value) => {
-    switch (key) {
-      case "product":
-        return productTitle(value);
-      case "quantity":
-        return `${value} бр.`;
-      case "mileage":
-        return `${value} км.`;
-      case "date":
-        return moment(value).format("DD.MM.YYYY");
-      case "fuel_price":
-      case "price":
-      case "total_amount":
-        return `${value?.toFixed(2)} лв.`;
-      default:
-        return value;
-    }
-  };
+  const renderCellValue = useMemo(
+    () => (key, value) => {
+      switch (key) {
+        case "product":
+          return productTitle(value);
+        case "quantity":
+          return `${value} бр.`;
+        case "mileage":
+          return `${value} км.`;
+        case "date":
+          return moment(value).format("DD.MM.YYYY");
+        case "fuel_price":
+        case "price":
+        case "total_amount":
+          return `${value?.toFixed(2)} лв.`;
+        default:
+          return value;
+      }
+    },
+    []
+  );
 
   return (
     <div className="sm:container sm:mx-auto sm:px-8 2xl:px-0">
@@ -65,6 +74,7 @@ const Table = (props) => {
               <ModalHeader className="flex flex-col gap-1 text-2xl mt-3">
                 Изтрий {props.title === "Заявки" ? "заявката" : "продажбата"}
               </ModalHeader>
+
               <ModalBody>
                 <div>
                   Сигурни ли сте, че искате да изтриете{" "}
