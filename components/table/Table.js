@@ -25,20 +25,20 @@ const Table = (props) => {
 
   const toggleFilterSection = useCallback(() => {
     props.setShowFilter(!props.showFilter);
-  }, [props.showFilter, props.setShowFilter]);
+  }, [props]);
 
   const handleDelete = useMemo(
     () => (id) => {
       props.delete(id);
     },
-    [props.delete]
+    [props]
   );
 
   const handleFieldChange = useMemo(
     () => (value) => {
       props.setSearchBarText(value);
     },
-    [props.setSearchBarText]
+    [props]
   );
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();

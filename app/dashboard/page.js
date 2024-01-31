@@ -48,7 +48,7 @@ const Dashboard = () => {
         setDashboardBoxPeriod({ ...dashboardBoxPeriod, [name]: value });
       }
     },
-    [dashboardBoxPeriod]
+    [dashboardBoxPeriod, setDashboardBoxPeriod]
   );
 
   const filteredProductAvailabilities = productAvailabilities?.map(
