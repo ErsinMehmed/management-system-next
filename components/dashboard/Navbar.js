@@ -13,7 +13,7 @@ const Navbar = (props) => {
       }`}
     >
       <div className="px-3 py-3 lg:px-5 lg:pl-3">
-        <div className="flex items-center justify-between">
+        <div className="flex-container">
           <div className="flex items-center justify-start">
             <button
               onClick={props.onMenuClick}

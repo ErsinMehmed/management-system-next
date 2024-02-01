@@ -28,7 +28,7 @@ const AccountDropdown = () => {
     <div className="flex items-center gap-4">
       <Dropdown placement="bottom-start">
         <DropdownTrigger>
-          <div className="flex items-center justify-center cursor-pointer">
+          <div className="center-element cursor-pointer">
             <Avatar
               isBordered
               size="sm"

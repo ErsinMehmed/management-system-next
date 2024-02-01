@@ -144,7 +144,7 @@ const Dashboard = () => {
                 <Tab key="Други" title="Други">
                   <div className="bg-gray-50 rounded-lg">
                     {expenses.total_fuel_expenses > 0 && (
-                      <dl className="flex items-center justify-between py-2.5 px-3 text-sm">
+                      <dl className="flex-container py-2.5 px-3 text-sm">
                         <dt className="text-gray-500 font-semibold">Гориво</dt>
 
                         <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
@@ -154,7 +154,7 @@ const Dashboard = () => {
                     )}
 
                     {expenses.total_ad_expenses > 0 && (
-                      <dl className="flex items-center justify-between py-2.5 px-3 text-sm border-t">
+                      <dl className="flex-container py-2.5 px-3 text-sm border-t">
                         <dt className="text-gray-500 font-semibold">Реклами</dt>
 
                         <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
@@ -164,7 +164,7 @@ const Dashboard = () => {
                     )}
 
                     {expenses.total_additional_expenses > 0 && (
-                      <dl className="flex items-center justify-between py-2.5 px-3 text-sm border-t">
+                      <dl className="flex-container py-2.5 px-3 text-sm border-t">
                         <dt className="text-gray-500 font-semibold">
                           Допълнителни
                         </dt>

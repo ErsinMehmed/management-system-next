@@ -37,7 +37,7 @@ const Table = (props) => {
       <div className="p-3">
         <div className="overflow-x-auto">
           {Object.keys(props.data).length === 0 ? (
-            <div className="w-full h-[28rem] flex items-center justify-center">
+            <div className="w-full h-[28rem] center-element">
               <Spinner classNames={{ wrapper: "w-20 h-20" }} />
             </div>
           ) : (

@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .center-element {
+        @apply flex justify-center items-center;
+    }
+
+    .flex-container {
+        @apply flex justify-between items-center;
+    }
+
+    .income-display {
+        @apply bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md
+    }
+}

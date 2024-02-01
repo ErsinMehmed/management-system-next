@@ -144,10 +144,10 @@ const Pie = (props) => {
                 {props.data.map((stat, index) => (
                   <dl
                     key={index}
-                    className={`bg-${pieChartBoxColors[index]}-50 rounded-lg flex flex-col items-center justify-center h-[78px]`}
+                    className={`bg-${pieChartBoxColors[index]}-50 rounded-lg center-element flex-col h-[78px]`}
                   >
                     <dt
-                      className={`w-8 h-8 rounded-full bg-${pieChartBoxColors[index]}-100 text-${pieChartBoxColors[index]}-600 text-sm font-semibold flex items-center justify-center mb-1`}
+                      className={`w-8 h-8 rounded-full bg-${pieChartBoxColors[index]}-100 text-${pieChartBoxColors[index]}-600 text-sm font-semibold center-element mb-1`}
                     >
                       {stat.total_quantity}
                     </dt>
@@ -189,43 +189,39 @@ const Pie = (props) => {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="border-gray-200 border-t pt-3 space-y-2 overflow-hidden"
                   >
-                    <dl className="flex items-center justify-between font-medium">
+                    <dl className="flex-container font-medium">
                       <dt className="text-gray-500 text-sm">Брой доставки:</dt>
 
-                      <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
-                        {totalSalesCount}
-                      </dd>
+                      <dd className="income-display">{totalSalesCount}</dd>
                     </dl>
 
-                    <dl className="flex items-center justify-between font-medium">
+                    <dl className="flex-container font-medium">
                       <dt className="text-gray-500 text-sm">
                         Брой продадени кашона:
                       </dt>
 
-                      <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
+                      <dd className="income-display">
                         {totalCartonCount.toFixed(1)}
                       </dd>
                     </dl>
 
-                    <dl className="flex items-center justify-between font-medium">
+                    <dl className="flex-container font-medium">
                       <dt className="text-gray-500 text-sm">
                         Брой продадени бутилки:
                       </dt>
 
-                      <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
-                        {totalBottleCount}
-                      </dd>
+                      <dd className="income-display">{totalBottleCount}</dd>
                     </dl>
 
                     {(modifiedPieChartPeriod
                       ? modifiedPieChartPeriod
                       : pieChartPeriod[0]) === dashboardBoxPeriod.period && (
-                      <dl className="flex items-center justify-between font-medium">
+                      <dl className="flex-container font-medium">
                         <dt className="text-gray-500 text-sm">
                           Средна продажна цена:
                         </dt>
 
-                        <dd className="bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md">
+                        <dd className="income-display">
                           {(incomes.incomes / totalBottleCount).toFixed(2)} лв.
                         </dd>
                       </dl>
@@ -242,11 +238,11 @@ const Pie = (props) => {
         {props.data?.length > 0 ? (
           chartComponent
         ) : !props.data?.length && !props.status && props.message ? (
-          <div className="h-full w-full flex items-center justify-center font-semibold text-slate-700 text-center">
+          <div className="h-full w-full center-element font-semibold text-slate-700 text-center">
             {props.message}
           </div>
         ) : (
-          <div className="h-full w-full flex items-center justify-center font-semibold text-slate-700 text-center">
+          <div className="h-full w-full center-element font-semibold text-slate-700 text-center">
             <Spinner classNames={{ wrapper: "w-20 h-20" }} />
           </div>
         )}

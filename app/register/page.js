@@ -25,8 +25,8 @@ const Register = () => {
   //   return (
   //     <>
   //       <Alert />
-  //       <section className='flex items-center justify-center min-h-screen w-full bg-[#f3f7fd] py-10 2xl:py-0'>
-  //         <div className='flex flex-col items-center justify-center px-6 py-8 w-full sm:mx-auto lg:py-0'>
+  //       <section className='center-element min-h-screen w-full bg-[#f3f7fd] py-10 2xl:py-0'>
+  //         <div className='center-element flex-col px-6 py-8 w-full sm:mx-auto lg:py-0'>
   //           <div className='w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0'>
   //             <div className='p-6 space-y-4 md:space-y-6 sm:p-8'>
   //               <h1 className='text-xl font-bold leading-tight tracking-tight text-gray-800'>
