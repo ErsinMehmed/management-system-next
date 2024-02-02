@@ -13,6 +13,8 @@ import {
 } from "@nextui-org/react";
 import moment from "moment";
 import { FaCircleInfo } from "react-icons/fa6";
+import { IoMdArrowDropup } from "react-icons/io";
+import { IoMdArrowDropdown } from "react-icons/io";
 import { productTitle } from "@/utils";
 import { perPageResult } from "@/data";
 import SearchBar from "./SearchBar";
@@ -188,11 +190,23 @@ const Table = (props) => {
                   <tr>
                     {props.columns.map((column, index) => (
                       <th
-                        className="px-4 py-3.5 border-b-2 border-[#ebf4ff] bg-[#ebf4ff] text-left text-sm font-bold text-slate-700 uppercase tracking-wider cursor-pointer"
+                        className="px-4 py-3.5 border-b-2 items-center border-[#ebf4ff] bg-[#ebf4ff] text-left text-sm font-bold text-slate-700 uppercase tracking-wider cursor-pointer"
                         key={index}
                         onClick={() => handleColumnClick(column)}
                       >
-                        {column}
+                        <div className="flex items-center">
+                          <span>{column}</span>
+
+                          {getColumnName(column) === props.orderColumn.name && (
+                            <span>
+                              {props.orderColumn.order === "asc" ? (
+                                <IoMdArrowDropup className="w-5 h-5 mt-0.5" />
+                              ) : (
+                                <IoMdArrowDropdown className="w-5 h-5 mt-0.5" />
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </th>
                     ))}
 

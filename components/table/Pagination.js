@@ -1,3 +1,5 @@
+"use client";
+import React, { useMemo } from "react";
 import Button from "./PaginationButton";
 
 function Pagination(props) {
@@ -9,6 +11,15 @@ function Pagination(props) {
   } else if (props.currentPage >= props.totalPages - 1) {
     startPage = Math.max(1, props.totalPages - 4);
   }
+
+  const handlePageClick = useMemo(
+    () => (page) => {
+      if (props.currentPage !== page) {
+        props.handlePageClick(page);
+      }
+    },
+    [props.currentPage, props.handlePageClick]
+  );
 
   const pageButtons = [];
 
@@ -22,12 +33,6 @@ function Pagination(props) {
       />
     );
   }
-
-  const handlePageClick = (page) => {
-    if (props.currentPage !== page) {
-      props.handlePageClick(page);
-    }
-  };
 
   const loadingButton = (key) => {
     return (
