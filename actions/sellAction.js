@@ -1,6 +1,10 @@
 import { fetchData } from "@/utils";
 
 class Sell {
+  constructor() {
+    this.cache = new Map();
+  }
+
   createSell = async (data) => {
     try {
       const response = await fetch("/api/sales", {
@@ -73,9 +77,21 @@ class Sell {
           break;
       }
 
-      const response = await fetch(`/api/sales-stats?period=${period}`);
+      if (
+        this.cache.has("period") &&
+        this.cache.has("stats") &&
+        this.cache.get("period") === period
+      ) {
+        return this.cache.get("stats");
+      }
 
-      return await response.json();
+      const response = await fetch(`/api/sales-stats?period=${period}`);
+      const stats = response.json();
+
+      this.cache.set("period", period);
+      this.cache.set("stats", stats);
+
+      return await stats;
     } catch (error) {
       throw error;
     }

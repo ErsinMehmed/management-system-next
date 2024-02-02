@@ -33,7 +33,7 @@ const ProductForm = (props) => {
         <Input
           type="text"
           label="Начличност на проддукта"
-          value={props.data.availability || ""}
+          value={props.data.availability || "0"}
           errorMessage={props.errorFields.availability}
           onChange={(value) => props.handleFieldChange("availability", value)}
         />
@@ -75,7 +75,7 @@ const ProductForm = (props) => {
             </div>
           ))}
 
-          <div className="flex justify-center mt-4 w-full">
+          <div className="center-element mt-4 w-full">
             <button
               className="rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95"
               onClick={props.addData}

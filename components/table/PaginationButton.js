@@ -4,7 +4,7 @@ import { MdOutlineKeyboardDoubleArrowRight } from "react-icons/md";
 const PaginationButton = (props) => {
   return (
     <button
-      className={`flex rounded-lg items-center justify-center w-9 h-9 leading-tight group ${
+      className={`rounded-lg center-element w-9 h-9 leading-tight group ${
         props.check
           ? "text-blue-400 bg-[#ebf4ff]"
           : "bg-[#f4f4f5] hover:bg-[#e6e6e7] text-gray-500 transition-all"

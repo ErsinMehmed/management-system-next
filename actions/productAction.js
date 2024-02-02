@@ -1,4 +1,8 @@
 class Product {
+  constructor() {
+    this.cache = new Map();
+  }
+
   createProduct = async (data) => {
     try {
       const response = await fetch("/api/products", {
@@ -25,6 +29,8 @@ class Product {
         body: JSON.stringify(data),
       });
 
+      this.cache.delete(id);
+
       return response.json();
     } catch (error) {
       throw error;
@@ -32,16 +38,34 @@ class Product {
   };
 
   getProduct = async (id) => {
-    const response = await fetch(`/api/products/${id}`);
+    try {
+      if (this.cache.has(id)) {
+        return this.cache.get(id);
+      }
 
-    return response.json();
+      const response = await fetch(`/api/products/${id}`);
+      const product = await response.json();
+
+      this.cache.set(id, product);
+
+      return product;
+    } catch (error) {
+      throw error;
+    }
   };
 
-  getProducts = async () => {
+  getProducts = async (noCache = false) => {
     try {
-      const response = await fetch("/api/products");
+      if (!noCache && this.cache.has("products")) {
+        return this.cache.get("products");
+      }
 
-      return await response.json();
+      const response = await fetch("/api/products");
+      const products = await response.json();
+
+      this.cache.set("products", products);
+
+      return products;
     } catch (error) {
       throw error;
     }
