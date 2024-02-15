@@ -29,8 +29,6 @@ class Product {
         body: JSON.stringify(data),
       });
 
-      this.cache.delete(id);
-
       return response.json();
     } catch (error) {
       throw error;
@@ -39,14 +37,8 @@ class Product {
 
   getProduct = async (id) => {
     try {
-      if (this.cache.has(id)) {
-        return this.cache.get(id);
-      }
-
       const response = await fetch(`/api/products/${id}`);
       const product = await response.json();
-
-      this.cache.set(id, product);
 
       return product;
     } catch (error) {
@@ -54,16 +46,10 @@ class Product {
     }
   };
 
-  getProducts = async (noCache = false) => {
+  getProducts = async () => {
     try {
-      if (!noCache && this.cache.has("products")) {
-        return this.cache.get("products");
-      }
-
       const response = await fetch("/api/products");
       const products = await response.json();
-
-      this.cache.set("products", products);
 
       return products;
     } catch (error) {

@@ -38,8 +38,8 @@ class Product {
     );
   };
 
-  loadProducts = async (noCache = false) => {
-    this.setProducts(await productAction.getProducts(noCache));
+  loadProducts = async () => {
+    this.setProducts(await productAction.getProducts());
   };
 
   updateProduct = async (id, data) => {
@@ -61,7 +61,7 @@ class Product {
 
     if (response.status) {
       commonStore.setSuccessMessage(response.message);
-      this.loadProducts(true);
+      this.loadProducts();
 
       return true;
     }

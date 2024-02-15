@@ -70,10 +70,12 @@ const DashboardSales = () => {
   );
 
   const updatedProducts = useMemo(() => {
-    return products.map((product) => ({
-      ...product,
-      name: productTitle(product),
-    }));
+    return products
+      .filter((product) => product.availability > 1)
+      .map((product) => ({
+        ...product,
+        name: productTitle(product),
+      }));
   }, [products]);
 
   const handleFieldChange = (name, value) => {

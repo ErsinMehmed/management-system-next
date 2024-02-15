@@ -44,33 +44,37 @@ const DashboardProducts = () => {
   };
 
   return (
-    <Layout title='Наличности'>
-      <div className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8'>
-        {products.map((product, index) => (
-          <Modal
-            key={index}
-            title='Редактирай продукт'
-            saveBtnAction={() => {
-              return updateProduct(product._id, productData);
-            }}
-            openButton={
-              <Box
-                onClick={() => {
-                  setProductData({});
-                  fetchProductData(product._id);
+    <Layout title="Наличности">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8">
+        {products.map(
+          (product, index) =>
+            product.availability > 1 && (
+              <Modal
+                key={index}
+                title="Редактирай продукт"
+                saveBtnAction={() => {
+                  return updateProduct(product._id, productData);
                 }}
-                data={product}
-              />
-            }>
-            <ProductForm
-              addData={addData}
-              data={productData}
-              removeData={removeData}
-              errorFields={errorFields}
-              handleFieldChange={handleFieldChange}
-            />
-          </Modal>
-        ))}
+                openButton={
+                  <Box
+                    onClick={() => {
+                      setProductData({});
+                      fetchProductData(product._id);
+                    }}
+                    data={product}
+                  />
+                }
+              >
+                <ProductForm
+                  addData={addData}
+                  data={productData}
+                  removeData={removeData}
+                  errorFields={errorFields}
+                  handleFieldChange={handleFieldChange}
+                />
+              </Modal>
+            )
+        )}
       </div>
     </Layout>
   );

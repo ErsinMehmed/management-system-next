@@ -6,7 +6,9 @@ import Miami615Img from "@/public/images/MiamiMagic-615G.webp";
 import Miami3300Img from "@/public/images/MiamiMagic-3300G.webp";
 import BakingBad640Img from "@/public/images/BakingBad-640G.webp";
 import BakingBad2200Img from "@/public/images/BakingBad-2200G.jpg";
+import GreatWhip615Img from "@/public/images/GreatWhip-615G.webp";
 import GreatWhip640Img from "@/public/images/GreatWhip-640G.webp";
+import GreatWhip2200Img from "@/public/images/GreatWhip-2200G.jpg";
 import SilentBlueberryImg from "@/public/images/Silent-Nozzle-Blueberry.png";
 import SilentPineappleImg from "@/public/images/Silent-Nozzle-Pineapple.png";
 import SilentStrawberryImg from "@/public/images/Silent-Nozzle-Strawberry.png";
@@ -147,7 +149,11 @@ export function getProductImage(name, weight, flavor) {
     case "Exotic Whip":
       return weight === 640 ? Exotic640Img : Exotic2000Img;
     case "Great Whip":
-      return GreatWhip640Img;
+      return weight === 615
+        ? GreatWhip615Img
+        : weight === 640
+        ? GreatWhip640Img
+        : GreatWhip2200Img;
     case "Miami Magic":
       return weight === 615 ? Miami615Img : Miami3300Img;
     case "Fresh Whip":
@@ -174,8 +180,12 @@ export function getProductImageByWeight(name) {
   switch (name) {
     case "Exotic Whip 640гр.":
       return Exotic640Img;
+    case "Great Whip 615гр.":
+      return GreatWhip615Img;
     case "Great Whip 640гр.":
       return GreatWhip640Img;
+    case "Great Whip 2200гр.":
+      return GreatWhip2200Img;
     case "Baking Bad 640гр.":
       return BakingBad640Img;
     case "Baking Bad 2200гр.":
