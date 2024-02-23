@@ -44,14 +44,14 @@ const DashboardProducts = () => {
   };
 
   return (
-    <Layout title="Наличности">
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8">
+    <Layout title='Наличности'>
+      <div className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8'>
         {products.map(
           (product, index) =>
-            product.availability && (
+            product.availability > 0 && (
               <Modal
                 key={index}
-                title="Редактирай продукт"
+                title='Редактирай продукт'
                 saveBtnAction={() => {
                   return updateProduct(product._id, productData);
                 }}
@@ -63,8 +63,7 @@ const DashboardProducts = () => {
                     }}
                     data={product}
                   />
-                }
-              >
+                }>
                 <ProductForm
                   addData={addData}
                   data={productData}

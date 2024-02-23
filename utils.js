@@ -334,3 +334,12 @@ export function getDateCondition(dateFrom, dateTo, period) {
     };
   }
 }
+
+export function formatCurrency(amount, fractionDigits) {
+  const formatter = new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  });
+
+  return formatter.format(amount);
+}

@@ -1,6 +1,7 @@
 import Textarea from "@/components/html/Textarea";
 import Select from "@/components/html/Select";
 import Input from "@/components/html/Input";
+import { formatCurrency } from "@/utils";
 
 const OrderForm = (props) => {
   return (
@@ -40,7 +41,9 @@ const OrderForm = (props) => {
           <div className='text-sm'>Единична цена</div>
 
           <div>
-            {props.data.price ? props.data.price.toFixed(2) + "лв." : "0.00лв."}
+            {props.data.price
+              ? formatCurrency(props.data.price, 2) + "лв."
+              : "0.00лв."}
           </div>
         </div>
 
@@ -49,7 +52,7 @@ const OrderForm = (props) => {
 
           <div>
             {props.data.total_amount
-              ? props.data.total_amount.toFixed(2) + "лв."
+              ? formatCurrency(props.data.total_amount, 2) + "лв."
               : "0.00лв."}
           </div>
         </div>
