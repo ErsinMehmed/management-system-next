@@ -73,7 +73,7 @@ class Sell {
           period = "lastYear";
           break;
         default:
-          period = "lastMonth";
+          period = "lastYear";
           break;
       }
 

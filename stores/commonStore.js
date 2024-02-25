@@ -9,7 +9,7 @@ class Common {
   successMessage = "";
   isLoading = false;
   dashboardBoxPeriod = {
-    period: "Последният месец",
+    period: "Последната година",
     dateFrom: "",
     dateTo: "",
   };

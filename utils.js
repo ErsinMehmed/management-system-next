@@ -214,7 +214,7 @@ export function getPeriodParam(period) {
     case "Последната година":
       return "period=lastYear";
     default:
-      return "period=lastMonth";
+      return "period=lastYear";
   }
 }
 
@@ -336,10 +336,22 @@ export function getDateCondition(dateFrom, dateTo, period) {
 }
 
 export function formatCurrency(amount, fractionDigits) {
-  const formatter = new Intl.NumberFormat("fr-FR", {
+  const parts = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
-  });
+  }).formatToParts(amount);
 
-  return formatter.format(amount);
+  let formattedAmount = "";
+
+  for (const part of parts) {
+    if (part.type === "group") {
+      formattedAmount += " ";
+    } else if (part.type === "decimal") {
+      formattedAmount += ".";
+    } else {
+      formattedAmount += part.value;
+    }
+  }
+
+  return formattedAmount;
 }

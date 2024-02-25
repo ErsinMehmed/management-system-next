@@ -38,7 +38,7 @@ class Sell {
     minQuantity: "",
     maxQuantity: "",
   };
-  pieChartPeriod = ["Последният месец"];
+  pieChartPeriod = ["Последната година"];
 
   constructor() {
     makeObservable(this, {
