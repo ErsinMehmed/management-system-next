@@ -40,15 +40,19 @@ const ModalComponent = (props) => {
         classNames={{
           body: "px-3.5",
           base: "mx-5 sm:mx-0",
-          header: "border-b border-gray-300 px-4",
+          header: !props.showHeader
+            ? "border-b border-gray-300 px-4"
+            : "border-0",
         }}
         onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className='flex flex-col gap-1'>
-                {props.title}
-              </ModalHeader>
+              {!props.showHeader && (
+                <ModalHeader className='flex flex-col gap-1'>
+                  {props.title}
+                </ModalHeader>
+              )}
 
               <ModalBody>{props.children}</ModalBody>
 
