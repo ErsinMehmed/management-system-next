@@ -3,7 +3,7 @@ import { VscSend } from "react-icons/vsc";
 import io from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 
-const socket = io("https://managament-system-next.vercel.app");
+const socket = io("http://localhost:3001");
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
