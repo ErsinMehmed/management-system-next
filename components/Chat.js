@@ -39,8 +39,8 @@ const Chat = () => {
       const currentTime = new Date();
       const hours = currentTime.getHours();
       const minutes = currentTime.getMinutes();
-      const time = `${hours < 10 && "0"}${hours}:${
-        minutes < 10 && "0"
+      const time = `${hours < 10 ? "0" : ""}${hours}:${
+        minutes < 10 ? "0" : ""
       }${minutes}`;
 
       socket.emit("chat message", {
