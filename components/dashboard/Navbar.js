@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { HiMenuAlt1 } from "react-icons/hi";
 import { IoNotificationsOutline, IoChatbubblesOutline } from "react-icons/io5";
@@ -38,14 +39,16 @@ const Navbar = (props) => {
           </div>
 
           <div className='flex items-center'>
-            <Modal
-              showFooter={true}
-              showHeader={true}
-              openButton={
-                <IoChatbubblesOutline className='w-6 h-6 text-gray-400 mr-3 cursor-pointer' />
-              }>
-              <Chat />
-            </Modal>
+            {process.env.МODE === "dev" && (
+              <Modal
+                showFooter={true}
+                showHeader={true}
+                openButton={
+                  <IoChatbubblesOutline className='w-6 h-6 text-gray-400 mr-3 cursor-pointer' />
+                }>
+                <Chat />
+              </Modal>
+            )}
 
             <IoNotificationsOutline className='w-6 h-6 text-gray-400 cursor-pointer' />
 
