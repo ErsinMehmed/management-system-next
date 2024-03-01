@@ -7,16 +7,13 @@ import commonStore from "./commonStore";
 class Product {
   products = [];
   productData = {};
-  productAvailabilities = [];
 
   constructor() {
     makeObservable(this, {
       products: observable,
       productData: observable,
-      productAvailabilities: observable,
       setProducts: action,
       setProductData: action,
-      setProductAvailabilities: action,
     });
   }
 
@@ -26,16 +23,6 @@ class Product {
 
   setProductData = (data) => {
     this.productData = data;
-  };
-
-  setProductAvailabilities = (data) => {
-    this.productAvailabilities = data;
-  };
-
-  loadProductAvailabilities = async () => {
-    this.setProductAvailabilities(
-      await productAction.getProductAvailabilities()
-    );
   };
 
   loadProducts = async () => {
