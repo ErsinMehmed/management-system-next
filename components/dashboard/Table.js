@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Spinner } from "@nextui-org/react";
-import { getProductImageByWeight, formatCurrency } from "@/utils";
+import { formatCurrency } from "@/utils";
 
 const Table = (props) => {
   const renderCellValue = (key, value) => {
@@ -59,30 +59,28 @@ const Table = (props) => {
                   <tr
                     key={rowIndex}
                     className='text-slate-600'>
-                    {Object.entries(row).map(([key, value], cellIndex) =>
-                      key === "name" ? (
-                        <td
-                          className='py-2.5 px-5 border-b whitespace-nowrap'
-                          key={cellIndex}>
-                          <div className='flex items-center gap-2.5'>
-                            <Image
-                              src={getProductImageByWeight(value)}
-                              className='size-10 border object-cover object-center rounded-full shadow border-gray-100'
-                              alt={`Picture of ${value}`}
-                              width={"100%"}
-                              height={"100%"}
-                            />
-
-                            {value}
-                          </div>
-                        </td>
-                      ) : (
-                        <td
-                          className='py-2.5 px-5 border-b whitespace-nowrap'
-                          key={cellIndex}>
-                          {renderCellValue(key, value)}
-                        </td>
-                      )
+                    {Object.entries(row).map(
+                      ([key, value], cellIndex) =>
+                        key !== "image_url" && (
+                          <td
+                            className='py-2.5 px-5 border-b whitespace-nowrap'
+                            key={cellIndex}>
+                            {key === "name" ? (
+                              <div className='flex items-center gap-2.5'>
+                                <Image
+                                  src={row.image_url}
+                                  className='size-10 border object-cover object-center rounded-full shadow border-gray-100'
+                                  alt={`Picture of ${value}`}
+                                  width={100}
+                                  height={100}
+                                />
+                                {value}
+                              </div>
+                            ) : (
+                              renderCellValue(key, value)
+                            )}
+                          </td>
+                        )
                     )}
                   </tr>
                 ))}

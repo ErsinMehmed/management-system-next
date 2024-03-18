@@ -15,6 +15,7 @@ const productSchema = new Schema(
     availability: Number,
     price: Number,
     hidden: Boolean,
+    image_url: String,
     sell_prices: {
       type: [Number],
       required: true,

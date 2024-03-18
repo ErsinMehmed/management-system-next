@@ -21,7 +21,7 @@ export async function GET() {
       select: "name",
     })
     .select(
-      "name weight flavor price availability sell_prices count category hidden"
+      "name weight flavor price availability sell_prices count category image_url hidden"
     );
 
   return NextResponse.json(products);

@@ -57,18 +57,17 @@ const DashboardProducts = () => {
   };
 
   return (
-    <Layout title="Наличности">
+    <Layout title='Наличности'>
       <Modal
-        title="Редактирай продукти"
+        title='Редактирай продукти'
         showFooter={true}
         openButton={
-          <button className="text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
+          <button className='text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
             Видимост
           </button>
-        }
-      >
-        <div className="border-b pb-6 w-full">
-          <div className="text-slate-700 text-lg font-semibold mb-4">
+        }>
+        <div className='border-b pb-6 w-full'>
+          <div className='text-slate-700 text-lg font-semibold mb-4'>
             Продукти
           </div>
 
@@ -81,9 +80,8 @@ const DashboardProducts = () => {
                   : index === products.length - 1
                   ? "pt-2"
                   : "border-b py-2"
-              }`}
-            >
-              <div className="col-span-2 font-semibold text-slate-700">
+              }`}>
+              <div className='col-span-2 font-semibold text-slate-700'>
                 {productTitle(product)}
               </div>
 
@@ -92,9 +90,8 @@ const DashboardProducts = () => {
                   base: !product.hidden
                     ? "bg-green-400 text-white"
                     : "bg-red-400 text-white",
-                }}
-              >
-                {!product.hidden ? "Видимо" : "Скрито"}
+                }}>
+                {!product.hidden ? "Видим" : "Скрит"}
               </Chip>
 
               <Switch
@@ -106,13 +103,13 @@ const DashboardProducts = () => {
         </div>
       </Modal>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8">
+      <div className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8'>
         {products.map(
           (product, index) =>
             !product.hidden && (
               <Modal
                 key={index}
-                title="Редактирай продукт"
+                title='Редактирай продукт'
                 saveBtnAction={() => {
                   return updateProduct(product._id, productData);
                 }}
@@ -124,8 +121,7 @@ const DashboardProducts = () => {
                     }}
                     data={product}
                   />
-                }
-              >
+                }>
                 <ProductForm
                   addData={addData}
                   data={productData}
