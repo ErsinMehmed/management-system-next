@@ -14,6 +14,7 @@ const productSchema = new Schema(
     count: Number,
     availability: Number,
     price: Number,
+    hidden: Boolean,
     sell_prices: {
       type: [Number],
       required: true,
