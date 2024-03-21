@@ -8,15 +8,18 @@ const SelectComponent = (props) => {
   return (
     <Select
       label={props.label}
-      className="w-full"
+      classNames={{
+        trigger: props.classes ?? "w-full",
+      }}
       size={"sm"}
       onChange={handleChange}
       defaultSelectedKeys={props.value ? [props.value] : []}
       isInvalid={props.errorMessage ? true : false}
-      errorMessage={props.errorMessage}
-    >
+      errorMessage={props.errorMessage}>
       {props.items?.map((item) => (
-        <SelectItem key={item._id ?? item.value} value={item._id ?? item.value}>
+        <SelectItem
+          key={item._id ?? item.value}
+          value={item._id ?? item.value}>
           {item.name ?? item.value}
         </SelectItem>
       ))}

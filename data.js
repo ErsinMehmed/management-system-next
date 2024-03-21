@@ -1,8 +1,13 @@
 import { BsBox, BsCart2, BsTruck, BsHouse, BsMegaphone } from "react-icons/bs";
 
-const perPageResult = [5, 10, 15, 20];
-
 const socialPlatforms = [{ value: "Facebook" }, { value: "Instagram" }];
+
+const perPageResult = [
+  { value: "5" },
+  { value: "10" },
+  { value: "15" },
+  { value: "20" },
+];
 
 const periods = [
   { value: "Днес" },

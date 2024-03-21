@@ -27,7 +27,7 @@ class Sell {
   currentPage = 1;
   fuelConsumption = null;
   dieselPrice = null;
-  perPage = 10;
+  perPage = "10";
   isLoading = true;
   searchText = "";
   showFilter = false;

@@ -19,8 +19,8 @@ import { productTitle, formatCurrency } from "@/utils";
 import { perPageResult } from "@/data";
 import SearchBar from "./SearchBar";
 import Filter from "./Filter";
+import Select from "@/components/html/Select";
 import Loader from "./Loader";
-import Select from "./Select";
 
 const Table = (props) => {
   const [rowId, setRowId] = useState(null);
@@ -285,8 +285,9 @@ const Table = (props) => {
                 </div>
               ) : (
                 <Select
-                  options={perPageResult}
-                  value={props.perPage}
+                  items={perPageResult}
+                  classes='w-20'
+                  value={props.perPage || ""}
                   onChange={(event) => props.setPerPage(event)}
                 />
               )}

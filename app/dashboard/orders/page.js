@@ -45,7 +45,7 @@ const DashboardOrders = () => {
     deleteOrder(id);
   };
 
-  const filteredOrders = orders?.orders?.map(
+  const filteredOrders = orders?.items?.map(
     ({ _id, product, quantity, price, total_amount, date, message }) => ({
       _id,
       product,
@@ -99,9 +99,8 @@ const DashboardOrders = () => {
       isButton={true}
       errorFields={errorFields}
       saveBtnAction={createOrder}
-      openBtnText="Добави"
-      title="Добави поръчка"
-    >
+      openBtnText='Добави'
+      title='Добави поръчка'>
       <OrderForm
         data={orderData}
         errorFields={errorFields}
@@ -112,10 +111,10 @@ const DashboardOrders = () => {
   );
 
   return (
-    <Layout title="Поръчки">
-      <div className="min-h-screen 2xl:px-10">
+    <Layout title='Поръчки'>
+      <div className='min-h-screen 2xl:px-10'>
         <Table
-          title="Заявки"
+          title='Заявки'
           data={filteredOrders}
           columns={["продукт", "количество", "ед. цена", "обща сума", "дата"]}
           delete={handleDeleteOrder}
@@ -132,11 +131,10 @@ const DashboardOrders = () => {
           isLoading={isLoading}
           setPerPage={setPerPage}
           searchBarButton={modal}
-          searchBarPlaceholder="име на продукт"
+          searchBarPlaceholder='име на продукт'
           searchBarValue={searchText}
           setSearchBarText={setSearchText}
-          filterSection={true}
-        >
+          filterSection={true}>
           <Pagination
             isLoading={isLoading}
             currentPage={orders.pagination?.current_page}

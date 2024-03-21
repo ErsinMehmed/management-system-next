@@ -67,19 +67,11 @@ const DashboardProducts = () => {
           </button>
         }>
         <div className='border-b pb-6 w-full'>
-          <div className='text-slate-700 text-lg font-semibold mb-4'>
-            Продукти
-          </div>
-
           {products.map((product, index) => (
             <div
               key={index}
               className={`grid grid-cols-4 gap-4 place-content-around ${
-                index === 0
-                  ? "border-b pb-2"
-                  : index === products.length - 1
-                  ? "pt-2"
-                  : "border-b py-2"
+                index === products.length - 1 ? "pt-2" : "border-b py-2"
               }`}>
               <div className='col-span-2 font-semibold text-slate-700'>
                 {productTitle(product)}

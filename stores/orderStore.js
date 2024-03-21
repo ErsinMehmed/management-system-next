@@ -19,7 +19,7 @@ class Order {
     order: "",
   };
   currentPage = 1;
-  perPage = 10;
+  perPage = "10";
   isLoading = true;
   searchText = "";
   showFilter = false;
