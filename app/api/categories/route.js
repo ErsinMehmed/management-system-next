@@ -9,5 +9,8 @@ export async function POST(request) {
 
   await Category.create(data);
 
-  return NextResponse.json({ message: "Category Created" }, { status: 201 });
+  return NextResponse.json(
+    { message: "Категорията е създадена успешно" },
+    { status: 201 }
+  );
 }

@@ -24,12 +24,14 @@ import { formatCurrency } from "@/utils";
 const Dashboard = () => {
   const { sellStats, loadSaleStats } = sellStore;
   const { expenses, loadExpenses } = expenseStore;
-  const { incomes, loadIncomes } = incomeStore;
+  const { incomes, additionalIncomes, loadIncomes, loadAdditionalIncomes } =
+    incomeStore;
   const { products } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
 
   useEffect(() => {
+    loadAdditionalIncomes();
     loadSaleStats();
     loadExpenses();
     loadIncomes();
@@ -49,6 +51,11 @@ const Dashboard = () => {
       }
     },
     [dashboardBoxPeriod, setDashboardBoxPeriod]
+  );
+
+  const additionalIncomeTotal = additionalIncomes.reduce(
+    (total, income) => total + income.amount,
+    0
   );
 
   const filteredProducts = products.filter(
@@ -81,6 +88,15 @@ const Dashboard = () => {
       price: price * availability,
     })
   );
+
+  const allExpenses = (
+    expenses.total_order_expenses +
+    expenses.total_fuel_expenses +
+    expenses.total_additional_expenses +
+    expenses.total_ad_expenses
+  ).toFixed(2);
+
+  const profit = (incomes?.incomes + additionalIncomeTotal).toFixed(2);
 
   return (
     <Layout title="Администраторско табло">
@@ -129,9 +145,25 @@ const Dashboard = () => {
                   />
                 </Tab>
               ))}
+
+              <Tab title="Други">
+                <div className="bg-gray-50 rounded-lg">
+                  {additionalIncomeTotal > 0 && (
+                    <dl className="flex-container py-2.5 px-3 text-sm">
+                      <dt className="text-gray-500 font-semibold">
+                        Допълнителни приходи
+                      </dt>
+
+                      <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
+                        {formatCurrency(additionalIncomeTotal, 2)} лв.
+                      </dd>
+                    </dl>
+                  )}
+                </div>
+              </Tab>
             </Tabs>
           }
-          value={incomes.incomes?.toFixed(2)}
+          value={profit}
           icon={<MdAttachMoney className="w-6 h-6" />}
           modalTitle="Приходи по категории"
           modal={true}
@@ -219,12 +251,7 @@ const Dashboard = () => {
               )}
             </Tabs>
           }
-          value={(
-            expenses.total_order_expenses +
-            expenses.total_fuel_expenses +
-            expenses.total_additional_expenses +
-            expenses.total_ad_expenses
-          ).toFixed(2)}
+          value={allExpenses}
           icon={<MdAttachMoney className="w-6 h-6" />}
           modalTitle="Разходи по категории"
           modal={true}
@@ -233,15 +260,7 @@ const Dashboard = () => {
         <Box
           title="Печалба"
           period={dashboardBoxPeriod}
-          value={(
-            incomes.incomes?.toFixed(2) -
-            (
-              expenses.total_order_expenses +
-              expenses.total_fuel_expenses +
-              expenses.total_additional_expenses +
-              expenses.total_ad_expenses
-            ).toFixed(2)
-          ).toFixed(2)}
+          value={(profit - allExpenses).toFixed(2)}
           icon={<TbMoneybag className="w-6 h-6" />}
           modal={false}
         />

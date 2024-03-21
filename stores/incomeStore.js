@@ -4,16 +4,23 @@ import commonStore from "./commonStore";
 
 class Income {
   incomes = [];
+  additionalIncomes = [];
 
   constructor() {
     makeObservable(this, {
       incomes: observable,
+      additionalIncomes: observable,
       setIncomes: action,
+      setAdditionalIncomes: action,
     });
   }
 
   setIncomes = (data) => {
     this.incomes = data;
+  };
+
+  setAdditionalIncomes = (data) => {
+    this.additionalIncomes = data;
   };
 
   loadIncomes = async (period) => {
@@ -24,6 +31,12 @@ class Income {
     } else {
       commonStore.setErrorMessage(response.message);
     }
+  };
+
+  loadAdditionalIncomes = async () => {
+    const response = await incomeAction.getAdditonalIncomes();
+
+    this.setAdditionalIncomes(response);
   };
 }
 

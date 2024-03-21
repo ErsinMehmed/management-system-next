@@ -11,6 +11,16 @@ class Income {
       throw error;
     }
   };
+
+  getAdditonalIncomes = async () => {
+    try {
+      const response = await fetch("/api/additional-incomes");
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
 export default new Income();

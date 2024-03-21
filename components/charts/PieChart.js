@@ -160,7 +160,7 @@ const Pie = (props) => {
                     className={`bg-${pieChartBoxColors[index]}-50 rounded-lg center-element flex-col h-[78px]`}
                   >
                     <dt
-                      className={`w-8 h-8 rounded-full bg-${pieChartBoxColors[index]}-100 text-${pieChartBoxColors[index]}-600 text-sm font-semibold center-element mb-1`}
+                      className={`w-9 h-9 rounded-full bg-${pieChartBoxColors[index]}-100 text-${pieChartBoxColors[index]}-600 text-sm font-semibold center-element mb-1`}
                     >
                       {stat.total_quantity}
                     </dt>
