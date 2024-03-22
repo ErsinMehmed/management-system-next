@@ -12,9 +12,10 @@ class Income {
     }
   };
 
-  getAdditonalIncomes = async () => {
+  getAdditonalIncomes = async (period) => {
     try {
-      const response = await fetch("/api/additional-incomes");
+      const periodParam = getPeriodParam(period);
+      const response = await fetch(`/api/additional-incomes?${periodParam}`);
 
       return await response.json();
     } catch (error) {

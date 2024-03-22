@@ -35,7 +35,7 @@ const Dashboard = () => {
     loadSaleStats();
     loadExpenses();
     loadIncomes();
-  }, [loadSaleStats, loadExpenses, loadIncomes]);
+  }, [loadAdditionalIncomes, loadSaleStats, loadExpenses, loadIncomes]);
 
   const handleFieldChange = useCallback(
     (name, value) => {
@@ -51,11 +51,6 @@ const Dashboard = () => {
       }
     },
     [dashboardBoxPeriod, setDashboardBoxPeriod]
-  );
-
-  const additionalIncomeTotal = additionalIncomes.reduce(
-    (total, income) => total + income.amount,
-    0
   );
 
   const filteredProducts = products.filter(
@@ -96,7 +91,7 @@ const Dashboard = () => {
     expenses.total_ad_expenses
   ).toFixed(2);
 
-  const profit = (incomes?.incomes + additionalIncomeTotal).toFixed(2);
+  const profit = (incomes?.incomes + additionalIncomes?.incomes).toFixed(2);
 
   return (
     <Layout title="Администраторско табло">
@@ -146,21 +141,21 @@ const Dashboard = () => {
                 </Tab>
               ))}
 
-              <Tab title="Други">
-                <div className="bg-gray-50 rounded-lg">
-                  {additionalIncomeTotal > 0 && (
+              {additionalIncomes?.incomes > 0 && (
+                <Tab title="Други">
+                  <div className="bg-gray-50 rounded-lg">
                     <dl className="flex-container py-2.5 px-3 text-sm">
                       <dt className="text-gray-500 font-semibold">
                         Допълнителни приходи
                       </dt>
 
                       <dd className="bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium">
-                        {formatCurrency(additionalIncomeTotal, 2)} лв.
+                        {formatCurrency(additionalIncomes?.incomes, 2)} лв.
                       </dd>
                     </dl>
-                  )}
-                </div>
-              </Tab>
+                  </div>
+                </Tab>
+              )}
             </Tabs>
           }
           value={profit}

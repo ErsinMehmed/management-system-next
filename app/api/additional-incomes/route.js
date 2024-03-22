@@ -1,6 +1,7 @@
 import connectMongoDB from "@/libs/mongodb";
 import Income from "@/models/income";
 import { NextResponse } from "next/server";
+import { getDateCondition } from "@/utils";
 
 export async function POST(request) {
   const data = await request.json();
@@ -19,10 +20,35 @@ export async function POST(request) {
   );
 }
 
-export async function GET() {
+export async function GET(request) {
   await connectMongoDB();
 
-  const incomes = await Income.find().select("amount message date");
+  const dateFrom = request.nextUrl.searchParams.get("dateFrom");
+  const dateTo = request.nextUrl.searchParams.get("dateTo");
+  const period = request.nextUrl.searchParams.get("period");
 
-  return NextResponse.json(incomes);
+  if (dateFrom && dateTo && dateFrom > dateTo) {
+    return NextResponse.json({
+      status: false,
+    });
+  }
+
+  const dateCondition = getDateCondition(dateFrom, dateTo, period);
+
+  const totalIncomesArray = await Income.aggregate([
+    {
+      $match: dateCondition,
+    },
+    {
+      $group: {
+        _id: null,
+        incomes: { $sum: "$amount" },
+      },
+    },
+  ]);
+
+  const incomes =
+    totalIncomesArray.length > 0 ? totalIncomesArray[0].incomes : 0;
+
+  return NextResponse.json({ incomes: incomes });
 }
