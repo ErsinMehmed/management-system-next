@@ -29,6 +29,11 @@ const TabSection = (props) => {
     }
   };
 
+  const totalQuantity = filteredData?.reduce(
+    (accumulator, item) => accumulator + item.quantity,
+    0
+  );
+
   return (
     <div className='bg-gray-50 rounded-lg'>
       {filteredData?.length > 0 ? (
@@ -76,10 +81,19 @@ const TabSection = (props) => {
           ))}
 
           {filteredData?.length > 1 && (
-            <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t'>
-              <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
+            <dl className='grid grid-cols-3 gap-x-8 py-2.5 px-3 text-sm border-t'>
+              {props.category === "Бутилки" && (
+                <dt className='bg-gray-100 text-center col-start-2 text-gray-800 px-2.5 py-1 rounded-md font-semibold'>
+                  {totalQuantity} бр.
+                </dt>
+              )}
+
+              <dt
+                className={`${
+                  props.category !== "Бутилки" && "col-start-3"
+                } bg-gray-100 text-center text-gray-800 px-2.5 py-1 rounded-md font-semibold`}>
                 {formatCurrency(totalAmount, 2)} лв.
-              </dd>
+              </dt>
             </dl>
           )}
         </>
