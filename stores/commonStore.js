@@ -57,6 +57,7 @@ class Common {
     expenseStore.setExpenses([]);
     incomeStore.loadIncomes(data);
     expenseStore.loadExpenses(data);
+    incomeStore.loadAdditionalIncomes(data);
   };
 }
 

@@ -33,8 +33,8 @@ class Income {
     }
   };
 
-  loadAdditionalIncomes = async () => {
-    const response = await incomeAction.getAdditonalIncomes();
+  loadAdditionalIncomes = async (period) => {
+    const response = await incomeAction.getAdditonalIncomes(period);
 
     this.setAdditionalIncomes(response);
   };
