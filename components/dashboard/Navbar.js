@@ -39,7 +39,7 @@ const Navbar = (props) => {
           </div>
 
           <div className='flex items-center'>
-            {process.env.МODE === "dev" && (
+            {/* {process.env.МODE === "dev" && (
               <Modal
                 showFooter={true}
                 showHeader={true}
@@ -48,7 +48,7 @@ const Navbar = (props) => {
                 }>
                 <Chat />
               </Modal>
-            )}
+            )} */}
 
             <IoNotificationsOutline className='w-6 h-6 text-gray-400 cursor-pointer' />
 

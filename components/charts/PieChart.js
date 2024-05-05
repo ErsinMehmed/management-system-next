@@ -37,6 +37,7 @@ const Pie = (props) => {
     "purple",
     "rose",
     "orange",
+    "fuchsia",
   ];
 
   const seriesData = [];
@@ -86,6 +87,7 @@ const Pie = (props) => {
       "#c084fc",
       "#fb7185",
       "#fb923c",
+      "#e879f9",
     ],
     chart: {
       height: 420,

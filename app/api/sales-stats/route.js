@@ -100,6 +100,11 @@ export async function GET(request) {
         category: "Бутилки",
       },
     },
+    {
+      $sort: {
+        total_quantity: 1,
+      },
+    },
   ]);
 
   if (sales.length === 0) {
