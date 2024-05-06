@@ -15,7 +15,7 @@ export async function POST(request) {
   await Income.create(data);
 
   return NextResponse.json(
-    { message: "Допълнителният приход добавен успешно", status: true },
+    { message: "Допълнителният приход е добавен успешно", status: true },
     { status: 201 }
   );
 }
