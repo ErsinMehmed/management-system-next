@@ -10,8 +10,14 @@ import ProductForm from "@/components/forms/Product";
 import productAction from "@/actions/productAction";
 
 const DashboardProducts = () => {
-  const { products, productData, updateProduct, setProductData, loadProducts } =
-    productStore;
+  const {
+    products,
+    productData,
+    isProductUpdated,
+    updateProduct,
+    setProductData,
+    loadProducts,
+  } = productStore;
   const { errorFields } = commonStore;
 
   const handleFieldChange = (name, value, index) => {
@@ -102,6 +108,7 @@ const DashboardProducts = () => {
               <Modal
                 key={index}
                 title='Редактирай продукт'
+                isRecordCreated={isProductUpdated}
                 saveBtnAction={() => {
                   return updateProduct(product._id, productData);
                 }}
