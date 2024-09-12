@@ -19,6 +19,7 @@ const DashboardOrders = () => {
     filterData,
     showFilter,
     orderColumn,
+    isOrderCreated,
     handlePageChange,
     handlePageClick,
     setOrderColumn,
@@ -99,6 +100,7 @@ const DashboardOrders = () => {
       isButton={true}
       errorFields={errorFields}
       saveBtnAction={createOrder}
+      isRecordCreated={isOrderCreated}
       openBtnText='Добави'
       title='Добави поръчка'>
       <OrderForm

@@ -67,7 +67,7 @@ const ModalComponent = (props) => {
 
                   <Button
                     color='primary'
-                    isLoading={props.isSellCreated}
+                    isLoading={props.isRecordCreated}
                     onPress={async () => {
                       const success = await props.saveBtnAction();
 

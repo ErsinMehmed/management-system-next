@@ -214,6 +214,7 @@ class Sell {
 
     if (errorFields) {
       commonStore.setErrorFields(errorFields);
+      this.isSellCreated = false;
       return false;
     }
 
@@ -229,9 +230,9 @@ class Sell {
     } else if (!response.status) {
       commonStore.setErrorMessage(response.message);
       this.isSellCreated = false;
-
-      return false;
     }
+
+    this.isSellCreated = false;
 
     return false;
   };

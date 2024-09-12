@@ -30,6 +30,7 @@ class Order {
     minQuantity: "",
     maxQuantity: "",
   };
+  isOrderCreated = false;
 
   constructor() {
     makeObservable(this, {
@@ -143,6 +144,7 @@ class Order {
   };
 
   createOrder = async () => {
+    this.isOrderCreated = true;
     commonStore.setErrorFields({});
     commonStore.setErrorMessage("");
     commonStore.setSuccessMessage("");
@@ -152,6 +154,8 @@ class Order {
 
     if (errorFields) {
       commonStore.setErrorFields(errorFields);
+      this.isOrderCreated = false;
+
       return false;
     }
 
@@ -161,9 +165,12 @@ class Order {
       commonStore.setSuccessMessage(response.message);
       this.clearOrderData();
       this.loadOrders();
+      this.isOrderCreated = false;
 
       return true;
     }
+
+    this.isOrderCreated = false;
 
     return false;
   };
