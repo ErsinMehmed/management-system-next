@@ -39,6 +39,7 @@ class Sell {
     maxQuantity: "",
   };
   pieChartPeriod = ["Последната година"];
+  isSellCreated = false;
 
   constructor() {
     makeObservable(this, {
@@ -55,6 +56,7 @@ class Sell {
       fuelConsumption: observable,
       dieselPrice: observable,
       orderColumn: observable,
+      isSellCreated: observable,
       setSales: action,
       setSellData: action,
       setCurrentPage: action,
@@ -202,6 +204,7 @@ class Sell {
   };
 
   createSell = async () => {
+    this.isSellCreated = true;
     commonStore.setErrorFields({});
     commonStore.setErrorMessage("");
     commonStore.setSuccessMessage("");
@@ -220,10 +223,12 @@ class Sell {
       commonStore.setSuccessMessage(response.message);
       this.clearSellData();
       this.loadSales();
+      this.isSellCreated = false;
 
       return true;
     } else if (!response.status) {
       commonStore.setErrorMessage(response.message);
+      this.isSellCreated = false;
 
       return false;
     }
