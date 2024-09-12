@@ -170,7 +170,7 @@ const Pie = (props) => {
                     key={index}
                     className={`bg-${pieChartBoxColors[index]}-50 rounded-lg center-element flex-col h-[78px]`}>
                     <dt
-                      className={`w-9 h-9 rounded-full bg-${pieChartBoxColors[index]}-100 text-${pieChartBoxColors[index]}-600 text-sm font-semibold center-element mb-1`}>
+                      className={`size-[38px] rounded-full bg-${pieChartBoxColors[index]}-100 text-${pieChartBoxColors[index]}-600 text-sm font-semibold center-element mb-1`}>
                       {stat.total_quantity}
                     </dt>
 

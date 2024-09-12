@@ -77,6 +77,9 @@ export async function GET(request) {
         total_incomes: 1,
       },
     },
+    {
+      $sort: { quantity: 1 },
+    },
   ]);
 
   const totalIncomes =

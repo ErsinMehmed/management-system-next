@@ -1,8 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import { HiMenuAlt1 } from "react-icons/hi";
-import { IoNotificationsOutline, IoChatbubblesOutline } from "react-icons/io5";
 import { FaXmark } from "react-icons/fa6";
 import Modal from "@/components/Modal";
 import Chat from "@/components/Chat";
@@ -49,10 +47,6 @@ const Navbar = (props) => {
                 <Chat />
               </Modal>
             )} */}
-
-            <IoNotificationsOutline className='w-6 h-6 text-gray-400 cursor-pointer' />
-
-            <div className='h-7 w-0.5 bg-gray-200 ml-3.5 mr-5 md:ml-5 md:mr-7 rounded-full' />
 
             <Dropdown />
           </div>

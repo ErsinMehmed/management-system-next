@@ -104,6 +104,9 @@ export async function GET(request) {
         total_expenses: 1,
       },
     },
+    {
+      $sort: { quantity: 1 },
+    },
   ]);
 
   const totalAdAmount =
