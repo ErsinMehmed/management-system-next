@@ -113,6 +113,7 @@ export function objectHasValues(obj) {
 
 export function productTitle(product) {
   switch (product?.name) {
+    case "Cream Cartrige":
     case "Exotic Whip":
     case "Great Whip":
     case "Fresh Whip":
