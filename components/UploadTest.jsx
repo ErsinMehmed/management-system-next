@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Head from "next/head";
 
-export default function Home() {
+export default function UploadTest() {
   const [imageSrc, setImageSrc] = useState();
   const [uploadData, setUploadData] = useState();
 

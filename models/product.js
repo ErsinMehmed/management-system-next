@@ -11,9 +11,11 @@ const productSchema = new Schema(
     },
     flavor: String,
     weight: Number,
+    model: String,
     count: Number,
     availability: Number,
     price: Number,
+    puff_count: Number,
     hidden: Boolean,
     image_url: String,
     sell_prices: {

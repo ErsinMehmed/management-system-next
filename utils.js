@@ -112,18 +112,15 @@ export function objectHasValues(obj) {
 }
 
 export function productTitle(product) {
-  switch (product?.name) {
-    case "Cream Cartrige":
-    case "Exotic Whip":
-    case "Great Whip":
-    case "Fresh Whip":
-    case "Miami Magic":
-    case "Baking Bad":
+  switch (product?.category.name) {
+    case "Бутилки":
       return `${product.name} ${product.weight}гр.`;
     case "Балони":
       return `${product.name} пакет ${product.count}бр.`;
     case "Накрайник":
       return `${product.name} ${product.flavor}`;
+    case "Вейпове":
+      return `${product.name} ${product.puff_count}др.`;
     default:
       return product?.name;
   }
