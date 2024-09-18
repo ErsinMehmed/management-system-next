@@ -16,7 +16,6 @@ const productSchema = new Schema(
     availability: Number,
     units_per_box: Number,
     price: Number,
-    puff_count: Number,
     hidden: Boolean,
     image_url: String,
     sell_prices: {
