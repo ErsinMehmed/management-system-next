@@ -38,6 +38,7 @@ class Product {
     this.isProductUpdated = true;
 
     data.price = parseFloat(data.price);
+    data.availability = parseFloat(data.availability);
 
     const productRules = getProductRules();
     const errorFields = validateFields(this.productData, productRules);

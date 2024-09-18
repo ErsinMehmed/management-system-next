@@ -36,21 +36,21 @@ export function validateFields(object, fieldRules) {
       validatePassword(field, value, errors);
     }
 
-    if (rules.minLength && value && value.length < rules.minLength) {
+    if (rules.minLength && value.length < rules.minLength) {
       errors[field] = `Полето трябва съдържа поне ${rules.minLength} символа.`;
     }
 
-    if (rules.maxLength && value && value.length > rules.maxLength) {
+    if (rules.maxLength && value.length > rules.maxLength) {
       errors[
         field
       ] = `Полето трябва да бъде по-кратко или равно на ${rules.maxLength} символа.`;
     }
 
-    if (rules.minValue && value && Number(value) < rules.minValue) {
+    if (rules.minValue && Number(value) < rules.minValue) {
       errors[field] = `Минималната стойност на полето е ${rules.minValue}.`;
     }
 
-    if (rules.maxValue && value && Number(value) > rules.maxValue) {
+    if (rules.maxValue && Number(value) > rules.maxValue) {
       errors[field] = `Максималната стойност на полето е ${rules.maxValue}.`;
     }
 
@@ -61,7 +61,9 @@ export function validateFields(object, fieldRules) {
     if (
       rules.required &&
       !Array.isArray(value) &&
-      (value === "" || value === null)
+      (value === "" ||
+        value === null ||
+        (isNaN(value) && typeof value === "number"))
     ) {
       errors[field] = "Полето е задължително.";
     }

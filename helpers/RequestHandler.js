@@ -62,7 +62,11 @@ export default class RequestHandler {
     const items = await queryBuilder
       .populate({
         path: "product",
-        select: "name weight flavor count category",
+        select: "name weight flavor count category puff_count",
+        populate: {
+          path: "category",
+          select: "name",
+        },
       })
       .skip((page - 1) * perPage)
       .limit(perPage);

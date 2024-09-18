@@ -29,33 +29,33 @@ const dropdownPeriods = [
   "Последната година",
 ];
 
-const categories = ["Бутилки", "Балони", "Накрайници"];
+const categories = ["Бутилки", "Вейпове", "Балони"];
 
 const dashboardLinks = [
   {
     link: "/dashboard",
     text: "Табло",
-    icon: <BsHouse className='w-5 h-5' />,
+    icon: <BsHouse className="w-5 h-5" />,
   },
   {
     link: "/dashboard/orders",
     text: "Поръчки",
-    icon: <BsTruck className='w-5 h-5' />,
+    icon: <BsTruck className="w-5 h-5" />,
   },
   {
     link: "/dashboard/products",
     text: "Продукти",
-    icon: <BsBox className='w-5 h-5' />,
+    icon: <BsBox className="w-5 h-5" />,
   },
   {
     link: "/dashboard/sales",
     text: "Продажби",
-    icon: <BsCart2 className='w-5 h-5' />,
+    icon: <BsCart2 className="w-5 h-5" />,
   },
   {
     link: "/dashboard/ads",
     text: "Реклами",
-    icon: <BsMegaphone className='w-5 h-5' />,
+    icon: <BsMegaphone className="w-5 h-5" />,
   },
 ];
 

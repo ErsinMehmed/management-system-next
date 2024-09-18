@@ -35,7 +35,7 @@ const ProductForm = (props) => {
         <Input
           type="text"
           label="Начличност на проддукта"
-          value={props.data.availability || "0"}
+          value={props.data.availability || null}
           errorMessage={props.errorFields.availability}
           onChange={(value) => props.handleFieldChange("availability", value)}
         />
