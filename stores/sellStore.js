@@ -9,6 +9,7 @@ import productStore from "./productStore";
 class Sell {
   sales = [];
   sellStats = [];
+  lineChartSaleStats = [];
   sellData = {
     quantity: null,
     mileage: null,
@@ -57,6 +58,7 @@ class Sell {
       dieselPrice: observable,
       orderColumn: observable,
       isSellCreated: observable,
+      lineChartSaleStats: observable,
       setSales: action,
       setSellData: action,
       setCurrentPage: action,
@@ -145,6 +147,14 @@ class Sell {
   loadSaleStats = async (period) => {
     this.setSellStats(
       await sellAction.getStats(period?.currentKey ?? this.pieChartPeriod)
+    );
+
+    this.setIsLoading(false);
+  };
+
+  loadLineChartSaleStats = async (period) => {
+    this.lineChartSaleStats = await sellAction.getLineChartStats(
+      period?.currentKey ?? this.pieChartPeriod
     );
 
     this.setIsLoading(false);

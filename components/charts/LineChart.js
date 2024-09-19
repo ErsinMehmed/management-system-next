@@ -1,31 +1,22 @@
 import ReactApexChart from "react-apexcharts";
 
 const LineChart = (props) => {
-  const series = [
-    {
-      name: "Developer Edition",
-      data: [1500, 1418, 1456, 1526, 1356, 1256],
-      color: "#1A56DB",
-    },
-    {
-      name: "Designer Edition",
-      data: [643, 413, 765, 412, 1423, 1731],
-      color: "#7E3BF2",
-    },
-  ];
+  if (!props.data?.data) {
+    return;
+  }
+
+  const series = props.data?.data;
 
   const options = {
     chart: {
-      height: "100%",
-      maxWidth: "100%",
-      type: "line",
       fontFamily: "Inter, sans-serif",
       toolbar: {
         show: false,
       },
     },
     stroke: {
-      width: 3,
+      curve: "smooth",
+      width: 4,
     },
     tooltip: {
       enabled: true,
@@ -38,24 +29,19 @@ const LineChart = (props) => {
       position: "bottom",
     },
     fill: {
-      type: "solid",
+      type: "gradient",
+      gradient: {
+        opacityFrom: 0.55,
+        opacityTo: 0,
+        shade: "#1C64F2",
+        gradientToColors: ["#1C64F2"],
+      },
     },
     dataLabels: {
       enabled: false,
     },
-    grid: {
-      show: false,
-    },
     xaxis: {
-      categories: [
-        "01 February",
-        "02 February",
-        "03 February",
-        "04 February",
-        "05 February",
-        "06 February",
-        "07 February",
-      ],
+      categories: props.data?.periods,
       labels: {
         show: true,
       },
@@ -74,14 +60,25 @@ const LineChart = (props) => {
       },
     },
   };
+
   return (
-    <div className="line-chart">
-      <ReactApexChart
-        options={options}
-        series={series}
-        type="line"
-        height={400}
-      />
+    <div className='bg-white rounded-md shadow-md p-4 md:p-5'>
+      <div className='px-5 py-4 border-b border-slate-100'>
+        <div className='text-xl font-bold leading-none text-slate-800'>
+          Продажби на бутилки за посоченият период
+        </div>
+      </div>
+
+      <div className='overflow-x-auto'>
+        <div className='min-w-[800px]'>
+          <ReactApexChart
+            options={options}
+            series={series}
+            type='area'
+            height={400}
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -85,11 +85,58 @@ class Sell {
         return this.cache.get("stats");
       }
 
-      const response = await fetch(`/api/sales-stats?period=${period}`);
+      const response = await fetch(
+        `/api/pie-chart-sales-stats?period=${period}`
+      );
       const stats = response.json();
 
       this.cache.set("period", period);
       this.cache.set("stats", stats);
+
+      return await stats;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  getLineChartStats = async (period) => {
+    try {
+      switch (period) {
+        case "Последните 7 дни":
+          period = "last7days";
+          break;
+        case "Последният месец":
+          period = "lastMonth";
+          break;
+        case "Последните 3 месеца":
+          period = "last3Months";
+          break;
+        case "Последните 6 месеца":
+          period = "last6Months";
+          break;
+        case "Последната година":
+          period = "lastYear";
+          break;
+        default:
+          period = "last7days";
+          break;
+      }
+
+      if (
+        this.cache.has("period-line") &&
+        this.cache.has("stats-line") &&
+        this.cache.get("period-line") === period
+      ) {
+        return this.cache.get("stats-line");
+      }
+
+      const response = await fetch(
+        `/api/line-chart-sales-stats?period=${period}`
+      );
+      const stats = response.json();
+
+      this.cache.set("period-line", period);
+      this.cache.set("stats-line", stats);
 
       return await stats;
     } catch (error) {

@@ -18,79 +18,36 @@ const monthNamesBulgarian = [
   "Декември",
 ];
 
-function groupSalesByMonth(sales) {
-  const groupedData = {};
-  const periods = [];
-
-  sales.forEach((sale) => {
-    const date = new Date(sale.period);
-    const monthYear = `${
-      monthNamesBulgarian[date.getMonth()]
-    } ${date.getFullYear()}`;
-
-    if (!groupedData[sale.name]) {
-      groupedData[sale.name] = {};
-    }
-
-    if (!groupedData[sale.name][monthYear]) {
-      groupedData[sale.name][monthYear] = 0;
-    }
-
-    groupedData[sale.name][monthYear] += sale.total_quantity;
-
-    if (!periods.includes(monthYear)) {
-      periods.push(monthYear);
-    }
-  });
-
-  const data = Object.keys(groupedData).map((productName) => {
-    return {
-      name: productName,
-      data: periods.map((period) => groupedData[productName][period] || 0),
-    };
-  });
-
-  return { periods, data };
-}
-
 export async function GET(request) {
   await connectMongoDB();
 
   let startDate;
   let endDate = new Date();
 
-  // Получаваме периода от заявката
   const period = request.nextUrl.searchParams.get("period");
-  const customStart = request.nextUrl.searchParams.get("start");
-  const customEnd = request.nextUrl.searchParams.get("end");
 
-  if (customStart && customEnd) {
-    startDate = new Date(customStart);
-    endDate = new Date(customEnd);
-  } else {
-    switch (period) {
-      case "last7days":
-        startDate = new Date();
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case "lastMonth":
-        startDate = new Date();
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
-      case "last6Months":
-        startDate = new Date();
-        startDate.setMonth(startDate.getMonth() - 6);
-        break;
-      case "lastYear":
-        startDate = new Date();
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        break;
-      default:
-        return NextResponse.json({
-          message: "Невалиден период",
-          status: false,
-        });
-    }
+  switch (period) {
+    case "last7days":
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+      break;
+    case "lastMonth":
+      startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 1);
+      break;
+    case "last6Months":
+      startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 6);
+      break;
+    case "lastYear":
+      startDate = new Date();
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      break;
+    default:
+      return NextResponse.json({
+        message: "Невалиден период",
+        status: false,
+      });
   }
 
   const sales = await Sell.aggregate([
@@ -134,12 +91,10 @@ export async function GET(request) {
     },
     {
       $sort: {
-        period: 1, // Подреждане по период
+        period: 1,
       },
     },
   ]);
-
-  console.log(sales);
 
   if (sales.length === 0) {
     return NextResponse.json({
@@ -192,6 +147,40 @@ export async function GET(request) {
   return NextResponse.json({
     periods: periods,
     data: correctedData,
-    status: true,
   });
+}
+
+function groupSalesByMonth(sales) {
+  const groupedData = {};
+  const periods = [];
+
+  sales.forEach((sale) => {
+    const date = new Date(sale.period);
+    const monthYear = `${
+      monthNamesBulgarian[date.getMonth()]
+    } ${date.getFullYear()}`;
+
+    if (!groupedData[sale.name]) {
+      groupedData[sale.name] = {};
+    }
+
+    if (!groupedData[sale.name][monthYear]) {
+      groupedData[sale.name][monthYear] = 0;
+    }
+
+    groupedData[sale.name][monthYear] += sale.total_quantity;
+
+    if (!periods.includes(monthYear)) {
+      periods.push(monthYear);
+    }
+  });
+
+  const data = Object.keys(groupedData).map((productName) => {
+    return {
+      name: productName,
+      data: periods.map((period) => groupedData[productName][period] || 0),
+    };
+  });
+
+  return { periods, data };
 }
