@@ -1,6 +1,10 @@
-import ReactApexChart from "react-apexcharts";
+import dynamic from "next/dynamic";
 
 const LineChart = (props) => {
+  const ReactApexChart = dynamic(() => import("react-apexcharts"), {
+    ssr: false,
+  });
+
   if (!props.data?.data) {
     return;
   }
@@ -70,12 +74,13 @@ const LineChart = (props) => {
       </div>
 
       <div className='overflow-x-auto'>
-        <div className='min-w-[800px]'>
+        <div className='min-w-[800px] h-80 md:h-96 overflow-y-hidden'>
           <ReactApexChart
             options={options}
             series={series}
             type='area'
-            height={400}
+            height={"100%"}
+            width={"100%"}
           />
         </div>
       </div>
