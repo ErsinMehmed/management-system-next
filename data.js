@@ -29,7 +29,7 @@ const dropdownPeriods = [
   "Последната година",
 ];
 
-const categories = ["Бутилки", "Вейпове", "Балони"];
+const categories = ["Бутилки", "Балони"];
 
 const dashboardLinks = [
   {

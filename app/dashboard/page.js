@@ -20,6 +20,7 @@ import Table from "@/components/dashboard/Table";
 import Box from "@/components/dashboard/Box";
 import { categories, periods } from "@/data";
 import { formatCurrency } from "@/utils";
+import LineChart from "@/components/charts/LineChart";
 
 const Dashboard = () => {
   const { sellStats, loadSaleStats } = sellStore;
@@ -259,6 +260,12 @@ const Dashboard = () => {
           />
         </div>
       </div>
+
+      <LineChart
+        data={sellStats.sales}
+        status={sellStats.status}
+        message={sellStats.message}
+      />
     </Layout>
   );
 };
