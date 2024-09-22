@@ -70,7 +70,11 @@ export async function POST(request) {
 
 export async function GET(request) {
   const sellHandler = new RequestHandler(Sell);
-  const { items, pagination } = await sellHandler.handleRequest(request, true);
+  const { items, pagination } = await sellHandler.handleRequest(
+    request,
+    true,
+    true
+  );
 
   return NextResponse.json({ items, pagination });
 }

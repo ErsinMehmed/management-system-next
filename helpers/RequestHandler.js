@@ -1,12 +1,14 @@
 import connectMongoDB from "@/libs/mongodb";
 import Product from "@/models/product";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export default class RequestHandler {
   constructor(Model) {
     this.Model = Model;
   }
 
-  async handleRequest(request, getCreator = false) {
+  async handleRequest(request, getCreator = false, getUserRecords = false) {
     const page = request.nextUrl.searchParams.get("page") || 1;
     const perPage = request.nextUrl.searchParams.get("per_page") || 10;
     const searchText = request.nextUrl.searchParams.get("search");
@@ -19,6 +21,9 @@ export default class RequestHandler {
     const sortOrder = request.nextUrl.searchParams.get("sort_order");
 
     await connectMongoDB();
+
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
 
     let queryBuilder = this.Model.find();
 
@@ -48,6 +53,10 @@ export default class RequestHandler {
 
     if (maxQuantity) {
       queryBuilder.where("quantity").lte(parseInt(maxQuantity));
+    }
+
+    if (getUserRecords && userId) {
+      queryBuilder = queryBuilder.where("creator").equals(userId);
     }
 
     if (sortColumn && sortOrder) {
