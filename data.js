@@ -35,27 +35,32 @@ const dashboardLinks = [
   {
     link: "/dashboard",
     text: "Табло",
-    icon: <BsHouse className="w-5 h-5" />,
+    role: ["Admin", "Seller"],
+    icon: <BsHouse className='w-5 h-5' />,
   },
   {
     link: "/dashboard/orders",
     text: "Поръчки",
-    icon: <BsTruck className="w-5 h-5" />,
+    role: ["Admin"],
+    icon: <BsTruck className='w-5 h-5' />,
   },
   {
     link: "/dashboard/products",
     text: "Продукти",
-    icon: <BsBox className="w-5 h-5" />,
+    role: ["Admin"],
+    icon: <BsBox className='w-5 h-5' />,
   },
   {
     link: "/dashboard/sales",
     text: "Продажби",
-    icon: <BsCart2 className="w-5 h-5" />,
+    role: ["Admin", "Seller"],
+    icon: <BsCart2 className='w-5 h-5' />,
   },
   {
     link: "/dashboard/ads",
     text: "Реклами",
-    icon: <BsMegaphone className="w-5 h-5" />,
+    role: ["Admin"],
+    icon: <BsMegaphone className='w-5 h-5' />,
   },
 ];
 

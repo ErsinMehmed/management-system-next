@@ -1,10 +1,16 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { dashboardLinks } from "@/data";
 
 const SideBar = (props) => {
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  const filteredLinks = dashboardLinks.filter(
+    (item) => item.role.includes(session?.user?.role) // Проверка за наличие на роля
+  );
 
   return (
     <aside
@@ -13,7 +19,7 @@ const SideBar = (props) => {
       } transition-all duration-500 h-screen sm:translate-x-0 bg-gradient-to-r from-[#534bed] via-[#4d44ef] to-[#4b43e7]`}>
       <div className='h-full px-3 py-4 overflow-y-auto border-r border-gray-200'>
         <ul className='space-y-2.5 font-medium'>
-          {dashboardLinks.map((item, index) => (
+          {filteredLinks.map((item, index) => (
             <li key={index}>
               <Link
                 title={item.text}

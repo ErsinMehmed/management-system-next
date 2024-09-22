@@ -2,9 +2,16 @@ import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import mongoose from "mongoose";
 
 export async function GET(request) {
   await connectMongoDB();
+
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  const userObjectId = new mongoose.Types.ObjectId(userId);
 
   let startDate;
 
@@ -45,6 +52,7 @@ export async function GET(request) {
   const sales = await Sell.aggregate([
     {
       $match: {
+        creator: userObjectId,
         date:
           request.nextUrl.searchParams.get("period") === "yesterday"
             ? {
