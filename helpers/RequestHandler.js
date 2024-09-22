@@ -6,7 +6,7 @@ export default class RequestHandler {
     this.Model = Model;
   }
 
-  async handleRequest(request) {
+  async handleRequest(request, getCreator = false) {
     const page = request.nextUrl.searchParams.get("page") || 1;
     const perPage = request.nextUrl.searchParams.get("per_page") || 10;
     const searchText = request.nextUrl.searchParams.get("search");
@@ -59,17 +59,20 @@ export default class RequestHandler {
     }
 
     const totalItems = await this.Model.countDocuments(queryBuilder);
-    const items = await queryBuilder
-      .populate({
-        path: "product",
-        select: "name weight flavor count category puff_count",
-        populate: {
-          path: "category",
-          select: "name",
-        },
-      })
-      .skip((page - 1) * perPage)
-      .limit(perPage);
+    queryBuilder = queryBuilder.populate({
+      path: "product",
+      select: "name weight flavor count category",
+      populate: {
+        path: "category",
+        select: "name",
+      },
+    });
+
+    if (getCreator) {
+      queryBuilder = queryBuilder.populate({ path: "creator", select: "name" });
+    }
+
+    const items = await queryBuilder.skip((page - 1) * perPage).limit(perPage);
 
     const pagination = {
       current_page: parseInt(page),

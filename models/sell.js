@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import Product from "./product.js";
+import User from "./user.js";
 
 const sellSchema = new Schema(
   {
@@ -12,7 +13,7 @@ const sellSchema = new Schema(
     fuel_consumption: Number,
     diesel_price: Number,
     fuel_price: Number,
-
+    creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
   },
   {

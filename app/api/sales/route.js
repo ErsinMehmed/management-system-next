@@ -3,9 +3,22 @@ import Sell from "@/models/sell";
 import Product from "@/models/product";
 import RequestHandler from "@/helpers/RequestHandler";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(request) {
   const data = await request.json();
+
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user || !session.user.id) {
+    return NextResponse.json(
+      { message: "User not authenticated", status: false },
+      { status: 401 }
+    );
+  }
+
+  data.creator = session.user.id;
 
   await connectMongoDB();
 
@@ -57,7 +70,7 @@ export async function POST(request) {
 
 export async function GET(request) {
   const sellHandler = new RequestHandler(Sell);
-  const { items, pagination } = await sellHandler.handleRequest(request);
+  const { items, pagination } = await sellHandler.handleRequest(request, true);
 
   return NextResponse.json({ items, pagination });
 }

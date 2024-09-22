@@ -121,8 +121,6 @@ export function productTitle(product) {
       return `${product.name} пакет ${product.count}бр.`;
     case "Накрайник":
       return `${product.name} ${product.flavor}`;
-    case "Вейпове":
-      return `${product.name} ${product.puff_count}др.`;
     default:
       return product?.name;
   }
