@@ -3,12 +3,14 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
-    // if (
-    //   req.nextUrl.pathname === "/dashboard" &&
-    //   req.nextauth.token?.role !== "admin"
-    // ) {
-    //   return new NextResponse("You are not authorized!");
-    // }
+    if (
+      (req.nextUrl.pathname === "/dashboard/products" ||
+        req.nextUrl.pathname === "/dashboard/orders" ||
+        req.nextUrl.pathname === "/dashboard/ads") &&
+      req.nextauth.token?.role !== "Admin"
+    ) {
+      return new NextResponse("You are not authorized!");
+    }
   },
   {
     callbacks: {

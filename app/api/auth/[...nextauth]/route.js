@@ -44,6 +44,7 @@ export const authOptions = {
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.email = token.email;
+        session.user.role = token.role;
       }
 
       return session;
@@ -51,12 +52,16 @@ export const authOptions = {
     async jwt({ token, user }) {
       const dbUser = await User.findOne({
         email: emailFromCredentials,
+      }).populate({
+        path: "role",
+        select: "name",
       });
 
       if (dbUser) {
         token.id = dbUser._id;
         token.name = dbUser.name;
         token.email = dbUser.email;
+        token.role = dbUser.role.name;
       }
 
       return token;

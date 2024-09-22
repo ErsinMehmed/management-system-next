@@ -278,9 +278,11 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <LineChart data={lineChartSaleStats} />
+      <div className='2xl:grid grid-cols-1 2xl:grid-cols-2 gap-5'>
+        <LineChart data={lineChartSaleStats} />
 
-      <BarChart />
+        <BarChart />
+      </div>
     </Layout>
   );
 };

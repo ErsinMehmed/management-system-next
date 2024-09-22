@@ -1,5 +1,6 @@
 import { makeObservable, observable, action } from "mobx";
 import authAction from "@/actions/authAction";
+import roleApi from "@/actions/roleAction";
 import commonStore from "./commonStore";
 import { RegisterEnums } from "@/enums/status";
 import { validateFields } from "@/utils";
@@ -9,6 +10,7 @@ class Auth {
   userData = {
     name: "",
     email: "",
+    role: "",
     password: "",
     passwordRep: "",
   };
@@ -18,10 +20,13 @@ class Auth {
     password: "",
   };
 
+  roles = [];
+
   constructor() {
     makeObservable(this, {
       userData: observable,
       loginData: observable,
+      roles: observable,
       setUserData: action,
       setLoginData: action,
     });
@@ -67,6 +72,10 @@ class Auth {
     }
   };
 
+  loadRoles = async () => {
+    this.roles = await roleApi.getRoles();
+  };
+
   handleValidationErrors = (errorFields) => {
     commonStore.setErrorFields(errorFields);
   };
@@ -99,6 +108,7 @@ class Auth {
     this.userData = {
       name: "",
       email: "",
+      role: "",
       password: "",
       passwordRep: "",
     };

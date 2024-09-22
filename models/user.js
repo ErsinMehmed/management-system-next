@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import Role from "./role.js";
 
 const userSchema = new Schema(
   {
@@ -17,6 +18,7 @@ const userSchema = new Schema(
       type: String,
       minlength: 8,
     },
+    role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
   },
   {
     timestamps: true,

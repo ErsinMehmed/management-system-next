@@ -100,7 +100,7 @@ const BarChart = (props) => {
   };
 
   return (
-    <div className='bg-white rounded-md shadow-md mt-5'>
+    <div className='bg-white rounded-md shadow-md mt-5 2xl:mt-0'>
       <div className='px-5 py-4 border-b border-slate-100'>
         <div className='ml-4 md:ml-5 text-xl font-bold leading-none text-slate-800'>
           Средна печалба по бутилка
