@@ -95,9 +95,11 @@ const Table = (props) => {
                   <td className='py-3 px-5 border-b whitespace-nowrap'>
                     {totals.availability} бр.
                   </td>
-                  <td className='py-3 px-5 border-b whitespace-nowrap'>
-                    {formatCurrency(totals.price, 2)} лв.
-                  </td>
+                  {props.data?.price && (
+                    <td className='py-3 px-5 border-b whitespace-nowrap'>
+                      {formatCurrency(totals.price, 2)} лв.
+                    </td>
+                  )}
                 </tr>
               </tbody>
             </table>

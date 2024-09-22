@@ -3,9 +3,16 @@ import Sell from "@/models/sell";
 import Order from "@/models/order";
 import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import mongoose from "mongoose";
 
 export async function GET(request) {
   await connectMongoDB();
+
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  const userObjectId = new mongoose.Types.ObjectId(userId);
 
   const dateFrom = request.nextUrl.searchParams.get("dateFrom");
   const dateTo = request.nextUrl.searchParams.get("dateTo");
@@ -20,9 +27,14 @@ export async function GET(request) {
 
   const dateCondition = getDateCondition(dateFrom, dateTo, period);
 
+  const matchCondition = {
+    ...dateCondition,
+    creator: userObjectId,
+  };
+
   const totalIncomesArray = await Sell.aggregate([
     {
-      $match: dateCondition,
+      $match: matchCondition,
     },
     {
       $group: {
@@ -34,7 +46,7 @@ export async function GET(request) {
 
   const incomesByProductArray = await Sell.aggregate([
     {
-      $match: dateCondition,
+      $match: matchCondition,
     },
     {
       $group: {

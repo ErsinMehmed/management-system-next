@@ -22,8 +22,10 @@ import Box from "@/components/dashboard/Box";
 import { categories, periods } from "@/data";
 import { formatCurrency } from "@/utils";
 import LineChart from "@/components/charts/LineChart";
+import { useSession } from "next-auth/react";
 
 const Dashboard = () => {
+  const { data: session } = useSession();
   const {
     sellStats,
     lineChartSaleStats,
@@ -41,6 +43,7 @@ const Dashboard = () => {
   const { products } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
+  const isUserAdmin = session?.user?.role === "Admin";
 
   useEffect(() => {
     loadAdditionalIncomes();
@@ -72,13 +75,23 @@ const Dashboard = () => {
   );
 
   const filteredProductAvailabilities = filteredProducts?.map(
-    ({ name, weight, image_url, availability, price, units_per_box }) => ({
-      name: `${name} ${weight}гр.`,
-      image_url: image_url,
-      carton: (availability / units_per_box).toFixed(1),
-      availability,
-      price: price * availability,
-    })
+    ({ name, weight, image_url, availability, price, units_per_box }) => {
+      const baseData = {
+        name: `${name} ${weight}гр.`,
+        image_url: image_url,
+        carton: (availability / units_per_box).toFixed(1),
+        availability,
+      };
+
+      if (isUserAdmin) {
+        return {
+          ...baseData,
+          price: price * availability,
+        };
+      }
+
+      return baseData;
+    }
   );
 
   const allExpenses = (
@@ -89,6 +102,11 @@ const Dashboard = () => {
   ).toFixed(2);
 
   const profit = (incomes?.incomes + additionalIncomes?.incomes).toFixed(2);
+
+  const columns =
+    session?.user?.role === "Admin"
+      ? ["продукт", "кашони", "бутилки", "стойност"]
+      : ["продукт", "кашони", "бутилки"];
 
   return (
     <Layout title='Администраторско табло'>
@@ -117,7 +135,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5'>
+      <div
+        className={`grid grid-cols-1 ${
+          isUserAdmin ? "lg:grid-cols-3" : ""
+        }  gap-5 mb-5`}>
         <Box
           title='Приходи'
           period={dashboardBoxPeriod}
@@ -162,104 +183,113 @@ const Dashboard = () => {
           modal={true}
         />
 
-        <Box
-          title='Разходи'
-          period={dashboardBoxPeriod}
-          modalContent={
-            <Tabs
-              aria-label='Options'
-              selectedKey={selectedCategory}
-              onSelectionChange={setSelectedCategory}>
-              {categories.map((category) => (
-                <Tab
-                  key={category}
-                  title={category}>
-                  <TabSection
-                    data={expenses}
-                    kind='expenses'
-                    category={category}
-                    totalKey='total_expenses'
-                  />
-                </Tab>
-              ))}
+        {isUserAdmin && (
+          <Box
+            title='Разходи'
+            period={dashboardBoxPeriod}
+            modalContent={
+              <Tabs
+                aria-label='Options'
+                selectedKey={selectedCategory}
+                onSelectionChange={setSelectedCategory}>
+                {categories.map((category) => (
+                  <Tab
+                    key={category}
+                    title={category}>
+                    <TabSection
+                      data={expenses}
+                      kind='expenses'
+                      category={category}
+                      totalKey='total_expenses'
+                    />
+                  </Tab>
+                ))}
 
-              {(expenses.total_fuel_expenses > 0 ||
-                expenses.total_additional_expenses > 0 ||
-                expenses.total_ad_expenses > 0) && (
-                <Tab
-                  key='Други'
-                  title='Други'>
-                  <div className='bg-gray-50 rounded-lg'>
-                    {expenses.total_fuel_expenses > 0 && (
-                      <dl className='flex-container py-2.5 px-3 text-sm'>
-                        <dt className='text-gray-500 font-semibold'>Гориво</dt>
+                {(expenses.total_fuel_expenses > 0 ||
+                  expenses.total_additional_expenses > 0 ||
+                  expenses.total_ad_expenses > 0) && (
+                  <Tab
+                    key='Други'
+                    title='Други'>
+                    <div className='bg-gray-50 rounded-lg'>
+                      {expenses.total_fuel_expenses > 0 && (
+                        <dl className='flex-container py-2.5 px-3 text-sm'>
+                          <dt className='text-gray-500 font-semibold'>
+                            Гориво
+                          </dt>
 
-                        <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                          {formatCurrency(expenses.total_fuel_expenses, 2)} лв.
-                        </dd>
-                      </dl>
-                    )}
+                          <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
+                            {formatCurrency(expenses.total_fuel_expenses, 2)}{" "}
+                            лв.
+                          </dd>
+                        </dl>
+                      )}
 
-                    {expenses.total_ad_expenses > 0 && (
-                      <dl className='flex-container py-2.5 px-3 text-sm border-t'>
-                        <dt className='text-gray-500 font-semibold'>Реклами</dt>
+                      {expenses.total_ad_expenses > 0 && (
+                        <dl className='flex-container py-2.5 px-3 text-sm border-t'>
+                          <dt className='text-gray-500 font-semibold'>
+                            Реклами
+                          </dt>
 
-                        <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                          {formatCurrency(expenses.total_ad_expenses, 2)} лв.
-                        </dd>
-                      </dl>
-                    )}
+                          <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
+                            {formatCurrency(expenses.total_ad_expenses, 2)} лв.
+                          </dd>
+                        </dl>
+                      )}
 
-                    {expenses.total_additional_expenses > 0 && (
-                      <dl className='flex-container py-2.5 px-3 text-sm border-t'>
-                        <dt className='text-gray-500 font-semibold'>
-                          Допълнителни
-                        </dt>
+                      {expenses.total_additional_expenses > 0 && (
+                        <dl className='flex-container py-2.5 px-3 text-sm border-t'>
+                          <dt className='text-gray-500 font-semibold'>
+                            Допълнителни
+                          </dt>
 
-                        <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                          {formatCurrency(
-                            expenses.total_additional_expenses,
-                            2
-                          )}{" "}
-                          лв.
-                        </dd>
-                      </dl>
-                    )}
+                          <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
+                            {formatCurrency(
+                              expenses.total_additional_expenses,
+                              2
+                            )}{" "}
+                            лв.
+                          </dd>
+                        </dl>
+                      )}
 
-                    {((expenses.total_fuel_expenses > 0 &&
-                      expenses.total_additional_expenses > 0) ||
-                      (expenses.total_fuel_expenses > 0 &&
-                        expenses.total_ad_expenses > 0)) && (
-                      <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t'>
-                        <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
-                          {formatCurrency(
-                            expenses.total_fuel_expenses +
-                              expenses.total_additional_expenses +
-                              expenses.total_ad_expenses,
-                            2
-                          )}
-                          лв.
-                        </dd>
-                      </dl>
-                    )}
-                  </div>
-                </Tab>
-              )}
-            </Tabs>
-          }
-          value={allExpenses}
-          icon={<MdAttachMoney className='w-6 h-6' />}
-          modalTitle='Разходи по категории'
-          modal={true}
-        />
+                      {((expenses.total_fuel_expenses > 0 &&
+                        expenses.total_additional_expenses > 0) ||
+                        (expenses.total_fuel_expenses > 0 &&
+                          expenses.total_ad_expenses > 0)) && (
+                        <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t'>
+                          <dd className='bg-gray-100 text-gray-800 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
+                            {formatCurrency(
+                              expenses.total_fuel_expenses +
+                                expenses.total_additional_expenses +
+                                expenses.total_ad_expenses,
+                              2
+                            )}
+                            лв.
+                          </dd>
+                        </dl>
+                      )}
+                    </div>
+                  </Tab>
+                )}
+              </Tabs>
+            }
+            value={allExpenses}
+            icon={<MdAttachMoney className='w-6 h-6' />}
+            modalTitle='Разходи по категории'
+            modal={true}
+          />
+        )}
 
-        <Box
-          title='Печалба'
-          period={dashboardBoxPeriod}
-          value={(profit - allExpenses).toFixed(2)}
-          icon={<TbMoneybag className='w-6 h-6' />}
-          modal={false}
-        />
+        {isUserAdmin && (
+          <Box
+            title='Печалба'
+            period={dashboardBoxPeriod}
+            value={(profit - allExpenses).toFixed(2)}
+            icon={<TbMoneybag className='w-6 h-6' />}
+            modal={false}
+          />
+        )}
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-y-5 lg:gap-5 mb-5'>
@@ -273,16 +303,18 @@ const Dashboard = () => {
           <Table
             title='Наличност на бутилки'
             data={filteredProductAvailabilities}
-            columns={["продукт", "кашони", "бутилки", "стойност"]}
+            columns={columns}
           />
         </div>
       </div>
 
-      <div className='2xl:grid grid-cols-1 2xl:grid-cols-2 gap-5'>
-        <LineChart data={lineChartSaleStats} />
+      {isUserAdmin && (
+        <div className='2xl:grid grid-cols-1 2xl:grid-cols-2 gap-5'>
+          <LineChart data={lineChartSaleStats} />
 
-        <BarChart />
-      </div>
+          <BarChart />
+        </div>
+      )}
     </Layout>
   );
 };
