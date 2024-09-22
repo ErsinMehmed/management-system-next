@@ -26,6 +26,7 @@ import { useSession } from "next-auth/react";
 
 const Dashboard = () => {
   const { data: session } = useSession();
+  const isUserAdmin = session?.user?.role === "Admin";
   const {
     sellStats,
     lineChartSaleStats,
@@ -43,7 +44,6 @@ const Dashboard = () => {
   const { products } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
-  const isUserAdmin = session?.user?.role === "Admin";
 
   useEffect(() => {
     loadAdditionalIncomes();
@@ -103,10 +103,9 @@ const Dashboard = () => {
 
   const profit = (incomes?.incomes + additionalIncomes?.incomes).toFixed(2);
 
-  const columns =
-    session?.user?.role === "Admin"
-      ? ["продукт", "кашони", "бутилки", "стойност"]
-      : ["продукт", "кашони", "бутилки"];
+  const columns = isUserAdmin
+    ? ["продукт", "кашони", "бутилки", "стойност"]
+    : ["продукт", "кашони", "бутилки"];
 
   return (
     <Layout title='Администраторско табло'>
@@ -310,7 +309,7 @@ const Dashboard = () => {
 
       {isUserAdmin && (
         <div className='2xl:grid grid-cols-1 2xl:grid-cols-2 gap-5'>
-          <LineChart data={lineChartSaleStats} />
+          <LineChart />
 
           <BarChart />
         </div>

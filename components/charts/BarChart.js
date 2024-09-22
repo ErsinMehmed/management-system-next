@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import { incomeStore } from "@/stores/useStore";
 import { Spinner } from "@nextui-org/react";
 
-const BarChart = (props) => {
+const BarChart = () => {
   const ReactApexChart = dynamic(() => import("react-apexcharts"), {
     ssr: false,
   });
@@ -33,7 +33,7 @@ const BarChart = (props) => {
     plotOptions: {
       bar: {
         horizontal: false,
-        columnWidth: "70%",
+        columnWidth: "80%",
         borderRadiusApplication: "end",
         borderRadius: 8,
       },

@@ -1,12 +1,15 @@
 import dynamic from "next/dynamic";
+import { sellStore } from "@/stores/useStore";
+
 import { Spinner } from "@nextui-org/react";
 
 const LineChart = (props) => {
+  const { lineChartSaleStats } = sellStore;
   const ReactApexChart = dynamic(() => import("react-apexcharts"), {
     ssr: false,
   });
 
-  const series = props.data?.data;
+  const series = lineChartSaleStats?.data;
 
   const options = {
     chart: {
@@ -42,7 +45,7 @@ const LineChart = (props) => {
       enabled: false,
     },
     xaxis: {
-      categories: props.data?.periods,
+      categories: lineChartSaleStats?.periods,
       labels: {
         show: true,
       },
@@ -72,7 +75,7 @@ const LineChart = (props) => {
 
       <div className='overflow-x-auto p-4 md:p-5'>
         <div className='min-w-[800px] h-80 md:h-96 overflow-y-hidden'>
-          {props.data?.data ? (
+          {lineChartSaleStats?.data ? (
             <ReactApexChart
               options={options}
               series={series}
