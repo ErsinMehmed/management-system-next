@@ -29,7 +29,7 @@ const DashboardLayout = (props) => {
 
         <div
           className={`${
-            isVisible ? "sm:ml-16" : "sm:ml-56 2xl:ml-72"
+            isVisible ? "sm:ml-16" : "sm:ml-52 2xl:ml-72"
           } transition-all duration-500 w-full min-h-screen`}>
           <Navbar
             onMenuClick={toggleMenu}

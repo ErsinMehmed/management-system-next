@@ -13,6 +13,7 @@ import { TbMoneybag } from "react-icons/tb";
 import { Tabs, Tab } from "@nextui-org/react";
 import Layout from "@/components/layout/Dashboard";
 import PieChart from "@/components/charts/PieChart";
+import BarChart from "@/components/charts/BarChart";
 import Select from "@/components/html/Select";
 import Input from "@/components/html/Input";
 import TabSection from "@/components/dashboard/TabSection";
@@ -278,6 +279,8 @@ const Dashboard = () => {
       </div>
 
       <LineChart data={lineChartSaleStats} />
+
+      <BarChart />
     </Layout>
   );
 };

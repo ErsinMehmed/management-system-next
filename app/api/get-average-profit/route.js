@@ -107,6 +107,8 @@ export async function GET(request) {
     };
   });
 
+  profitResults.sort((a, b) => b.averageProfit - a.averageProfit);
+
   // Изчисляване на общата печалба, включително и допълнителните разходи
   const totalProfit = profitResults.reduce(
     (acc, item) => acc + (item.profit - item.totalAdditionalCosts),
