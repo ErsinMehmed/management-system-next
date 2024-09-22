@@ -156,8 +156,10 @@ const Pie = (props) => {
           </h5>
 
           {props.status && (
-            <div className='bg-gray-50 p-3 rounded-lg'>
-              <Accordion isCompact>
+            <div className='bg-gray-50 p-2 rounded-lg'>
+              <Accordion
+                isCompact
+                selectionMode='multiple'>
                 <AccordionItem
                   key='1'
                   aria-label='Статистика на продажбите'
