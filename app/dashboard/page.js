@@ -30,8 +30,13 @@ const Dashboard = () => {
     loadLineChartSaleStats,
   } = sellStore;
   const { expenses, loadExpenses } = expenseStore;
-  const { incomes, additionalIncomes, loadIncomes, loadAdditionalIncomes } =
-    incomeStore;
+  const {
+    incomes,
+    additionalIncomes,
+    loadAverageProfit,
+    loadIncomes,
+    loadAdditionalIncomes,
+  } = incomeStore;
   const { products } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
@@ -42,6 +47,7 @@ const Dashboard = () => {
     loadExpenses();
     loadIncomes();
     loadLineChartSaleStats();
+    loadAverageProfit();
   }, []);
 
   const handleFieldChange = useCallback(

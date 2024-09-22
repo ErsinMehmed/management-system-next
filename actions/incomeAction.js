@@ -12,10 +12,33 @@ class Income {
     }
   };
 
-  getAdditonalIncomes = async (period) => {
+  getAdditionalIncomes = async (period) => {
     try {
       const periodParam = getPeriodParam(period);
       const response = await fetch(`/api/additional-incomes?${periodParam}`);
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  getAverageProfit = async (period) => {
+    if (!period?.dateFrom && !period?.dateTo) {
+      const currentDate = new Date();
+      const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+
+      period = {
+        dateFrom: startOfYear.toISOString().split("T")[0],
+        dateTo: currentDate.toISOString().split("T")[0],
+      };
+    }
+
+    try {
+      const periodParam = getPeriodParam(period);
+      const response = await fetch(
+        `/api/get-average-profit?dateFrom=${period.dateFrom}&dateTo=${period.dateTo}`
+      );
 
       return await response.json();
     } catch (error) {

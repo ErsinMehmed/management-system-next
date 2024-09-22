@@ -30,6 +30,7 @@ export async function GET(request) {
         _id: "$product",
         totalIncome: { $sum: "$price" },
         totalQuantity: { $sum: "$quantity" },
+        totalAdditionalCosts: { $sum: "$additional_costs" },
       },
     },
     {
@@ -44,12 +45,29 @@ export async function GET(request) {
       $unwind: "$productInfo",
     },
     {
+      $lookup: {
+        from: "categories",
+        localField: "productInfo.category",
+        foreignField: "_id",
+        as: "categoryInfo",
+      },
+    },
+    {
+      $unwind: "$categoryInfo",
+    },
+    {
+      $match: {
+        "categoryInfo.name": "Бутилки",
+      },
+    },
+    {
       $project: {
         productId: "$productInfo._id",
         productName: "$productInfo.name",
         productWeight: "$productInfo.weight",
         totalIncome: 1,
         totalQuantity: 1,
+        totalAdditionalCosts: 1,
       },
     },
   ]);
@@ -73,31 +91,42 @@ export async function GET(request) {
   // Изчисляване на печалбата за всеки продукт
   const profitResults = totalIncomeArray.map((item) => {
     const totalAmount = totalCostsMap[item.productId] || 0;
-    const profit = item.totalIncome - totalAmount; // Печалба
+    const totalAdditionalCosts = item.totalAdditionalCosts || 0;
+    const profit = item.totalIncome - totalAmount - totalAdditionalCosts; // Печалба
     const averageProfit =
       item.totalQuantity > 0 ? profit / item.totalQuantity : 0;
 
     return {
       productName: item.productName + " " + item.productWeight + "гр.",
-      totalIncome: item.totalIncome,
-      totalAmount,
-      profit,
-      averageProfit,
-      quantity: item.totalQuantity,
+      totalIncome: parseFloat(item.totalIncome.toFixed(2)),
+      totalAmount: parseFloat(totalAmount.toFixed(2)),
+      totalAdditionalCosts: parseFloat(totalAdditionalCosts.toFixed(2)),
+      profit: parseFloat(profit.toFixed(2)),
+      averageProfit: parseFloat(averageProfit.toFixed(2)),
+      quantity: parseFloat(item.totalQuantity.toFixed(2)),
     };
   });
 
-  // Изчисляване на средната печалба за всички продукти
-  const totalProfit = profitResults.reduce((acc, item) => acc + item.profit, 0);
+  // Изчисляване на общата печалба, включително и допълнителните разходи
+  const totalProfit = profitResults.reduce(
+    (acc, item) => acc + (item.profit - item.totalAdditionalCosts),
+    0
+  );
+
+  // Изчисляване на общото количество продадени продукти
   const totalSoldQuantity = profitResults.reduce(
     (acc, item) => acc + item.quantity,
     0
   );
-  const averageProfitOverall =
-    totalSoldQuantity > 0 ? totalProfit / totalSoldQuantity : 0;
+
+  // Изчисляване на средната печалба за всички продукти, включително допълнителните разходи
+  const averageProfitOverall = parseFloat(
+    (totalSoldQuantity > 0 ? totalProfit / totalSoldQuantity : 0).toFixed(2)
+  );
 
   return NextResponse.json({
     averageProfitOverall,
+    totalProfit,
     profitResults,
     status: true,
   });

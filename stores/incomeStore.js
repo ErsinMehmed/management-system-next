@@ -5,11 +5,13 @@ import commonStore from "./commonStore";
 class Income {
   incomes = [];
   additionalIncomes = [];
+  averageProfitData = [];
 
   constructor() {
     makeObservable(this, {
       incomes: observable,
       additionalIncomes: observable,
+      averageProfitData: observable,
       setIncomes: action,
       setAdditionalIncomes: action,
     });
@@ -34,9 +36,13 @@ class Income {
   };
 
   loadAdditionalIncomes = async (period) => {
-    const response = await incomeAction.getAdditonalIncomes(period);
+    const response = await incomeAction.getAdditionalIncomes(period);
 
     this.setAdditionalIncomes(response);
+  };
+
+  loadAverageProfit = async (period) => {
+    this.averageProfitData = await incomeAction.getAverageProfit(period);
   };
 }
 
