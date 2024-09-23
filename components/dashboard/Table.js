@@ -2,8 +2,12 @@
 import Image from "next/image";
 import { Spinner } from "@nextui-org/react";
 import { formatCurrency } from "@/utils";
+import { useSession } from "next-auth/react";
 
 const Table = (props) => {
+  const { data: session } = useSession();
+  const isUserAdmin = session?.user?.role === "Admin";
+
   const renderCellValue = (key, value) => {
     switch (key) {
       case "carton":
@@ -95,7 +99,7 @@ const Table = (props) => {
                   <td className='py-3 px-5 border-b whitespace-nowrap'>
                     {totals.availability} бр.
                   </td>
-                  {props.data?.price && (
+                  {isUserAdmin && (
                     <td className='py-3 px-5 border-b whitespace-nowrap'>
                       {formatCurrency(totals.price, 2)} лв.
                     </td>
