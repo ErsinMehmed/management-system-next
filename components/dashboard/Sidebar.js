@@ -6,18 +6,21 @@ import { dashboardLinks } from "@/data";
 
 const SideBar = (props) => {
   const pathname = usePathname();
-  const [userRole, setUserRole] = useState(null);
+  const [filteredLinks, setFilteredLinks] = useState(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUserRole = localStorage.getItem("userRole");
-      setUserRole(storedUserRole);
-    }
-  }, []);
+    let storedUserRole;
 
-  const filteredLinks = dashboardLinks.filter((item) =>
-    item.role.includes(userRole)
-  );
+    if (typeof window !== "undefined") {
+      storedUserRole = localStorage.getItem("userRole");
+    }
+
+    const filteredLink = dashboardLinks.filter((item) =>
+      item.role.includes(storedUserRole)
+    );
+
+    setFilteredLinks(filteredLink);
+  }, []);
 
   return (
     <aside
@@ -26,7 +29,7 @@ const SideBar = (props) => {
       } transition-all duration-500 h-screen sm:translate-x-0 bg-gradient-to-r from-[#534bed] via-[#4d44ef] to-[#4b43e7]`}>
       <div className='h-full px-3 py-4 overflow-y-auto border-r border-gray-200'>
         <ul className='space-y-2.5 font-medium'>
-          {filteredLinks.map((item, index) => (
+          {filteredLinks?.map((item, index) => (
             <li key={index}>
               <Link
                 title={item.text}

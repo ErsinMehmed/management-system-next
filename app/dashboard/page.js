@@ -50,12 +50,14 @@ const Dashboard = () => {
     loadIncomes();
     loadLineChartSaleStats();
     loadAverageProfit();
+  }, []);
 
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUserRole = localStorage.getItem("userRole");
-      setIsUserAdmin(storedUserRole);
+      setIsUserAdmin(storedUserRole === "Admin");
     }
-  }, []);
+  }, [setIsUserAdmin]);
 
   const handleFieldChange = useCallback(
     (name, value) => {
