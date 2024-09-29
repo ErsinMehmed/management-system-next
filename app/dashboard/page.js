@@ -51,8 +51,10 @@ const Dashboard = () => {
     loadLineChartSaleStats();
     loadAverageProfit();
 
-    const storedUserRole = localStorage.getItem("userRole");
-    setIsUserAdmin(storedUserRole === "Admin");
+    if (typeof window !== "undefined") {
+      const storedUserRole = localStorage.getItem("userRole");
+      setIsUserAdmin(storedUserRole);
+    }
   }, []);
 
   const handleFieldChange = useCallback(
