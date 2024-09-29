@@ -1,14 +1,22 @@
 "use client";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { dashboardLinks } from "@/data";
 
 const SideBar = (props) => {
   const pathname = usePathname();
-  const storedUserRole = localStorage.getItem("userRole");
+  const [userRole, setUserRole] = useState(null);
 
-  const filteredLinks = dashboardLinks.filter(
-    (item) => item.role.includes(storedUserRole) // Проверка за наличие на роля
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUserRole = localStorage.getItem("userRole");
+      setUserRole(storedUserRole);
+    }
+  }, []);
+
+  const filteredLinks = dashboardLinks.filter((item) =>
+    item.role.includes(userRole)
   );
 
   return (
