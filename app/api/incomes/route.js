@@ -1,18 +1,33 @@
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
+import User from "@/models/user";
 import Order from "@/models/order";
 import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import mongoose from "mongoose";
 
 export async function GET(request) {
   await connectMongoDB();
 
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
+  const userId = request.nextUrl.searchParams.get("userId");
+
+  if (!userId) {
+    return NextResponse.json({
+      status: false,
+      message: "User ID not provided.",
+    });
+  }
+
   const userObjectId = new mongoose.Types.ObjectId(userId);
+
+  const user = await User.findById(userObjectId);
+
+  if (!user) {
+    return NextResponse.json({
+      status: false,
+      message: "User not found.",
+    });
+  }
 
   const dateFrom = request.nextUrl.searchParams.get("dateFrom");
   const dateTo = request.nextUrl.searchParams.get("dateTo");

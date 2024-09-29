@@ -1,12 +1,16 @@
 "use client";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Spinner } from "@nextui-org/react";
 import { formatCurrency } from "@/utils";
-import { useSession } from "next-auth/react";
 
 const Table = (props) => {
-  const { data: session } = useSession();
-  const isUserAdmin = session?.user?.role === "Admin";
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+
+  useEffect(() => {
+    const storedUserRole = localStorage.getItem("userRole");
+    setIsUserAdmin(storedUserRole === "Admin");
+  }, []);
 
   const renderCellValue = (key, value) => {
     switch (key) {

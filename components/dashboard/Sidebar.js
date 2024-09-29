@@ -1,15 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { dashboardLinks } from "@/data";
 
 const SideBar = (props) => {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const storedUserRole = localStorage.getItem("userRole");
 
   const filteredLinks = dashboardLinks.filter(
-    (item) => item.role.includes(session?.user?.role) // Проверка за наличие на роля
+    (item) => item.role.includes(storedUserRole) // Проверка за наличие на роля
   );
 
   return (

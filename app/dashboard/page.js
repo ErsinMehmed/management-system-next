@@ -22,11 +22,9 @@ import Box from "@/components/dashboard/Box";
 import { categories, periods } from "@/data";
 import { formatCurrency } from "@/utils";
 import LineChart from "@/components/charts/LineChart";
-import { useSession } from "next-auth/react";
 
 const Dashboard = () => {
-  const { data: session } = useSession();
-  const isUserAdmin = session?.user?.role === "Admin";
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
   const {
     sellStats,
     lineChartSaleStats,
@@ -52,6 +50,9 @@ const Dashboard = () => {
     loadIncomes();
     loadLineChartSaleStats();
     loadAverageProfit();
+
+    const storedUserRole = localStorage.getItem("userRole");
+    setIsUserAdmin(storedUserRole === "Admin");
   }, []);
 
   const handleFieldChange = useCallback(

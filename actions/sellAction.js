@@ -85,8 +85,9 @@ class Sell {
         return this.cache.get("stats");
       }
 
+      const userId = localStorage.getItem("userId");
       const response = await fetch(
-        `/api/pie-chart-sales-stats?period=${period}`
+        `/api/pie-chart-sales-stats?period=${period}&userId=${userId}`
       );
       const stats = response.json();
 

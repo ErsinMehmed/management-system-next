@@ -4,7 +4,10 @@ class Income {
   getIncomes = async (period) => {
     try {
       const periodParam = getPeriodParam(period);
-      const response = await fetch(`/api/incomes?${periodParam}`);
+      const userId = localStorage.getItem("userId");
+      const response = await fetch(
+        `/api/incomes?${periodParam}&userId=${userId}`
+      );
 
       return await response.json();
     } catch (error) {
@@ -15,7 +18,10 @@ class Income {
   getAdditionalIncomes = async (period) => {
     try {
       const periodParam = getPeriodParam(period);
-      const response = await fetch(`/api/additional-incomes?${periodParam}`);
+      const userId = localStorage.getItem("userId");
+      const response = await fetch(
+        `/api/additional-incomes?${periodParam}&userId=${userId}`
+      );
 
       return await response.json();
     } catch (error) {
