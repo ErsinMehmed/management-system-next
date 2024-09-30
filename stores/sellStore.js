@@ -10,6 +10,7 @@ class Sell {
   sales = [];
   sellStats = [];
   lineChartSaleStats = [];
+  isLoadingLineChartStats = true;
   sellData = {
     quantity: null,
     mileage: null,
@@ -59,6 +60,7 @@ class Sell {
       orderColumn: observable,
       isSellCreated: observable,
       lineChartSaleStats: observable,
+      isLoadingLineChartStats: observable,
       setSales: action,
       setSellData: action,
       setCurrentPage: action,
@@ -153,11 +155,13 @@ class Sell {
   };
 
   loadLineChartSaleStats = async (period) => {
-    this.lineChartSaleStats = await sellAction.getLineChartStats(
-      period?.currentKey ?? this.pieChartPeriod
-    );
-
-    this.setIsLoading(false);
+    try {
+      this.lineChartSaleStats = await sellAction.getLineChartStats(
+        period?.currentKey ?? this.pieChartPeriod
+      );
+    } finally {
+      this.isLoadingLineChartStats = false;
+    }
   };
 
   loadValues = async () => {

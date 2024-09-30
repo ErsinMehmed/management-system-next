@@ -45,6 +45,11 @@ export async function GET(request) {
       $unwind: "$productInfo",
     },
     {
+      $match: {
+        "productInfo.hidden": false,
+      },
+    },
+    {
       $lookup: {
         from: "categories",
         localField: "productInfo.category",

@@ -6,7 +6,7 @@ const BarChart = () => {
   const ReactApexChart = dynamic(() => import("react-apexcharts"), {
     ssr: false,
   });
-  const { averageProfitData } = incomeStore;
+  const { averageProfitData, isLoadingAverageProfit } = incomeStore;
   const { profitResults } = averageProfitData;
 
   const transformedData = profitResults?.map((item) => ({
@@ -100,27 +100,31 @@ const BarChart = () => {
   };
 
   return (
-    <div className='bg-white rounded-md shadow-md mt-5 2xl:mt-0'>
-      <div className='px-5 py-4 border-b border-slate-100'>
-        <div className='ml-4 md:ml-5 text-xl font-bold leading-none text-slate-800'>
+    <div className="bg-white rounded-md shadow-md mt-5 2xl:mt-0">
+      <div className="px-5 py-4 border-b border-slate-100">
+        <div className="ml-4 md:ml-5 text-xl font-bold leading-none text-slate-800">
           Средна печалба по бутилка
         </div>
       </div>
 
-      <div className='overflow-x-auto p-4 md:p-5'>
-        <div className='min-w-[800px] h-80 md:h-96 overflow-y-hidden'>
-          {profitResults?.length ? (
+      <div className="overflow-x-auto p-4 md:p-5">
+        <div className="min-w-[800px] h-80 md:h-96 overflow-y-hidden">
+          {isLoadingAverageProfit ? (
+            <div className="h-full w-full center-element font-semibold text-slate-700 text-center">
+              <Spinner classNames={{ wrapper: "w-20 h-20" }} />
+            </div>
+          ) : profitResults?.length === 0 ? (
+            <p className="h-full w-full center-element font-semibold text-slate-700 text-center">
+              Няма намерени данни
+            </p>
+          ) : (
             <ReactApexChart
               options={options}
               series={options.series}
-              type='bar'
+              type="bar"
               height={"100%"}
               width={"100%"}
             />
-          ) : (
-            <div className='h-full w-full center-element font-semibold text-slate-700 text-center'>
-              <Spinner classNames={{ wrapper: "w-20 h-20" }} />
-            </div>
           )}
         </div>
       </div>

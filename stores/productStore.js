@@ -7,6 +7,7 @@ import commonStore from "./commonStore";
 class Product {
   products = [];
   productData = {};
+  isLoading = true;
   isProductUpdated = false;
 
   constructor() {
@@ -14,6 +15,7 @@ class Product {
       products: observable,
       productData: observable,
       isProductUpdated: observable,
+      isLoading: observable,
       setProducts: action,
       setProductData: action,
     });
@@ -28,7 +30,12 @@ class Product {
   };
 
   loadProducts = async () => {
-    this.setProducts(await productAction.getProducts());
+    try {
+      const products = await productAction.getProducts();
+      this.setProducts(products);
+    } finally {
+      this.isLoading = false;
+    }
   };
 
   updateProduct = async (id, data) => {
