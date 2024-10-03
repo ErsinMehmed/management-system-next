@@ -20,7 +20,7 @@ const LineChart = (props) => {
     },
     stroke: {
       curve: "smooth",
-      width: 4,
+      width: 3,
     },
     tooltip: {
       enabled: true,
@@ -35,7 +35,7 @@ const LineChart = (props) => {
     fill: {
       type: "gradient",
       gradient: {
-        opacityFrom: 0.55,
+        opacityFrom: 0.45,
         opacityTo: 0,
         shade: "#1C64F2",
         gradientToColors: ["#1C64F2"],

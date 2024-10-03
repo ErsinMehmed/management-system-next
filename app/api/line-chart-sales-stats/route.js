@@ -82,6 +82,22 @@ export async function GET(request) {
       $unwind: "$product",
     },
     {
+      $lookup: {
+        from: "categories",
+        localField: "product.category",
+        foreignField: "_id",
+        as: "category",
+      },
+    },
+    {
+      $unwind: "$category",
+    },
+    {
+      $match: {
+        "category.name": "Бутилки",
+      },
+    },
+    {
       $project: {
         _id: 0,
         name: "$product.name",

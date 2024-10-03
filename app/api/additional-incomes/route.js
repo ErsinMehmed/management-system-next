@@ -25,26 +25,6 @@ export async function POST(request) {
 export async function GET(request) {
   await connectMongoDB();
 
-  const userId = request.nextUrl.searchParams.get("userId");
-
-  if (!userId) {
-    return NextResponse.json({
-      status: false,
-      message: "User ID not provided.",
-    });
-  }
-
-  const userObjectId = new mongoose.Types.ObjectId(userId);
-
-  const user = await User.findById(userObjectId);
-
-  if (!user) {
-    return NextResponse.json({
-      status: false,
-      message: "User not found.",
-    });
-  }
-
   const dateFrom = request.nextUrl.searchParams.get("dateFrom");
   const dateTo = request.nextUrl.searchParams.get("dateTo");
   const period = request.nextUrl.searchParams.get("period");
@@ -57,14 +37,9 @@ export async function GET(request) {
 
   const dateCondition = getDateCondition(dateFrom, dateTo, period);
 
-  const matchCondition = {
-    ...dateCondition,
-    creator: userObjectId,
-  };
-
   const totalIncomesArray = await Income.aggregate([
     {
-      $match: matchCondition,
+      $match: dateCondition,
     },
     {
       $group: {
