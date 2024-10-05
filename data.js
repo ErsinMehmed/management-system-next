@@ -1,4 +1,4 @@
-import { BsBox, BsCart2, BsTruck, BsHouse, BsMegaphone } from "react-icons/bs";
+import { BsBox, BsCart2, BsTruck, BsHouse } from "react-icons/bs";
 
 const socialPlatforms = [{ value: "Facebook" }, { value: "Instagram" }];
 
@@ -55,12 +55,6 @@ const dashboardLinks = [
     text: "Продажби",
     role: ["Admin", "Seller"],
     icon: <BsCart2 className='w-5 h-5' />,
-  },
-  {
-    link: "/dashboard/ads",
-    text: "Реклами",
-    role: ["Admin"],
-    icon: <BsMegaphone className='w-5 h-5' />,
   },
 ];
 
