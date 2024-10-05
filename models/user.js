@@ -18,6 +18,7 @@ const userSchema = new Schema(
       type: String,
       minlength: 8,
     },
+    profile_image: { type: String },
     role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
   },
   {
