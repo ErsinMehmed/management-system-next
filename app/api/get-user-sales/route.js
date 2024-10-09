@@ -57,10 +57,22 @@ export async function GET(request) {
         $unwind: "$user",
       },
       {
+        $lookup: {
+          from: "roles",
+          localField: "user.role",
+          foreignField: "_id",
+          as: "role",
+        },
+      },
+      {
+        $unwind: "$role",
+      },
+      {
         $group: {
           _id: {
             user: "$user.name",
             profile_image: "$user.profile_image",
+            role: "$role.name",
             product: "$product.name",
             weight: "$product.weight",
             percent: "$product.percent",
@@ -74,6 +86,7 @@ export async function GET(request) {
           _id: {
             user: "$_id.user",
             profile_image: "$_id.profile_image",
+            role: "$_id.role",
           },
           products: {
             $push: {
@@ -92,6 +105,7 @@ export async function GET(request) {
           _id: 0,
           user: "$_id.user",
           profile_image: "$_id.profile_image",
+          role: "$_id.role",
           products: 1,
           total_bottles: 1,
           total_fuel_price: 1,

@@ -1,23 +1,22 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
-import { MdAttachMoney } from "react-icons/md";
+import React, { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
-import Modal from "@/components/Modal";
-import Input from "@/components/html/Input";
-import Table from "@/components/table/Table";
-import Pagination from "@/components/table/Pagination";
-import SellForm from "@/components/forms/Sell";
+import {
+  BsBox,
+  BsCart2,
+  BsCashCoin,
+  BsGraphUp,
+  BsInfoCircle,
+} from "react-icons/bs";
 import {
   Accordion,
   AccordionItem,
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
   Divider,
-  Link,
-  Image,
+  Avatar,
 } from "@nextui-org/react";
 import { productTitle } from "@/utils";
 import { userStore } from "@/stores/useStore";
@@ -33,9 +32,9 @@ const UserSales = () => {
     base: "py-0 w-full",
     title: "font-normal text-medium",
     trigger:
-      "px-2 py-0 data-[hover=true]:bg-default-100 rounded-lg h-14 flex items-center",
+      "py-0 data-[hover=true]:bg-default-100 rounded-lg h-14 flex items-center",
     indicator: "text-medium",
-    content: "text-small px-2",
+    content: "text-small",
   };
 
   const defaultContent =
@@ -44,21 +43,21 @@ const UserSales = () => {
   return (
     <Layout title="Продажби по потребители">
       {userSales.sales?.map((data, index) => (
-        <Card key={index} className="max-w-[400px]">
+        <Card key={index} className="max-w-[450px]">
           <CardHeader className="flex gap-3">
-            <Image
-              alt="nextui logo"
-              height={40}
-              radius="sm"
-              src={data.profile_image}
-              width={40}
-            />
+            <Avatar isBordered radius="md" src={data.profile_image} />
+
             <div className="flex flex-col">
-              <p className="text-md">{data.user}</p>
-              <p className="text-small text-default-500">nextui.org</p>
+              <p className="text-md text-slate-700 font-semibold">
+                {data.user}
+              </p>
+
+              <p className="text-small text-default-500">{data.role}</p>
             </div>
           </CardHeader>
+
           <Divider />
+
           <CardBody>
             <Accordion
               showDivider={false}
@@ -67,12 +66,24 @@ const UserSales = () => {
             >
               <AccordionItem
                 key="1"
+                aria-label="Обща информация"
+                startContent={<BsInfoCircle className="size-7" />}
+                subtitle="Информация за потребителят"
+                title="Продажби"
+              >
+                {defaultContent}
+              </AccordionItem>
+
+              <AccordionItem
+                key="2"
                 aria-label="Продажби"
-                startContent={""}
+                startContent={<BsCart2 className="size-7" />}
                 subtitle={
                   <p className="flex">
-                    2 issues to{" "}
-                    <span className="text-primary ml-1">fix now</span>
+                    Продадени бутилки
+                    <span className="font-semibold ml-1">
+                      {data?.total_bottles}бр.
+                    </span>
                   </p>
                 }
                 title="Продажби"
@@ -81,31 +92,30 @@ const UserSales = () => {
               </AccordionItem>
 
               <AccordionItem
-                key="2"
+                key="3"
                 aria-label="Наличности"
-                tartContent={""}
-                subtitle="3 apps have read permissions"
+                startContent={<BsBox className="size-7" />}
+                subtitle="налични бутилки...... {бройки}"
                 title="Наличности"
               >
                 {defaultContent}
               </AccordionItem>
 
               <AccordionItem
-                key="3"
-                aria-label="Оборот"
-                classNames={{ subtitle: "text-warning" }}
-                tartContent={""}
-                subtitle="Complete your profile"
+                key="4"
+                aria-label="Разходи"
+                startContent={<BsCashCoin className="size-7" />}
+                subtitle="За гориво"
                 title="Оборот"
               >
                 {defaultContent}
               </AccordionItem>
+
               <AccordionItem
-                key="4"
+                key="5"
                 aria-label="Печалба"
-                classNames={{ subtitle: "text-danger" }}
-                tartContent={""}
-                subtitle="Please, update now"
+                startContent={<BsGraphUp className="size-7" />}
+                subtitle="За посоченият период"
                 title="Печалба"
               >
                 {defaultContent}
