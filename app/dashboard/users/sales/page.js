@@ -43,8 +43,8 @@ const UserSales = () => {
 
   return (
     <Layout title="Продажби по потребители">
-      {userSales.sales?.map((data) => (
-        <Card className="max-w-[400px]">
+      {userSales.sales?.map((data, index) => (
+        <Card key={index} className="max-w-[400px]">
           <CardHeader className="flex gap-3">
             <Image
               alt="nextui logo"
