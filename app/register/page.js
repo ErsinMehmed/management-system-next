@@ -53,7 +53,7 @@ const Register = () => {
   //               label="Имейл"
   //               value={userData.email}
   //               errorMessage={errorFields.email}
-  //               onChange={(value) => handleFieldChange("email", value)}
+  //               onChange={(value) => handleInputChange("email", value)}
   //             />
   //             <Input
   //               label="Парола"

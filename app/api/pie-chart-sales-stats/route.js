@@ -19,15 +19,6 @@ export async function GET(request) {
 
   const userObjectId = new mongoose.Types.ObjectId(userId);
 
-  const user = await User.findById(userObjectId);
-
-  if (!user) {
-    return NextResponse.json({
-      status: false,
-      message: "User not found.",
-    });
-  }
-
   let startDate;
 
   switch (request.nextUrl.searchParams.get("period")) {

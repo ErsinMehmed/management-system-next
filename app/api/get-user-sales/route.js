@@ -63,8 +63,10 @@ export async function GET(request) {
             profile_image: "$user.profile_image",
             product: "$product.name",
             weight: "$product.weight",
+            percent: "$product.percent",
           },
           total_quantity: { $sum: "$quantity" },
+          total_fuel_price: { $sum: "$fuel_price" },
         },
       },
       {
@@ -77,10 +79,12 @@ export async function GET(request) {
             $push: {
               product: "$_id.product",
               weight: "$_id.weight",
+              percent: "$_id.percent",
               total_quantity: "$total_quantity",
             },
           },
           total_bottles: { $sum: "$total_quantity" },
+          total_fuel_price: { $sum: "$total_fuel_price" },
         },
       },
       {
@@ -90,6 +94,7 @@ export async function GET(request) {
           profile_image: "$_id.profile_image",
           products: 1,
           total_bottles: 1,
+          total_fuel_price: 1,
         },
       },
       {

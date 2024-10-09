@@ -11,14 +11,17 @@ const userSchema = new Schema(
     },
     email: {
       type: String,
+      required: true,
       minlength: 3,
       maxlength: 100,
     },
     password: {
       type: String,
+      required: true,
       minlength: 8,
     },
-    profile_image: { type: String },
+    profile_image: String,
+    percent: Number,
     role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
   },
   {

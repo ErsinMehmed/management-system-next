@@ -1,4 +1,4 @@
-import { BsBox, BsCart2, BsTruck, BsHouse } from "react-icons/bs";
+import { BsBox, BsCart2, BsTruck, BsHouse, BsPeople } from "react-icons/bs";
 
 const socialPlatforms = [{ value: "Facebook" }, { value: "Instagram" }];
 
@@ -36,25 +36,31 @@ const dashboardLinks = [
     link: "/dashboard",
     text: "Табло",
     role: ["Admin", "Seller"],
-    icon: <BsHouse className='w-5 h-5' />,
+    icon: <BsHouse className="w-5 h-5" />,
   },
   {
     link: "/dashboard/orders",
     text: "Поръчки",
     role: ["Admin"],
-    icon: <BsTruck className='w-5 h-5' />,
+    icon: <BsTruck className="w-5 h-5" />,
   },
   {
     link: "/dashboard/products",
     text: "Продукти",
     role: ["Admin"],
-    icon: <BsBox className='w-5 h-5' />,
+    icon: <BsBox className="w-5 h-5" />,
   },
   {
     link: "/dashboard/sales",
     text: "Продажби",
     role: ["Admin", "Seller"],
-    icon: <BsCart2 className='w-5 h-5' />,
+    icon: <BsCart2 className="w-5 h-5" />,
+  },
+  {
+    link: "/dashboard/users/sales",
+    text: "Потребители",
+    role: ["Admin", "Seller"],
+    icon: <BsPeople className="w-5 h-5" />,
   },
 ];
 

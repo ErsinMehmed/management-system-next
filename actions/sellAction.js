@@ -7,7 +7,9 @@ class Sell {
 
   createSell = async (data) => {
     try {
-      const response = await fetch("/api/sales", {
+      const userId = localStorage.getItem("userId");
+
+      const response = await fetch(`/api/sales?userId=${userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

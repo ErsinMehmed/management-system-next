@@ -14,20 +14,11 @@ export async function GET(request) {
   if (!userId) {
     return NextResponse.json({
       status: false,
-      message: "User ID not provided.",
+      message: "Потребителят не е предоставен.",
     });
   }
 
   const userObjectId = new mongoose.Types.ObjectId(userId);
-
-  const user = await User.findById(userObjectId);
-
-  if (!user) {
-    return NextResponse.json({
-      status: false,
-      message: "User not found.",
-    });
-  }
 
   const dateFrom = request.nextUrl.searchParams.get("dateFrom");
   const dateTo = request.nextUrl.searchParams.get("dateTo");

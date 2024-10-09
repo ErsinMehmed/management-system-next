@@ -3,22 +3,20 @@ import Sell from "@/models/sell";
 import Product from "@/models/product";
 import RequestHandler from "@/helpers/RequestHandler";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(request) {
   const data = await request.json();
 
-  const session = await getServerSession(authOptions);
+  const userId = request.nextUrl.searchParams.get("userId");
 
-  if (!session || !session.user || !session.user.id) {
-    return NextResponse.json(
-      { message: "User not authenticated", status: false },
-      { status: 401 }
-    );
+  if (!userId) {
+    return NextResponse.json({
+      status: false,
+      message: "Потребителят не е предоставен.",
+    });
   }
 
-  data.creator = session.user.id;
+  data.creator = userId;
 
   await connectMongoDB();
 
