@@ -14,7 +14,7 @@ const BarChart = () => {
     x: item.productName,
     y: item.averageProfit,
   }));
-  console.log(averageProfitData.averageProfitOverall);
+
   const options = {
     colors: ["#1A56DB", "#FDBA8C"],
     series: [

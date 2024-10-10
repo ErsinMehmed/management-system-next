@@ -16,23 +16,57 @@ import {
   CardHeader,
   CardBody,
   Divider,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
   Avatar,
+  DateRangePicker,
 } from "@nextui-org/react";
-import { productTitle } from "@/utils";
+import { formatCurrency } from "@/utils";
 import { userStore } from "@/stores/useStore";
+import { parseDate } from "@internationalized/date";
 
 const UserSales = () => {
   const { userSales, loadUserSales } = userStore;
-  console.log(userSales.sales);
+
+  const [value, setValue] = React.useState({
+    start: parseDate("2024-04-01"),
+    end: parseDate("2024-04-08"),
+  });
+
   useEffect(() => {
     loadUserSales();
   }, [loadUserSales]);
+
+  // Функция за изчисляване на общите стойности
+  const calculateTotals = (salesData) => {
+    return salesData.map((data) => {
+      const totalQuantity = data.products.reduce(
+        (acc, product) => acc + product.total_quantity,
+        0
+      );
+      const totalPrice = data.products.reduce(
+        (acc, product) => acc + product.total_price,
+        0
+      );
+      return {
+        ...data,
+        totalQuantity,
+        totalPrice: totalPrice.toFixed(2),
+      };
+    });
+  };
+
+  const userSalesWithTotals = calculateTotals(userSales.sales || []);
 
   const itemClasses = {
     base: "py-0 w-full",
     title: "font-normal text-medium",
     trigger:
-      "py-0 data-[hover=true]:bg-default-100 rounded-lg h-14 flex items-center",
+      "py-0 px-2 data-[hover=true]:bg-default-100 rounded-lg h-14 flex items-center",
     indicator: "text-medium",
     content: "text-small",
   };
@@ -40,19 +74,28 @@ const UserSales = () => {
   const defaultContent =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
+  const salesTableHeaders = ["ИМЕ", "КОЛИЧЕСТВО", "ПРИХОДИ", "РАЗХОДИ"];
+
   return (
     <Layout title="Продажби по потребители">
-      {userSales.sales?.map((data, index) => (
-        <Card key={index} className="max-w-[450px]">
-          <CardHeader className="flex gap-3">
-            <Avatar isBordered radius="md" src={data.profile_image} />
+      <div>
+        <DateRangePicker
+          label="Date range (controlled)"
+          value={value}
+          onChange={setValue}
+        />
+      </div>
+      {userSalesWithTotals.map((data, index) => (
+        <Card key={index} className="max-w-[550px]">
+          <CardHeader className="flex gap-3 ml-3 mt-1">
+            <Avatar isBordered radius="md" src={data.user_profile_image} />
 
             <div className="flex flex-col">
               <p className="text-md text-slate-700 font-semibold">
-                {data.user}
+                {data.user_name}
               </p>
 
-              <p className="text-small text-default-500">{data.role}</p>
+              <p className="text-small text-default-500">{data.user_role}</p>
             </div>
           </CardHeader>
 
@@ -69,9 +112,9 @@ const UserSales = () => {
                 aria-label="Обща информация"
                 startContent={<BsInfoCircle className="size-7" />}
                 subtitle="Информация за потребителят"
-                title="Продажби"
+                title="Обща информация"
               >
-                {defaultContent}
+                <div></div>
               </AccordionItem>
 
               <AccordionItem
@@ -82,13 +125,53 @@ const UserSales = () => {
                   <p className="flex">
                     Продадени бутилки
                     <span className="font-semibold ml-1">
-                      {data?.total_bottles}бр.
+                      {data?.total_bottles} бр.
                     </span>
                   </p>
                 }
                 title="Продажби"
               >
-                {defaultContent}
+                <Table isStriped>
+                  <TableHeader>
+                    {salesTableHeaders.map((text, index) => (
+                      <TableColumn key={index}>{text}</TableColumn>
+                    ))}
+                  </TableHeader>
+
+                  <TableBody>
+                    {data.products.map((product, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          {product.name + " " + product.weight}гр.
+                        </TableCell>
+
+                        <TableCell>{product.total_quantity} бр.</TableCell>
+
+                        <TableCell>
+                          {formatCurrency(product.total_price)} лв.
+                        </TableCell>
+
+                        <TableCell>
+                          {formatCurrency(product.total_cost)} лв.
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                    <TableRow>
+                      <TableCell className="font-semibold">ОБЩО:</TableCell>
+
+                      <TableCell></TableCell>
+
+                      <TableCell className="font-semibold">
+                        {data.totalQuantity} бр.
+                      </TableCell>
+
+                      <TableCell className="font-semibold">
+                        {formatCurrency(data.totalPrice)} лв.
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </AccordionItem>
 
               <AccordionItem
@@ -105,10 +188,24 @@ const UserSales = () => {
                 key="4"
                 aria-label="Разходи"
                 startContent={<BsCashCoin className="size-7" />}
-                subtitle="За гориво"
-                title="Оборот"
+                subtitle="За посоченият период"
+                title="Разходи"
               >
-                {defaultContent}
+                <Table isStriped>
+                  <TableHeader>
+                    <TableColumn>Тип</TableColumn>
+                    <TableColumn>Сума</TableColumn>
+                  </TableHeader>
+
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Гориво</TableCell>
+                      <TableCell>
+                        {data.total_fuel_price.toFixed(2)} лв.
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </AccordionItem>
 
               <AccordionItem

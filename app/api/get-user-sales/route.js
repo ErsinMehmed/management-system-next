@@ -71,44 +71,58 @@ export async function GET(request) {
         $group: {
           _id: {
             user: "$user.name",
+            user_id: "$user._id",
             profile_image: "$user.profile_image",
+            user_percent: "$user.percent",
             role: "$role.name",
             product: "$product.name",
             weight: "$product.weight",
             percent: "$product.percent",
+            product_price: "$product.price", // Вземаме цената на продукта
           },
           total_quantity: { $sum: "$quantity" },
           total_fuel_price: { $sum: "$fuel_price" },
+          total_price: { $sum: "$price" }, // Общата цена на продажбите
+          total_cost: { $sum: { $multiply: ["$quantity", "$product.price"] } }, // Изчисляваме общия разход
         },
       },
       {
         $group: {
           _id: {
             user: "$_id.user",
+            user_id: "$_id.user_id",
             profile_image: "$_id.profile_image",
             role: "$_id.role",
+            user_percent: "$_id.user_percent",
           },
           products: {
             $push: {
-              product: "$_id.product",
+              name: "$_id.product",
               weight: "$_id.weight",
               percent: "$_id.percent",
+              product_price: "$_id.product_price",
               total_quantity: "$total_quantity",
+              total_price: "$total_price",
+              total_cost: "$total_cost",
             },
           },
           total_bottles: { $sum: "$total_quantity" },
           total_fuel_price: { $sum: "$total_fuel_price" },
+          total_cost: { $sum: "$total_cost" },
         },
       },
       {
         $project: {
           _id: 0,
-          user: "$_id.user",
-          profile_image: "$_id.profile_image",
-          role: "$_id.role",
+          user_name: "$_id.user",
+          user_id: "$_id.user_id",
+          user_profile_image: "$_id.profile_image",
+          user_percent: "$_id.user_percent",
+          user_role: "$_id.role",
           products: 1,
           total_bottles: 1,
           total_fuel_price: 1,
+          total_cost: 1,
         },
       },
       {
