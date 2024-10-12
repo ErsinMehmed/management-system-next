@@ -12,6 +12,17 @@ class User {
       throw error;
     }
   };
+
+  getUserStocks = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const response = await fetch(`/api/user-stocks?userId=${userId}`);
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
 export default new User();

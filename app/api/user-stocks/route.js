@@ -106,7 +106,7 @@ export async function GET(request) {
     const transformedStocks = userStocks.map((stock) => ({
       id: stock._id,
       product_id: stock.product._id,
-      product: stock.product.name + " " + stock.product.weight + "гр.",
+      product_name: stock.product.name + " " + stock.product.weight + "гр.",
       stock: stock.stock,
     }));
 
