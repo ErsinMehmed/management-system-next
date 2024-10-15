@@ -13,12 +13,54 @@ class User {
     }
   };
 
-  getUserStocks = async () => {
+  getUserStocks = async (userId) => {
     try {
-      const userId = localStorage.getItem("userId");
-      const response = await fetch(`/api/user-stocks?userId=${userId}`);
+      const user = userId ?? localStorage.getItem("userId");
+      const response = await fetch(`/api/user-stocks?userId=${user}`);
 
       return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  getUsers = async () => {
+    try {
+      const response = await fetch("/api/get-users");
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  updateUserStocks = async (data) => {
+    try {
+      const response = await fetch(`/api/user-stocks`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  addUserStock = async (data) => {
+    try {
+      const response = await fetch(`/api/user-stocks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      return response.json();
     } catch (error) {
       throw error;
     }

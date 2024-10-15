@@ -16,6 +16,12 @@ const InputComponent = (props) => {
     setIsVisible(!isVisible);
   };
 
+  const style = {
+    classNames: {
+      inputWrapper: [props.inputWrapperClasses],
+    },
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === "Enter" && props.onEnterPress) {
       props.onEnterPress();
@@ -32,6 +38,7 @@ const InputComponent = (props) => {
             : "password"
           : props.type
       }
+      {...style}
       label={props.label}
       value={props.value}
       isDisabled={props.disabled}

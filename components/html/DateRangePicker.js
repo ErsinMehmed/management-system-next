@@ -10,7 +10,10 @@ const DateRangePickerComponent = (props) => {
 
   return (
     <DateRangePicker
-      label='Date range (controlled)'
+      classNames={{
+        base: "bg-white",
+      }}
+      label={props.label}
       value={value}
       onChange={setValue}
     />

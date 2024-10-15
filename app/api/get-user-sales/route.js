@@ -1,6 +1,6 @@
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
-import Product from "@/models/product";
+import UserStock from "@/models/userStock";
 import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
 
@@ -78,12 +78,12 @@ export async function GET(request) {
             product: "$product.name",
             weight: "$product.weight",
             percent: "$product.percent",
-            product_price: "$product.price", // Вземаме цената на продукта
+            product_price: "$product.price",
           },
           total_quantity: { $sum: "$quantity" },
           total_fuel_price: { $sum: "$fuel_price" },
-          total_price: { $sum: "$price" }, // Общата цена на продажбите
-          total_cost: { $sum: { $multiply: ["$quantity", "$product.price"] } }, // Изчисляваме общия разход
+          total_price: { $sum: "$price" },
+          total_cost: { $sum: { $multiply: ["$quantity", "$product.price"] } },
         },
       },
       {
@@ -132,15 +132,39 @@ export async function GET(request) {
       },
     ]);
 
+    const userIds = sales.map((sale) => sale.user_id);
+
+    const userStocks = await UserStock.find({
+      user: { $in: userIds },
+    })
+      .populate("product", "_id name weight")
+      .select("user product stock");
+
+    const stocksMap = userStocks.reduce((acc, stock) => {
+      if (!acc[stock.user]) {
+        acc[stock.user] = [];
+      }
+      acc[stock.user].push({
+        product_name: stock.product.name + " " + stock.product.weight + "гр.",
+        stock: stock.stock,
+      });
+      return acc;
+    }, {});
+
+    const transformedSales = sales.map((sale) => ({
+      ...sale,
+      user_stocks: stocksMap[sale.user_id] || [],
+    }));
+
     return NextResponse.json({
-      sales,
+      sales: transformedSales,
       status: true,
     });
   } catch (error) {
     return NextResponse.json(
       {
         message: "Грешка при извличане на продажбите",
-        error: error,
+        error: error.message,
         status: false,
       },
       { status: 500 }

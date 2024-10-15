@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
+import UserAviability from "@/components/pages/users/UserAviability";
 import {
   BsBox,
   BsCart2,
@@ -29,11 +30,11 @@ import DateRangePicker from "@/components/html/DateRangePicker";
 import { userStore } from "@/stores/useStore";
 
 const UserSales = () => {
-  const { userSales, userStocks, loadUserSales, loadUserStocks } = userStore;
+  const { userSales, loadUserSales, loadUserStocks, loadUsers } = userStore;
 
   useEffect(() => {
     loadUserSales();
-    loadUserStocks();
+    loadUsers();
   }, [loadUserSales, loadUserStocks]);
 
   const calculateTotals = (salesData) => {
@@ -54,12 +55,16 @@ const UserSales = () => {
     });
   };
 
-  const calculateTotalStock = (stocks) => {
-    return stocks.reduce((acc, product) => acc + product.stock, 0);
+  const calculateTotalStock = (userStocks) => {
+    return userStocks.reduce((acc, product) => acc + product.stock, 0);
   };
 
-  const userSalesWithTotals = calculateTotals(userSales.sales || []);
-  const totalStock = calculateTotalStock(userStocks.data || []);
+  const userSalesWithTotals = calculateTotals(userSales.sales || []).map(
+    (data) => ({
+      ...data,
+      totalStock: calculateTotalStock(data.user_stocks),
+    })
+  );
 
   const itemClasses = {
     base: "py-0 w-full",
@@ -73,30 +78,29 @@ const UserSales = () => {
   const defaultContent =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
-  const salesTableHeaders = ["ИМЕ", "КОЛИЧЕСТВО", "ПРИХОДИ", "РАЗХОДИ"];
+  const salesTableHeaders = ["ПРОДУКТ", "КОЛИЧЕСТВО", "ПРИХОДИ", "РАЗХОДИ"];
 
   return (
-    <Layout title='Продажби по потребители'>
-      <div>
-        <DateRangePicker />
-      </div>
-      {userSalesWithTotals.map((data, index) => (
-        <Card
-          key={index}
-          className='max-w-[550px]'>
-          <CardHeader className='flex gap-3 ml-3 mt-1'>
-            <Avatar
-              isBordered
-              radius='md'
-              src={data.user_profile_image}
-            />
+    <Layout title="Продажби по потребители">
+      <div className="grid lg:grid-cols-2 xl:grid-cols-3">
+        <div className="col-span-1 flex flex-col lg:flex-row items-center bg-white p-3 gap-3.5 w-full rounded-md shadow-md mb-5">
+          <DateRangePicker label="Избери дата" />
 
-            <div className='flex flex-col'>
-              <p className='text-md text-slate-700 font-semibold'>
+          <UserAviability />
+        </div>
+      </div>
+
+      {userSalesWithTotals.map((data, index) => (
+        <Card key={index} className="max-w-[550px]">
+          <CardHeader className="flex gap-3 ml-3 mt-1">
+            <Avatar isBordered radius="md" src={data.user_profile_image} />
+
+            <div className="flex flex-col">
+              <p className="text-md text-slate-700 font-semibold">
                 {data.user_name}
               </p>
 
-              <p className='text-small text-default-500'>{data.user_role}</p>
+              <p className="text-small text-default-500">{data.user_role}</p>
             </div>
           </CardHeader>
 
@@ -105,30 +109,33 @@ const UserSales = () => {
           <CardBody>
             <Accordion
               showDivider={false}
-              className='p-2 w-full'
-              itemClasses={itemClasses}>
+              className="p-2 w-full"
+              itemClasses={itemClasses}
+            >
               <AccordionItem
-                key='1'
-                aria-label='Обща информация'
-                startContent={<BsInfoCircle className='size-7' />}
-                subtitle='Информация за потребителят'
-                title='Обща информация'>
+                key="1"
+                aria-label="Обща информация"
+                startContent={<BsInfoCircle className="size-7" />}
+                subtitle="Информация за потребителят"
+                title="Обща информация"
+              >
                 <div></div>
               </AccordionItem>
 
               <AccordionItem
-                key='2'
-                aria-label='Продажби'
-                startContent={<BsCart2 className='size-7' />}
+                key="2"
+                aria-label="Продажби"
+                startContent={<BsCart2 className="size-7" />}
                 subtitle={
-                  <p className='flex'>
+                  <p className="flex">
                     Продадени бутилки
-                    <span className='font-semibold ml-1'>
-                      {data?.total_bottles} бр.
+                    <span className="font-semibold ml-1">
+                      {data.total_bottles} бр.
                     </span>
                   </p>
                 }
-                title='Продажби'>
+                title="Продажби"
+              >
                 <Table isStriped>
                   <TableHeader>
                     {salesTableHeaders.map((text, index) => (
@@ -157,15 +164,15 @@ const UserSales = () => {
 
                     {data.products.length > 1 && (
                       <TableRow>
-                        <TableCell className='font-semibold'>ОБЩО:</TableCell>
+                        <TableCell className="font-semibold">ОБЩО:</TableCell>
 
                         <TableCell></TableCell>
 
-                        <TableCell className='font-semibold'>
+                        <TableCell className="font-semibold">
                           {data.totalQuantity} бр.
                         </TableCell>
 
-                        <TableCell className='font-semibold'>
+                        <TableCell className="font-semibold">
                           {formatCurrency(data.totalPrice)} лв.
                         </TableCell>
                       </TableRow>
@@ -175,19 +182,27 @@ const UserSales = () => {
               </AccordionItem>
 
               <AccordionItem
-                key='3'
-                aria-label='Наличности'
-                startContent={<BsBox className='size-7' />}
-                subtitle='налични бутилки...... {бройки}'
-                title='Наличности'>
+                key="3"
+                aria-label="Наличности"
+                startContent={<BsBox className="size-7" />}
+                subtitle={
+                  <p className="flex">
+                    Налични бутилк
+                    <span className="font-semibold ml-1">
+                      {data.totalStock} бр.
+                    </span>
+                  </p>
+                }
+                title="Наличности"
+              >
                 <Table isStriped>
                   <TableHeader>
-                    <TableColumn>ИМЕ</TableColumn>
+                    <TableColumn>ПРОДУКТ</TableColumn>
                     <TableColumn>КОЛИЧЕСТВО</TableColumn>
                   </TableHeader>
 
                   <TableBody>
-                    {userStocks.data.map((product, index) => (
+                    {data.user_stocks.map((product, index) => (
                       <TableRow key={index}>
                         <TableCell>{product.product_name}</TableCell>
 
@@ -195,12 +210,12 @@ const UserSales = () => {
                       </TableRow>
                     ))}
 
-                    {userStocks.data.length > 1 && (
+                    {data.user_stocks.length > 1 && (
                       <TableRow>
-                        <TableCell className='font-semibold'>ОБЩО:</TableCell>
+                        <TableCell className="font-semibold">ОБЩО:</TableCell>
 
-                        <TableCell className='font-semibold'>
-                          {totalStock} бр.
+                        <TableCell className="font-semibold">
+                          {data.totalStock} бр.
                         </TableCell>
                       </TableRow>
                     )}
@@ -209,11 +224,12 @@ const UserSales = () => {
               </AccordionItem>
 
               <AccordionItem
-                key='4'
-                aria-label='Разходи'
-                startContent={<BsCashCoin className='size-7' />}
-                subtitle='За посоченият период'
-                title='Разходи'>
+                key="4"
+                aria-label="Разходи"
+                startContent={<BsCashCoin className="size-7" />}
+                subtitle="За посоченият период"
+                title="Разходи"
+              >
                 <Table isStriped>
                   <TableHeader>
                     <TableColumn>ТИП</TableColumn>
@@ -232,11 +248,12 @@ const UserSales = () => {
               </AccordionItem>
 
               <AccordionItem
-                key='5'
-                aria-label='Печалба'
-                startContent={<BsGraphUp className='size-7' />}
-                subtitle='За посоченият период'
-                title='Печалба'>
+                key="5"
+                aria-label="Печалба"
+                startContent={<BsGraphUp className="size-7" />}
+                subtitle="За посоченият период"
+                title="Печалба"
+              >
                 {defaultContent}
               </AccordionItem>
             </Accordion>

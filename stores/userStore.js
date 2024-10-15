@@ -4,11 +4,13 @@ import userAction from "@/actions/userAction";
 class User {
   userSales = [];
   userStocks = [];
+  users = [];
 
   constructor() {
     makeObservable(this, {
       userSales: observable,
       userStocks: observable,
+      users: observable,
     });
   }
 
@@ -18,6 +20,10 @@ class User {
 
   loadUserStocks = async () => {
     this.userStocks = await userAction.getUserStocks();
+  };
+
+  loadUsers = async () => {
+    this.users = await userAction.getUsers();
   };
 }
 

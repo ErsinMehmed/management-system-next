@@ -45,7 +45,7 @@ export async function POST(request) {
     if (existingStock) {
       return NextResponse.json(
         {
-          message: "Наличност вече съществува за този продукт и потребител",
+          message: "Наличността вече съществува",
           status: false,
         },
         { status: 400 }
@@ -88,7 +88,7 @@ export async function GET(request) {
     if (userId) {
       userStocks = await UserStock.find({ user: userId })
         .populate("product", "_id name weight")
-        .select("_id stock");
+        .select("_id user stock");
 
       if (!userStocks.length) {
         return NextResponse.json(
@@ -105,8 +105,9 @@ export async function GET(request) {
 
     const transformedStocks = userStocks.map((stock) => ({
       id: stock._id,
-      product_id: stock.product._id,
-      product_name: stock.product.name + " " + stock.product.weight + "гр.",
+      userId: stock.user,
+      productId: stock.product._id,
+      productName: stock.product.name + " " + stock.product.weight + "гр.",
       stock: stock.stock,
     }));
 
