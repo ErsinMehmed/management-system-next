@@ -1,21 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { DateRangePicker } from "@nextui-org/react";
-import { parseDate } from "@internationalized/date";
+import { getLocalTimeZone, today } from "@internationalized/date";
 
 const DateRangePickerComponent = (props) => {
-  const [value, setValue] = useState({
-    start: parseDate("2024-04-01"),
-    end: parseDate("2024-04-08"),
-  });
+  const { value, onChange, label } = props;
 
   return (
     <DateRangePicker
       classNames={{
         base: "bg-white",
       }}
-      label={props.label}
+      maxValue={today(getLocalTimeZone())}
+      label={label}
       value={value}
-      onChange={setValue}
+      onChange={onChange}
     />
   );
 };

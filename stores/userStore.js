@@ -15,7 +15,7 @@ class User {
   }
 
   loadUserSales = async (period) => {
-    this.userSales = await userAction.getUserSales();
+    this.userSales = await userAction.getUserSales(period);
   };
 
   loadUserStocks = async () => {
