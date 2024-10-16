@@ -3,6 +3,7 @@ import UserStock from "@/models/userStock";
 import User from "@/models/user";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 
 export async function POST(request) {
   const data = await request.json();
@@ -46,6 +47,26 @@ export async function POST(request) {
       return NextResponse.json(
         {
           message: "Наличността вече съществува",
+          status: false,
+        },
+        { status: 400 }
+      );
+    }
+
+    const productObjectId = new mongoose.Types.ObjectId(productId);
+
+    const totalUserStock = await UserStock.aggregate([
+      { $match: { product: productObjectId } },
+      { $group: { _id: null, totalStock: { $sum: "$stock" } } },
+    ]);
+
+    const availableStock =
+      product.availability - (totalUserStock[0]?.totalStock || 0);
+
+    if (availableStock < stock) {
+      return NextResponse.json(
+        {
+          message: `Недостатъчна наличност. Можете да добавите максимум ${availableStock} броя.`,
           status: false,
         },
         { status: 400 }
@@ -153,17 +174,15 @@ export async function PUT(request) {
       );
     }
 
-    if (data.productId) {
-      const product = await Product.findById(data.productId);
-
-      if (!product) {
-        return NextResponse.json(
-          { message: "Продуктът не беше намерен", status: false },
-          { status: 404 }
-        );
-      }
-      userStock.product = product._id;
+    const product = await Product.findById(data.productId);
+    if (!product) {
+      return NextResponse.json(
+        { message: "Продуктът не беше намерен", status: false },
+        { status: 404 }
+      );
     }
+
+    userStock.product = product._id;
 
     if (data.userId) {
       const user = await User.findById(data.userId);
@@ -174,11 +193,33 @@ export async function PUT(request) {
           { status: 404 }
         );
       }
+
       userStock.user = user._id;
     }
 
     if (data.stock !== undefined) {
       userStock.stock = data.stock;
+    }
+
+    const productObjectId = new mongoose.Types.ObjectId(product._id);
+    const stockObjectId = new mongoose.Types.ObjectId(userStockId);
+
+    const totalUserStock = await UserStock.aggregate([
+      { $match: { product: productObjectId, _id: { $ne: stockObjectId } } },
+      { $group: { _id: null, totalStock: { $sum: "$stock" } } },
+    ]);
+
+    const availableStock =
+      product.availability - (totalUserStock[0]?.totalStock || 0);
+
+    if (availableStock < data.stock) {
+      return NextResponse.json(
+        {
+          message: `Недостатъчна наличност. Можете да добавите максимум ${availableStock} броя.`,
+          status: false,
+        },
+        { status: 400 }
+      );
     }
 
     await userStock.save();

@@ -20,7 +20,7 @@ import { productTitle } from "@/utils";
 const UserAviability = () => {
   const { users, loadUserSales } = userStore;
   const { products } = productStore;
-  const { errorMessage, setErrorMessage } = commonStore;
+  const { successMessage, errorMessage, setErrorMessage } = commonStore;
   const [stateUserId, setUserId] = useState(users?.users[0]?._id);
   const [userAviability, setUserAviability] = useState([]);
   const [isLoadingUserAviability, setIsLoadingUserAviability] = useState(false);

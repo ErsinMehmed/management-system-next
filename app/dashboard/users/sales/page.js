@@ -27,10 +27,11 @@ import {
 } from "@nextui-org/react";
 import { formatCurrency } from "@/utils";
 import DateRangePicker from "@/components/html/DateRangePicker";
-import { userStore } from "@/stores/useStore";
+import { userStore, commonStore } from "@/stores/useStore";
 
 const UserSales = () => {
   const { userSales, loadUserSales, loadUserStocks, loadUsers } = userStore;
+  const { successMessage, errorMessage } = commonStore;
 
   useEffect(() => {
     loadUserSales();
