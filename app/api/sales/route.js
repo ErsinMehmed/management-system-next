@@ -1,6 +1,7 @@
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
 import Product from "@/models/product";
+import UserStock from "@/models/userStock";
 import RequestHandler from "@/helpers/RequestHandler";
 import { NextResponse } from "next/server";
 
@@ -44,9 +45,26 @@ export async function POST(request) {
       );
     }
 
-    product.availability -= data.quantity;
+    const userStock = await UserStock.findOne({
+      user: userId,
+      product: data.product,
+    });
 
+    if (!userStock || userStock.stock < data.quantity) {
+      return NextResponse.json(
+        {
+          message: "Недостатъчна наличност от продукта за този потребител",
+          status: false,
+        },
+        { status: 400 }
+      );
+    }
+
+    product.availability -= data.quantity;
     await product.save();
+
+    userStock.stock -= data.quantity;
+    await userStock.save();
 
     await Sell.create(data);
 
@@ -97,6 +115,24 @@ export async function DELETE(request) {
     if (!product) {
       return NextResponse.json(
         { message: "Продуктът не беше намерен", status: false },
+        { status: 404 }
+      );
+    }
+
+    const userStock = await UserStock.findOne({
+      user: sellToDelete.creator,
+      product: sellToDelete.product,
+    });
+
+    if (userStock) {
+      userStock.stock += sellToDelete.quantity;
+      await userStock.save();
+    } else {
+      return NextResponse.json(
+        {
+          message: "Не бяха намерени наличности за този потребител и продукт",
+          status: false,
+        },
         { status: 404 }
       );
     }
