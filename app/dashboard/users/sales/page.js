@@ -24,6 +24,7 @@ import {
   TableRow,
   TableCell,
   Avatar,
+  Skeleton,
 } from "@nextui-org/react";
 import { formatCurrency } from "@/utils";
 import DateRangePicker from "@/components/html/DateRangePicker";
@@ -32,7 +33,13 @@ import { parseDate } from "@internationalized/date";
 import moment from "moment";
 
 const UserSales = () => {
-  const { userSales, loadUserSales, loadUserStocks, loadUsers } = userStore;
+  const {
+    userSales,
+    isUserSalesLoad,
+    loadUserSales,
+    loadUserStocks,
+    loadUsers,
+  } = userStore;
   const { successMessage, errorMessage } = commonStore;
   const [dateRange, setDateRange] = useState({
     start: parseDate(moment().subtract(7, "days").format("YYYY-MM-DD")),
@@ -131,178 +138,222 @@ const UserSales = () => {
         </div>
       </div>
 
-      {userSalesWithTotals.map((data, index) => (
-        <Card key={index} className="max-w-[550px]">
-          <CardHeader className="flex gap-3 ml-3 mt-1">
-            <Avatar isBordered radius="md" src={data.user_profile_image} />
+      <div className="grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+        {isUserSalesLoad
+          ? [...Array(4)].map((_, index) => (
+              <Card key={index} className="w-full lg:max-w-[550px]">
+                <CardHeader className="flex gap-3 ml-3 mt-1">
+                  <Skeleton className="flex rounded-lg w-11 h-11" />
 
-            <div className="flex flex-col">
-              <p className="text-md text-slate-700 font-semibold">
-                {data.user_name}
-              </p>
+                  <div className="space-y-2.5">
+                    <Skeleton className="h-2.5 w-32 rounded-lg" />
+                    <Skeleton className="h-2.5 w-14 rounded-lg" />
+                  </div>
+                </CardHeader>
 
-              <p className="text-small text-default-500">{data.user_role}</p>
-            </div>
-          </CardHeader>
+                <Divider />
 
-          <Divider />
+                <CardBody>
+                  <div className="p-3.5 space-y-[22px]">
+                    {[...Array(5)].map((_, idx) => (
+                      <div key={idx} className="flex items-center">
+                        <Skeleton className="flex rounded-full w-9 h-9" />
 
-          <CardBody>
-            <Accordion
-              showDivider={false}
-              className="p-2 w-full"
-              itemClasses={itemClasses}
-            >
-              <AccordionItem
-                key="1"
-                aria-label="Обща информация"
-                startContent={<BsInfoCircle className="size-7" />}
-                subtitle="Информация за потребителят"
-                title="Обща информация"
-              >
-                <div></div>
-              </AccordionItem>
-
-              <AccordionItem
-                key="2"
-                aria-label="Продажби"
-                startContent={<BsCart2 className="size-7" />}
-                subtitle={
-                  <p className="flex">
-                    Продадени бутилки
-                    <span className="font-semibold ml-1">
-                      {data.total_bottles} бр.
-                    </span>
-                  </p>
-                }
-                title="Продажби"
-              >
-                <Table isStriped>
-                  <TableHeader>
-                    {salesTableHeaders.map((text, index) => (
-                      <TableColumn key={index}>{text}</TableColumn>
+                        <div className="space-y-2.5 ml-3">
+                          <Skeleton className="h-2.5 w-32 rounded-lg" />
+                          <Skeleton className="h-2.5 w-44 rounded-lg" />
+                        </div>
+                      </div>
                     ))}
-                  </TableHeader>
+                  </div>
+                </CardBody>
+              </Card>
+            ))
+          : userSalesWithTotals.map((data, index) => (
+              <Card key={index} className="w-full lg:max-w-[550px]">
+                <CardHeader className="flex gap-3 ml-3 mt-1">
+                  <Avatar
+                    isBordered
+                    radius="md"
+                    src={data.user_profile_image}
+                  />
 
-                  <TableBody>
-                    {data.products.map((product, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          {product.name + " " + product.weight}гр.
-                        </TableCell>
+                  <div className="flex flex-col">
+                    <p className="text-md text-slate-700 font-semibold">
+                      {data.user_name}
+                    </p>
 
-                        <TableCell>{product.total_quantity} бр.</TableCell>
+                    <p className="text-small text-default-500">
+                      {data.user_role}
+                    </p>
+                  </div>
+                </CardHeader>
 
-                        <TableCell>
-                          {formatCurrency(product.total_price)} лв.
-                        </TableCell>
+                <Divider />
 
-                        <TableCell>
-                          {formatCurrency(product.total_cost)} лв.
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                <CardBody>
+                  <Accordion
+                    showDivider={false}
+                    className="p-2 w-full"
+                    itemClasses={itemClasses}
+                  >
+                    <AccordionItem
+                      key="1"
+                      aria-label="Обща информация"
+                      startContent={<BsInfoCircle className="size-7" />}
+                      subtitle="Информация за потребителят"
+                      title="Обща информация"
+                    >
+                      <div></div>
+                    </AccordionItem>
 
-                    {data.products.length > 1 && (
-                      <TableRow>
-                        <TableCell className="font-semibold">ОБЩО:</TableCell>
+                    <AccordionItem
+                      key="2"
+                      aria-label="Продажби"
+                      startContent={<BsCart2 className="size-7" />}
+                      subtitle={
+                        <p className="flex">
+                          Продадени бутилки
+                          <span className="font-semibold ml-1">
+                            {data.total_bottles} бр.
+                          </span>
+                        </p>
+                      }
+                      title="Продажби"
+                    >
+                      <Table isStriped>
+                        <TableHeader>
+                          {salesTableHeaders.map((text, index) => (
+                            <TableColumn key={index}>{text}</TableColumn>
+                          ))}
+                        </TableHeader>
 
-                        <TableCell className="font-semibold">
-                          {data.totalQuantity} бр.
-                        </TableCell>
+                        <TableBody>
+                          {data.products.map((product, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                {product.name + " " + product.weight}гр.
+                              </TableCell>
 
-                        <TableCell className="font-semibold">
-                          {formatCurrency(data.totalPrice)} лв.
-                        </TableCell>
+                              <TableCell>
+                                {product.total_quantity} бр.
+                              </TableCell>
 
-                        <TableCell className="font-semibold">
-                          {formatCurrency(data.totalExpenses)} лв.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </AccordionItem>
+                              <TableCell>
+                                {formatCurrency(product.total_price)} лв.
+                              </TableCell>
 
-              <AccordionItem
-                key="3"
-                aria-label="Наличности"
-                startContent={<BsBox className="size-7" />}
-                subtitle={
-                  <p className="flex">
-                    Налични бутилки
-                    <span className="font-semibold ml-1">
-                      {data.totalStock} бр.
-                    </span>
-                  </p>
-                }
-                title="Наличности"
-              >
-                <Table isStriped>
-                  <TableHeader>
-                    <TableColumn>ПРОДУКТ</TableColumn>
-                    <TableColumn>КОЛИЧЕСТВО</TableColumn>
-                  </TableHeader>
+                              <TableCell>
+                                {formatCurrency(product.total_cost)} лв.
+                              </TableCell>
+                            </TableRow>
+                          ))}
 
-                  <TableBody>
-                    {data.user_stocks.map((product, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{product.product_name}</TableCell>
+                          {data.products.length > 1 && (
+                            <TableRow>
+                              <TableCell className="font-semibold">
+                                ОБЩО:
+                              </TableCell>
 
-                        <TableCell>{product.stock} бр.</TableCell>
-                      </TableRow>
-                    ))}
+                              <TableCell className="font-semibold">
+                                {data.totalQuantity} бр.
+                              </TableCell>
 
-                    {data.user_stocks.length > 1 && (
-                      <TableRow>
-                        <TableCell className="font-semibold">ОБЩО:</TableCell>
+                              <TableCell className="font-semibold">
+                                {formatCurrency(data.totalPrice)} лв.
+                              </TableCell>
 
-                        <TableCell className="font-semibold">
-                          {data.totalStock} бр.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </AccordionItem>
+                              <TableCell className="font-semibold">
+                                {formatCurrency(data.totalExpenses)} лв.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </AccordionItem>
 
-              <AccordionItem
-                key="4"
-                aria-label="Разходи"
-                startContent={<BsCashCoin className="size-7" />}
-                subtitle="За посоченият период"
-                title="Разходи"
-              >
-                <Table isStriped>
-                  <TableHeader>
-                    <TableColumn>ТИП</TableColumn>
-                    <TableColumn>СУМА</TableColumn>
-                  </TableHeader>
+                    <AccordionItem
+                      key="3"
+                      aria-label="Наличности"
+                      startContent={<BsBox className="size-7" />}
+                      subtitle={
+                        <p className="flex">
+                          Налични бутилки
+                          <span className="font-semibold ml-1">
+                            {data.totalStock} бр.
+                          </span>
+                        </p>
+                      }
+                      title="Наличности"
+                    >
+                      <Table isStriped>
+                        <TableHeader>
+                          <TableColumn>ПРОДУКТ</TableColumn>
+                          <TableColumn>КОЛИЧЕСТВО</TableColumn>
+                        </TableHeader>
 
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Гориво</TableCell>
-                      <TableCell>
-                        {data.total_fuel_price.toFixed(2)} лв.
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </AccordionItem>
+                        <TableBody>
+                          {data.user_stocks.map((product, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{product.product_name}</TableCell>
 
-              <AccordionItem
-                key="5"
-                aria-label="Печалба"
-                startContent={<BsGraphUp className="size-7" />}
-                subtitle="За посоченият период"
-                title="Печалба"
-              >
-                {defaultContent}
-              </AccordionItem>
-            </Accordion>
-          </CardBody>
-        </Card>
-      ))}
+                              <TableCell>{product.stock} бр.</TableCell>
+                            </TableRow>
+                          ))}
+
+                          {data.user_stocks.length > 1 && (
+                            <TableRow>
+                              <TableCell className="font-semibold">
+                                ОБЩО:
+                              </TableCell>
+
+                              <TableCell className="font-semibold">
+                                {data.totalStock} бр.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </AccordionItem>
+
+                    <AccordionItem
+                      key="4"
+                      aria-label="Разходи"
+                      startContent={<BsCashCoin className="size-7" />}
+                      subtitle="За посоченият период"
+                      title="Разходи"
+                    >
+                      <Table isStriped>
+                        <TableHeader>
+                          <TableColumn>ТИП</TableColumn>
+                          <TableColumn>СУМА</TableColumn>
+                        </TableHeader>
+
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Гориво</TableCell>
+                            <TableCell>
+                              {data.total_fuel_price.toFixed(2)} лв.
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </AccordionItem>
+
+                    <AccordionItem
+                      key="5"
+                      aria-label="Печалба"
+                      startContent={<BsGraphUp className="size-7" />}
+                      subtitle="За посоченият период"
+                      title="Печалба"
+                    >
+                      {defaultContent}
+                    </AccordionItem>
+                  </Accordion>
+                </CardBody>
+              </Card>
+            ))}
+      </div>
     </Layout>
   );
 };
