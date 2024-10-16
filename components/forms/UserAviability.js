@@ -27,7 +27,6 @@ const UserAviability = () => {
   const [isUpdateLoaded, setIsUpdateLoaded] = useState(false);
   const [isAddingNewStock, setIsAddingNewStock] = useState(false);
   const [newStockData, setNewStockData] = useState({
-    userId: stateUserId,
     productId: "",
     stock: "",
   });
@@ -75,6 +74,8 @@ const UserAviability = () => {
   };
 
   const handleAddNewStock = async () => {
+    newStockData.userId = stateUserId;
+
     if (newStockData.productId && newStockData.userId && newStockData.stock) {
       const response = await userAction.addUserStock(newStockData);
 
@@ -82,7 +83,7 @@ const UserAviability = () => {
         loadUserSales();
         loadUserAviability(newStockData.userId);
         setIsAddingNewStock(false);
-        setNewStockData({ userId: stateUserId, productId: "", stock: "" });
+        setNewStockData({ productId: "", stock: "" });
       }
 
       if (!response.status) {
@@ -108,7 +109,7 @@ const UserAviability = () => {
         value={selectedUserId}
         onChange={(value) => {
           loadUserAviability(value);
-          setUserId(selectedUserId);
+          setUserId(value);
         }}
       />
 

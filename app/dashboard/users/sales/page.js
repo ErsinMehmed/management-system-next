@@ -187,7 +187,7 @@ const UserSales = () => {
                 startContent={<BsBox className="size-7" />}
                 subtitle={
                   <p className="flex">
-                    Налични бутилк
+                    Налични бутилки
                     <span className="font-semibold ml-1">
                       {data.totalStock} бр.
                     </span>
