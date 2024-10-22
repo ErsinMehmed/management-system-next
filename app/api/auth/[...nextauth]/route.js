@@ -45,6 +45,7 @@ export const authOptions = {
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.role = token.role;
+        session.user.profile_image = token.profile_image;
       }
 
       return session;
@@ -62,6 +63,7 @@ export const authOptions = {
         token.name = dbUser.name;
         token.email = dbUser.email;
         token.role = dbUser.role.name;
+        token.profile_image = dbUser.profile_image;
       }
 
       return token;

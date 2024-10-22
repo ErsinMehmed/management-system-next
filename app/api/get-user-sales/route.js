@@ -41,11 +41,6 @@ export async function GET(request) {
         $unwind: "$category",
       },
       {
-        $match: {
-          "category.name": "Бутилки",
-        },
-      },
-      {
         $lookup: {
           from: "users",
           localField: "creator",
@@ -77,6 +72,7 @@ export async function GET(request) {
             role: "$role.name",
             product: "$product.name",
             weight: "$product.weight",
+            count: "$product.count",
             percent: "$product.percent",
             product_price: "$product.price",
           },
@@ -99,6 +95,7 @@ export async function GET(request) {
             $push: {
               name: "$_id.product",
               weight: "$_id.weight",
+              count: "$_id.count",
               percent: "$_id.percent",
               product_price: "$_id.product_price",
               total_quantity: "$total_quantity",
@@ -109,6 +106,11 @@ export async function GET(request) {
           total_bottles: { $sum: "$total_quantity" },
           total_fuel_price: { $sum: "$total_fuel_price" },
           total_cost: { $sum: "$total_cost" },
+        },
+      },
+      {
+        $sort: {
+          total_quantity: 1,
         },
       },
       {
@@ -137,17 +139,24 @@ export async function GET(request) {
     const userStocks = await UserStock.find({
       user: { $in: userIds },
     })
-      .populate("product", "_id name weight")
+      .populate("product", "_id name weight count")
       .select("user product stock");
 
     const stocksMap = userStocks.reduce((acc, stock) => {
       if (!acc[stock.user]) {
         acc[stock.user] = [];
       }
+
+      const productName =
+        stock.product.name === "Балони"
+          ? `${stock.product.name} ${stock.product.count}бр.`
+          : `${stock.product.name} ${stock.product.weight}гр.`;
+
       acc[stock.user].push({
-        product_name: stock.product.name + " " + stock.product.weight + "гр.",
+        product_name: productName,
         stock: stock.stock,
       });
+
       return acc;
     }, {});
 

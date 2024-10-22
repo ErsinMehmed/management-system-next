@@ -34,7 +34,7 @@ const AccountDropdown = () => {
               size="sm"
               as="button"
               className="transition-transform mr-2 sm:mr-0"
-              src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+              src={session?.user.profile_image}
             />
 
             <span className="ml-3.5 font-semibold hidden md:block">

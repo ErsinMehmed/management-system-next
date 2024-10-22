@@ -108,7 +108,7 @@ export async function GET(request) {
 
     if (userId) {
       userStocks = await UserStock.find({ user: userId })
-        .populate("product", "_id name weight")
+        .populate("product", "_id name weight count")
         .select("_id user stock");
 
       if (!userStocks.length) {
@@ -128,7 +128,12 @@ export async function GET(request) {
       id: stock._id,
       userId: stock.user,
       productId: stock.product._id,
-      productName: stock.product.name + " " + stock.product.weight + "гр.",
+      productName:
+        stock.product.name +
+        " " +
+        (stock.product.name === "Балони"
+          ? stock.product.count + "бр."
+          : stock.product.weight + "гр."),
       stock: stock.stock,
     }));
 

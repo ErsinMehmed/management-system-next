@@ -20,12 +20,15 @@ const Select = (props) => {
         <div className="h-1 animate-pulse bg-gray-200 rounded-full" />
       </div>
 
-      <div className="bg-[#f4f4f5] rounded-full w-1/6 2xl:w-[7%] ml-5 px-1 sm:px-5 py-2.5 2xl:py-3">
+      <div className="bg-[#f4f4f5] rounded-full w-1/6 2xl:w-[7%] ml-5 sm:px-5 py-2.5 2xl:py-3">
         <div className="sm:h-1 animate-pulse bg-gray-200 rounded-full w-10/12 mb-2" />
         <div className="sm:h-1 animate-pulse bg-gray-200 rounded-full" />
       </div>
 
-      <div className="bg-[#f4f4f5] rounded-full w-[2.7%] h-10 ml-2 px-1 sm:px-5" />
+      <div className="bg-[#f4f4f5] rounded-full w-1/6 2xl:w-[7%] ml-2 sm:px-5 py-2.5 2xl:py-3">
+        <div className="sm:h-1 animate-pulse bg-gray-200 rounded-full w-10/12 mb-2" />
+        <div className="sm:h-1 animate-pulse bg-gray-200 rounded-full" />
+      </div>
     </div>
   ) : (
     <div className="relative mb-5 2xl:mb-4 shadow rounded-lg">

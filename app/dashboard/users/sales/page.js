@@ -232,7 +232,11 @@ const UserSales = () => {
                           {data.products.map((product, index) => (
                             <TableRow key={index}>
                               <TableCell>
-                                {product.name + " " + product.weight}гр.
+                                {product.name +
+                                  " " +
+                                  (product.name === "Балони"
+                                    ? product.count + "бр."
+                                    : product.weight + "гр.")}
                               </TableCell>
 
                               <TableCell>
@@ -347,7 +351,32 @@ const UserSales = () => {
                       subtitle="За посоченият период"
                       title="Печалба"
                     >
-                      {defaultContent}
+                      <Table isStriped>
+                        <TableHeader>
+                          <TableColumn>ТИП</TableColumn>
+                          <TableColumn>СУМА</TableColumn>
+                        </TableHeader>
+
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Приходи</TableCell>
+
+                            <TableCell>лв.</TableCell>
+                          </TableRow>
+
+                          <TableRow>
+                            <TableCell>Разходи</TableCell>
+
+                            <TableCell>лв.</TableCell>
+                          </TableRow>
+
+                          <TableRow>
+                            <TableCell>Печалба</TableCell>
+
+                            <TableCell>лв.</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
                     </AccordionItem>
                   </Accordion>
                 </CardBody>
