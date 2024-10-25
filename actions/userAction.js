@@ -26,7 +26,17 @@ class User {
 
   getUsers = async () => {
     try {
-      const response = await fetch("/api/get-users");
+      const response = await fetch("/api/users/list");
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  updateUser = async () => {
+    try {
+      const response = await fetch("/api/users/edit");
 
       return await response.json();
     } catch (error) {

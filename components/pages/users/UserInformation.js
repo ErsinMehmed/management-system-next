@@ -1,22 +1,22 @@
 import React from "react";
 import Modal from "@/components/Modal";
-import UserAviabilityForm from "@/components/forms/UserAviability";
+import UserInformationForm from "@/components/forms/UserInformation";
 
-const UserAviability = (props) => {
+const UserInformation = () => {
   return (
     <Modal
-      title="Наличности"
+      title="Потребители"
       size="xl"
       showFooter={true}
       openButton={
         <button className="text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-6 py-2.5 text-center transition-all active:scale-90">
-          Наличности
+          Потребители
         </button>
       }
     >
-      <UserAviabilityForm period={props.period} />
+      <UserInformationForm />
     </Modal>
   );
 };
 
-export default UserAviability;
+export default UserInformation;

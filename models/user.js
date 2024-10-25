@@ -22,6 +22,7 @@ const userSchema = new Schema(
     },
     profile_image: String,
     percent: Number,
+    target: Number,
     role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
   },
   {

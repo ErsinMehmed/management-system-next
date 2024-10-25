@@ -13,8 +13,13 @@ class User {
       userStocks: observable,
       users: observable,
       isUserSalesLoad: observable,
+      setUsers: action,
     });
   }
+
+  setUsers = (data) => {
+    this.users = data;
+  };
 
   loadUserSales = async (period) => {
     try {
@@ -29,7 +34,11 @@ class User {
   };
 
   loadUsers = async () => {
-    this.users = await userAction.getUsers();
+    const response = await userAction.getUsers();
+
+    if (response.status) {
+      this.users = response.users;
+    }
   };
 }
 

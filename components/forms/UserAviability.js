@@ -17,11 +17,11 @@ import { FaCheck } from "react-icons/fa6";
 import { FiPlus } from "react-icons/fi";
 import { productTitle } from "@/utils";
 
-const UserAviability = () => {
+const UserAviability = (props) => {
   const { users, loadUserSales } = userStore;
   const { products } = productStore;
   const { successMessage, errorMessage, setErrorMessage } = commonStore;
-  const [stateUserId, setUserId] = useState(users?.users[0]?._id);
+  const [stateUserId, setUserId] = useState(users[0]?._id);
   const [userAviability, setUserAviability] = useState([]);
   const [isLoadingUserAviability, setIsLoadingUserAviability] = useState(false);
   const [isUpdateLoaded, setIsUpdateLoaded] = useState(false);
@@ -30,7 +30,7 @@ const UserAviability = () => {
     productId: "",
     stock: "",
   });
-  const selectedUserId = users?.users[0]?._id ?? "";
+  const selectedUserId = users[0]?._id ?? "";
 
   useEffect(() => {
     loadUserAviability(selectedUserId);
@@ -64,7 +64,7 @@ const UserAviability = () => {
       try {
         setIsUpdateLoaded((prev) => ({ ...prev, [productId]: true }));
         await userAction.updateUserStocks(productToUpdate);
-        loadUserSales();
+        loadUserSales(props.period);
       } finally {
         const data = await userAction.getUserStocks(productToUpdate.userId);
         setUserAviability(data);
@@ -80,7 +80,7 @@ const UserAviability = () => {
       const response = await userAction.addUserStock(newStockData);
 
       if (response.status) {
-        loadUserSales();
+        loadUserSales(props.period);
         loadUserAviability(newStockData.userId);
         setIsAddingNewStock(false);
         setNewStockData({ productId: "", stock: "" });
@@ -104,7 +104,7 @@ const UserAviability = () => {
   return (
     <div className="space-y-4 mt-2.5">
       <Select
-        items={users.users}
+        items={users}
         label="Избери потребител"
         value={selectedUserId}
         onChange={(value) => {

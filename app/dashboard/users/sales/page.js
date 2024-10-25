@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import UserAviability from "@/components/pages/users/UserAviability";
+import UserInformation from "@/components/pages/users/UserInformation";
 import {
   BsBox,
   BsCart2,
@@ -38,13 +39,7 @@ import { parseDate } from "@internationalized/date";
 import moment from "moment";
 
 const UserSales = () => {
-  const {
-    userSales,
-    isUserSalesLoad,
-    loadUserSales,
-    loadUserStocks,
-    loadUsers,
-  } = userStore;
+  const { userSales, isUserSalesLoad, loadUserSales, loadUsers } = userStore;
   const { saleIncomes, loadTotalSaleIncomes } = incomeStore;
   const {
     productExpenses,
@@ -152,7 +147,7 @@ const UserSales = () => {
 
   return (
     <Layout title="Продажби по потребители">
-      <div className="grid lg:grid-cols-2 xl:grid-cols-3">
+      <div className="grid xl:grid-cols-2">
         <div className="col-span-1 flex flex-col lg:flex-row items-center bg-white p-3 gap-3.5 w-full rounded-md shadow-md mb-5">
           <DateRangePicker
             label="Избери дата"
@@ -160,7 +155,10 @@ const UserSales = () => {
             onChange={handleDateChange}
           />
 
-          <UserAviability />
+          <div className="flex items-center gap-x-3.5">
+            <UserInformation />
+            <UserAviability period={transformDateRange(dateRange)} />
+          </div>
         </div>
       </div>
 

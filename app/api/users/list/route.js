@@ -6,7 +6,7 @@ export async function GET() {
   await connectMongoDB();
 
   try {
-    const users = await User.find().select("_id name");
+    const users = await User.find().select("_id name percent target");
 
     return NextResponse.json({
       users,
