@@ -5,18 +5,18 @@ import { formatCurrency } from "@/utils";
 
 const OrderForm = (props) => {
   return (
-    <div className='space-y-3.5 mt-2.5'>
+    <div className="space-y-3.5 mt-2.5">
       <Select
         items={props.updatedProducts}
-        label='Избери продукт'
+        label="Избери продукт"
         value={props.data.product || ""}
         errorMessage={props.errorFields.product}
         onChange={(value) => props.handleFieldChange("product", value)}
       />
 
       <Input
-        type='text'
-        label='Количество'
+        type="text"
+        label="Количество"
         value={props.data.quantity || ""}
         disabled={!props.data.product}
         errorMessage={props.errorFields.quantity}
@@ -24,35 +24,33 @@ const OrderForm = (props) => {
       />
 
       <Input
-        type='date'
-        label='Дата'
+        type="date"
+        label="Дата"
         value={props.data.date || ""}
         onChange={(value) => props.handleFieldChange("date", value)}
       />
 
       <Textarea
-        label='Съобщение'
+        label="Съобщение"
         value={props.data.message || ""}
         onChange={(value) => props.handleFieldChange("message", value)}
       />
 
-      <div className='grid grid-cols-2 gap-3.5'>
-        <div className='bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold'>
-          <div className='text-sm'>Единична цена</div>
+      <div className="grid grid-cols-2 gap-3.5">
+        <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
+          <div className="text-sm">Единична цена</div>
 
           <div>
-            {props.data.price
-              ? formatCurrency(props.data.price, 2) + "лв."
-              : "0.00лв."}
+            {props.data.price ? formatCurrency(props.data.price, 2) : "0.00лв."}
           </div>
         </div>
 
-        <div className='bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold'>
-          <div className='text-sm'>Обща сума</div>
+        <div className="bg-[#f4f4f5] p-5 text-slate-600 rounded-lg shadow-sm text-center font-semibold">
+          <div className="text-sm">Обща сума</div>
 
           <div>
             {props.data.total_amount
-              ? formatCurrency(props.data.total_amount, 2) + "лв."
+              ? formatCurrency(props.data.total_amount, 2)
               : "0.00лв."}
           </div>
         </div>

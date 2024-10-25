@@ -126,7 +126,7 @@ const BarChart = () => {
             </div>
 
             <div className="text-gray-900 font-semibold">
-              {formatCurrency(averageProfitData.totalProfit)}лв.
+              {formatCurrency(averageProfitData.totalProfit)}
             </div>
           </div>
         </div>

@@ -33,7 +33,7 @@ const TabSection = (props) => {
   );
 
   return (
-    <div className='bg-gray-50 rounded-lg'>
+    <div className="bg-gray-50 rounded-lg">
       {filteredData?.length > 0 ? (
         <>
           {filteredData?.map((item, index) => (
@@ -41,47 +41,48 @@ const TabSection = (props) => {
               key={index}
               className={`grid grid-cols-3 ${
                 index > 0 && "border-t"
-              } py-2.5 px-3 text-sm`}>
-              <dt className='text-gray-500 font-semibold'>
+              } py-2.5 px-3 text-sm`}
+            >
+              <dt className="text-gray-500 font-semibold">
                 <Tooltip
-                  content={
-                    formatCurrency(item[props.totalKey] / item.quantity, 2) +
-                    " лв."
-                  }
-                  placement='bottom'>
-                  <button className='hidden sm:block'>
+                  content={formatCurrency(
+                    item[props.totalKey] / item.quantity,
+                    2
+                  )}
+                  placement="bottom"
+                >
+                  <button className="hidden sm:block">
                     {getProductName(item)}
                   </button>
                 </Tooltip>
 
-                <Popover placement='bottom'>
+                <Popover placement="bottom">
                   <PopoverTrigger>
-                    <button className='sm:hidden'>
+                    <button className="sm:hidden">
                       {getProductName(item)}
                     </button>
                   </PopoverTrigger>
 
                   <PopoverContent>
-                    {formatCurrency(item[props.totalKey] / item.quantity, 2) +
-                      " лв."}
+                    {formatCurrency(item[props.totalKey] / item.quantity, 2)}
                   </PopoverContent>
                 </Popover>
               </dt>
 
-              <dt className='text-gray-500 font-semibold text-center'>
+              <dt className="text-gray-500 font-semibold text-center">
                 {item.quantity} бр.
               </dt>
 
-              <dd className='bg-gray-100 w-fit h-fit text-gray-800 px-2.5 py-1 rounded-md font-medium ml-auto'>
-                {formatCurrency(item[props.totalKey], 2)} лв.
+              <dd className="bg-gray-100 w-fit h-fit text-gray-800 px-2.5 py-1 rounded-md font-medium ml-auto">
+                {formatCurrency(item[props.totalKey], 2)}
               </dd>
             </dl>
           ))}
 
           {filteredData?.length > 1 && (
-            <dl className='grid grid-cols-3 gap-x-8 py-2.5 px-3 text-sm border-t'>
+            <dl className="grid grid-cols-3 gap-x-8 py-2.5 px-3 text-sm border-t">
               {props.category === "Бутилки" && (
-                <dt className='bg-gray-100 text-center col-start-2 text-gray-800 px-2.5 py-1 rounded-md font-semibold'>
+                <dt className="bg-gray-100 text-center col-start-2 text-gray-800 px-2.5 py-1 rounded-md font-semibold">
                   {totalQuantity} бр.
                 </dt>
               )}
@@ -89,14 +90,15 @@ const TabSection = (props) => {
               <dt
                 className={`${
                   props.category !== "Бутилки" && "col-start-3"
-                } bg-gray-100 text-center text-gray-800 px-2.5 py-1 rounded-md font-semibold`}>
-                {formatCurrency(totalAmount, 2)} лв.
+                } bg-gray-100 text-center text-gray-800 px-2.5 py-1 rounded-md font-semibold`}
+              >
+                {formatCurrency(totalAmount, 2)}
               </dt>
             </dl>
           )}
         </>
       ) : (
-        <div className='text-gray-500 text-center py-3 font-semibold text-sm'>
+        <div className="text-gray-500 text-center py-3 font-semibold text-sm">
           Няма налични данни
         </div>
       )}

@@ -48,6 +48,19 @@ class Income {
       throw error;
     }
   };
+
+  getSaleIncomes = async (period) => {
+    try {
+      const periodParam = getPeriodParam(period);
+      const response = await fetch(
+        `/api/sales/get-total-incomes?${periodParam}`
+      );
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
 export default new Income();

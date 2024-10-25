@@ -20,7 +20,7 @@ const Table = (props) => {
       case "availability":
         return `${value} бр.`;
       case "price":
-        return `${formatCurrency(value, 2)} лв.`;
+        return `${formatCurrency(value, 2)}`;
       default:
         return value;
     }
@@ -108,7 +108,7 @@ const Table = (props) => {
                   </td>
                   {isUserAdmin && (
                     <td className="py-3 px-5 border-b whitespace-nowrap">
-                      {formatCurrency(totals.price, 2)} лв.
+                      {formatCurrency(totals.price, 2)}
                     </td>
                   )}
                 </tr>

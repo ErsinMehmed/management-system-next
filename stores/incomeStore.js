@@ -7,6 +7,7 @@ class Income {
   additionalIncomes = [];
   averageProfitData = [];
   isLoadingAverageProfit = true;
+  saleIncomes = [];
 
   constructor() {
     makeObservable(this, {
@@ -14,6 +15,7 @@ class Income {
       additionalIncomes: observable,
       averageProfitData: observable,
       isLoadingAverageProfit: observable,
+      saleIncomes: observable,
       setIncomes: action,
       setAdditionalIncomes: action,
     });
@@ -48,6 +50,14 @@ class Income {
       this.averageProfitData = await incomeAction.getAverageProfit(period);
     } finally {
       this.isLoadingAverageProfit = false;
+    }
+  };
+
+  loadTotalSaleIncomes = async (period) => {
+    const response = await incomeAction.getSaleIncomes(period);
+
+    if (response.status) {
+      this.saleIncomes = response.total_amount_sales;
     }
   };
 }

@@ -3,10 +3,12 @@ import expenseAction from "@/actions/expenseAction";
 
 class Expense {
   expenses = [];
+  productExpenses = [];
 
   constructor() {
     makeObservable(this, {
       expenses: observable,
+      productExpenses: observable,
       setExpenses: action,
     });
   }
@@ -17,6 +19,14 @@ class Expense {
 
   loadExpenses = async (period) => {
     this.setExpenses(await expenseAction.getExpenses(period));
+  };
+
+  loadProductExpenses = async (period) => {
+    const response = await expenseAction.getProductExpenses(period);
+
+    if (response.status) {
+      this.productExpenses = response.total_cost;
+    }
   };
 }
 

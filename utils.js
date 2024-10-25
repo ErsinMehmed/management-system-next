@@ -286,5 +286,5 @@ export function formatCurrency(amount, fractionDigits) {
     }
   }
 
-  return formattedAmount;
+  return formattedAmount + " лв.";
 }

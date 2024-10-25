@@ -71,7 +71,7 @@ const ProductForm = (props) => {
                 />
 
                 <div className="size-12 bg-[#f4f4f5] rounded-lg center-element text-xs px-2 text-slate-800">
-                  {formatCurrency((index + 1) * props.data.price, 0)}лв.
+                  {formatCurrency((index + 1) * props.data.price, 0)}
                 </div>
               </div>
             </div>

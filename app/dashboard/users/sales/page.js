@@ -28,7 +28,12 @@ import {
 } from "@nextui-org/react";
 import { formatCurrency } from "@/utils";
 import DateRangePicker from "@/components/html/DateRangePicker";
-import { userStore, commonStore } from "@/stores/useStore";
+import {
+  userStore,
+  commonStore,
+  expenseStore,
+  incomeStore,
+} from "@/stores/useStore";
 import { parseDate } from "@internationalized/date";
 import moment from "moment";
 
@@ -40,6 +45,8 @@ const UserSales = () => {
     loadUserStocks,
     loadUsers,
   } = userStore;
+  const { saleIncomes, loadTotalSaleIncomes } = incomeStore;
+  const { productExpenses, loadProductExpenses } = expenseStore;
   const { successMessage, errorMessage } = commonStore;
   const [dateRange, setDateRange] = useState({
     start: parseDate(moment().subtract(7, "days").format("YYYY-MM-DD")),
@@ -64,8 +71,10 @@ const UserSales = () => {
     const period = transformDateRange(dateRange);
 
     loadUserSales(period);
+    loadProductExpenses(period);
+    loadTotalSaleIncomes(period);
     loadUsers();
-  }, [loadUserSales, loadUserStocks]);
+  }, [loadUserSales, loadUserStocks, loadProductExpenses]);
 
   const calculateTotals = (salesData) => {
     return salesData.map((data) => {
@@ -108,6 +117,8 @@ const UserSales = () => {
     const period = transformDateRange(newValue);
     setDateRange(newValue);
     loadUserSales(period);
+    loadProductExpenses(period);
+    loadTotalSaleIncomes(period);
   };
 
   const itemClasses = {
@@ -244,11 +255,11 @@ const UserSales = () => {
                               </TableCell>
 
                               <TableCell>
-                                {formatCurrency(product.total_price)} лв.
+                                {formatCurrency(product.total_price)}
                               </TableCell>
 
                               <TableCell>
-                                {formatCurrency(product.total_cost)} лв.
+                                {formatCurrency(product.total_cost)}
                               </TableCell>
                             </TableRow>
                           ))}
@@ -264,11 +275,11 @@ const UserSales = () => {
                               </TableCell>
 
                               <TableCell className="font-semibold">
-                                {formatCurrency(data.totalPrice)} лв.
+                                {formatCurrency(data.totalPrice)}
                               </TableCell>
 
                               <TableCell className="font-semibold">
-                                {formatCurrency(data.totalExpenses)} лв.
+                                {formatCurrency(data.totalExpenses)}
                               </TableCell>
                             </TableRow>
                           )}
@@ -361,13 +372,15 @@ const UserSales = () => {
                           <TableRow>
                             <TableCell>Приходи</TableCell>
 
-                            <TableCell>лв.</TableCell>
+                            <TableCell>{formatCurrency(saleIncomes)}</TableCell>
                           </TableRow>
 
                           <TableRow>
-                            <TableCell>Разходи</TableCell>
+                            <TableCell>Разходи за продукти</TableCell>
 
-                            <TableCell>лв.</TableCell>
+                            <TableCell>
+                              {formatCurrency(productExpenses)}
+                            </TableCell>
                           </TableRow>
 
                           <TableRow>
