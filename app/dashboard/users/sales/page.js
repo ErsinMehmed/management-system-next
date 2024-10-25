@@ -46,7 +46,14 @@ const UserSales = () => {
     loadUsers,
   } = userStore;
   const { saleIncomes, loadTotalSaleIncomes } = incomeStore;
-  const { productExpenses, loadProductExpenses } = expenseStore;
+  const {
+    productExpenses,
+    fuelExpenses,
+    additionalExpenses,
+    loadProductExpenses,
+    loadFuelExpenses,
+    loadAdditionalExpenses,
+  } = expenseStore;
   const { successMessage, errorMessage } = commonStore;
   const [dateRange, setDateRange] = useState({
     start: parseDate(moment().subtract(7, "days").format("YYYY-MM-DD")),
@@ -73,8 +80,10 @@ const UserSales = () => {
     loadUserSales(period);
     loadProductExpenses(period);
     loadTotalSaleIncomes(period);
+    loadFuelExpenses(period);
+    loadAdditionalExpenses(period);
     loadUsers();
-  }, [loadUserSales, loadUserStocks, loadProductExpenses]);
+  }, []);
 
   const calculateTotals = (salesData) => {
     return salesData.map((data) => {
@@ -119,6 +128,8 @@ const UserSales = () => {
     loadUserSales(period);
     loadProductExpenses(period);
     loadTotalSaleIncomes(period);
+    loadFuelExpenses(period);
+    loadAdditionalExpenses(period);
   };
 
   const itemClasses = {
@@ -130,10 +141,14 @@ const UserSales = () => {
     content: "text-small",
   };
 
-  const defaultContent =
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
-
   const salesTableHeaders = ["ПРОДУКТ", "КОЛИЧЕСТВО", "ПРИХОДИ", "РАЗХОДИ"];
+
+  const totalProfit =
+    saleIncomes - (additionalExpenses + fuelExpenses + productExpenses);
+
+  const calculatePercentage = (amount, percentage) => {
+    return (amount * percentage) / 100;
+  };
 
   return (
     <Layout title="Продажби по потребители">
@@ -379,14 +394,46 @@ const UserSales = () => {
                             <TableCell>Разходи за продукти</TableCell>
 
                             <TableCell>
-                              {formatCurrency(productExpenses)}
+                              {formatCurrency(productExpenses, 2)}
                             </TableCell>
                           </TableRow>
 
                           <TableRow>
-                            <TableCell>Печалба</TableCell>
+                            <TableCell>Разходи за гориво</TableCell>
 
-                            <TableCell>лв.</TableCell>
+                            <TableCell>
+                              {formatCurrency(fuelExpenses, 2)}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow>
+                            <TableCell>Допълнителни разходи</TableCell>
+
+                            <TableCell>
+                              {formatCurrency(additionalExpenses)}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow>
+                            <TableCell>Обща печалба</TableCell>
+
+                            <TableCell>
+                              {formatCurrency(totalProfit, 2)}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow>
+                            <TableCell>КРАЙНА СУМА</TableCell>
+
+                            <TableCell>
+                              {formatCurrency(
+                                calculatePercentage(
+                                  totalProfit,
+                                  data.user_percent
+                                ),
+                                2
+                              )}
+                            </TableCell>
                           </TableRow>
                         </TableBody>
                       </Table>

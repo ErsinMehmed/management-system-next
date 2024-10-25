@@ -16,7 +16,33 @@ class Expense {
     try {
       const periodParam = getPeriodParam(period);
       const response = await fetch(
-        `/api/expenses/get-total-product-expenses?${periodParam}`
+        `/api/expenses/get-total-product?${periodParam}`
+      );
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  getFuelExpenses = async (period) => {
+    try {
+      const periodParam = getPeriodParam(period);
+      const response = await fetch(
+        `/api/expenses/get-total-fuel-price?${periodParam}`
+      );
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  getAdditionalExpenses = async (period) => {
+    try {
+      const periodParam = getPeriodParam(period);
+      const response = await fetch(
+        `/api/expenses/get-total-additional?${periodParam}`
       );
 
       return await response.json();

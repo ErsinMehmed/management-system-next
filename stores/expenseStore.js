@@ -4,11 +4,15 @@ import expenseAction from "@/actions/expenseAction";
 class Expense {
   expenses = [];
   productExpenses = [];
+  fuelExpenses = [];
+  additionalExpenses = [];
 
   constructor() {
     makeObservable(this, {
       expenses: observable,
       productExpenses: observable,
+      fuelExpenses: observable,
+      additionalExpenses: observable,
       setExpenses: action,
     });
   }
@@ -26,6 +30,22 @@ class Expense {
 
     if (response.status) {
       this.productExpenses = response.total_cost;
+    }
+  };
+
+  loadFuelExpenses = async (period) => {
+    const response = await expenseAction.getFuelExpenses(period);
+
+    if (response.status) {
+      this.fuelExpenses = response.total_fuel_price;
+    }
+  };
+
+  loadAdditionalExpenses = async (period) => {
+    const response = await expenseAction.getAdditionalExpenses(period);
+
+    if (response.status) {
+      this.additionalExpenses = response.total_additional_costs;
     }
   };
 }
