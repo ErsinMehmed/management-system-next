@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Input from "@/components/html/Input";
 import { userStore } from "@/stores/useStore";
 import { observer } from "mobx-react-lite";
+import userAction from "@/actions/userAction";
 import {
   Table,
   TableHeader,
@@ -13,8 +14,9 @@ import {
 } from "@nextui-org/react";
 import { FaCheck } from "react-icons/fa6";
 
-const UserInformation = () => {
-  const { users, setUsers } = userStore;
+const UserInformation = (props) => {
+  const { users, setUsers, loadUserSales } = userStore;
+  const [loadingUsers, setLoadingUsers] = useState({});
 
   const handleUpdateUser = (userId, field, value) => {
     const updatedUsers = users.map((user) => {
@@ -26,6 +28,21 @@ const UserInformation = () => {
     });
 
     setUsers(updatedUsers);
+  };
+
+  const handleUpdateUserInfo = async (userId) => {
+    const userToUpdate = users.find((user) => user._id === userId);
+
+    if (userToUpdate) {
+      try {
+        setLoadingUsers((prev) => ({ ...prev, [userId]: true }));
+        await userAction.updateUser(userId, userToUpdate);
+        loadUserSales(props.period);
+      } finally {
+        await userAction.getUsers();
+        setLoadingUsers((prev) => ({ ...prev, [userId]: false }));
+      }
+    }
   };
 
   return (
@@ -53,6 +70,7 @@ const UserInformation = () => {
                   type="text"
                   label="Таргет"
                   value={user.target || ""}
+                  disabled={loadingUsers[user._id]}
                   onChange={(value) =>
                     handleUpdateUser(user._id, "target", value)
                   }
@@ -67,6 +85,7 @@ const UserInformation = () => {
                   type="text"
                   label="Процент"
                   value={user.percent || ""}
+                  disabled={loadingUsers[user._id]}
                   onChange={(value) =>
                     handleUpdateUser(user._id, "percent", value)
                   }
@@ -77,7 +96,13 @@ const UserInformation = () => {
               </TableCell>
 
               <TableCell>
-                <Button isIconOnly color="primary" aria-label="Save">
+                <Button
+                  onClick={() => handleUpdateUserInfo(user._id)}
+                  isIconOnly
+                  color="primary"
+                  aria-label="Save"
+                  isDisabled={loadingUsers[user._id]}
+                >
                   <FaCheck className="size-5" />
                 </Button>
               </TableCell>

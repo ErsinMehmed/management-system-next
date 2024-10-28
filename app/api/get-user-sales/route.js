@@ -69,6 +69,7 @@ export async function GET(request) {
             user_id: "$user._id",
             profile_image: "$user.profile_image",
             user_percent: "$user.percent",
+            user_target: "$user.target",
             role: "$role.name",
             product: "$product.name",
             weight: "$product.weight",
@@ -90,6 +91,7 @@ export async function GET(request) {
             profile_image: "$_id.profile_image",
             role: "$_id.role",
             user_percent: "$_id.user_percent",
+            user_target: "$_id.user_target",
           },
           products: {
             $push: {
@@ -120,6 +122,7 @@ export async function GET(request) {
           user_id: "$_id.user_id",
           user_profile_image: "$_id.profile_image",
           user_percent: "$_id.user_percent",
+          user_target: "$_id.user_target",
           user_role: "$_id.role",
           products: 1,
           total_bottles: 1,

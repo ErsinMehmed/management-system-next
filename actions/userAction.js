@@ -34,16 +34,6 @@ class User {
     }
   };
 
-  updateUser = async () => {
-    try {
-      const response = await fetch("/api/users/edit");
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
-  };
-
   updateUserStocks = async (data) => {
     try {
       const response = await fetch(`/api/user-stocks`, {
@@ -64,6 +54,22 @@ class User {
     try {
       const response = await fetch(`/api/user-stocks`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  updateUser = async (id, data) => {
+    try {
+      const response = await fetch(`/api/users/edit/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },

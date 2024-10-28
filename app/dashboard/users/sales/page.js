@@ -127,6 +127,12 @@ const UserSales = () => {
     loadAdditionalExpenses(period);
   };
 
+  const calculateTargetPercentage = (target, sold) => {
+    if (target === 0) return 0;
+
+    return ((target / sold) * 100).toFixed(2);
+  };
+
   const itemClasses = {
     base: "py-0 w-full",
     title: "font-normal text-medium",
@@ -156,7 +162,7 @@ const UserSales = () => {
           />
 
           <div className="flex items-center gap-x-3.5">
-            <UserInformation />
+            <UserInformation period={transformDateRange(dateRange)} />
             <UserAviability period={transformDateRange(dateRange)} />
           </div>
         </div>
@@ -228,7 +234,10 @@ const UserSales = () => {
                       subtitle="Информация за потребителят"
                       title="Обща информация"
                     >
-                      <div></div>
+                      {calculateTargetPercentage(
+                        data.user_target,
+                        data.total_bottles
+                      )}
                     </AccordionItem>
 
                     <AccordionItem

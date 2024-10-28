@@ -140,7 +140,7 @@ const UserAviability = (props) => {
                   label="Наличност"
                   value={product.stock || ""}
                   onChange={(value) => handleStockChange(product.id, value)}
-                  isDisabled={isUpdateLoaded[product.id]}
+                  disabled={isUpdateLoaded[product.id]}
                   inputWrapperClasses={
                     index % 2 !== 0 ? "bg-white focus-within:!bg-blue-50" : ""
                   }

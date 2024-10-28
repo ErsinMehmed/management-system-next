@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "@/components/Modal";
 import UserInformationForm from "@/components/forms/UserInformation";
 
-const UserInformation = () => {
+const UserInformation = (props) => {
   return (
     <Modal
       title="Потребители"
@@ -14,7 +14,7 @@ const UserInformation = () => {
         </button>
       }
     >
-      <UserInformationForm />
+      <UserInformationForm period={props.period} />
     </Modal>
   );
 };
