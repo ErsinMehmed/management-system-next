@@ -25,12 +25,7 @@ import LineChart from "@/components/charts/LineChart";
 
 const Dashboard = () => {
   const [isUserAdmin, setIsUserAdmin] = useState(false);
-  const {
-    sellStats,
-    lineChartSaleStats,
-    loadSaleStats,
-    loadLineChartSaleStats,
-  } = sellStore;
+  const { sellStats, loadSaleStats, loadLineChartSaleStats } = sellStore;
   const { expenses, loadExpenses } = expenseStore;
   const {
     incomes,

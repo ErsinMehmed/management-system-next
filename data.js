@@ -1,7 +1,5 @@
 import { BsBox, BsCart2, BsTruck, BsHouse, BsPeople } from "react-icons/bs";
 
-const socialPlatforms = [{ value: "Facebook" }, { value: "Instagram" }];
-
 const perPageResult = [
   { value: "5" },
   { value: "10" },
@@ -64,11 +62,13 @@ const dashboardLinks = [
   },
 ];
 
+const salesTableHeaders = ["ПРОДУКТ", "КОЛИЧЕСТВО", "ПРИХОДИ", "РАЗХОДИ"];
+
 export {
   periods,
   dropdownPeriods,
   perPageResult,
   dashboardLinks,
   categories,
-  socialPlatforms,
+  salesTableHeaders,
 };
