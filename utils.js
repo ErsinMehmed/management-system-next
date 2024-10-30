@@ -157,7 +157,8 @@ export async function fetchData(
   perPage,
   searchText,
   filterData,
-  orderColumn
+  orderColumn,
+  userRole = ""
 ) {
   try {
     const params = {
@@ -172,6 +173,10 @@ export async function fetchData(
       sort_column: orderColumn?.name,
       sort_order: orderColumn?.order,
     };
+
+    if (userRole) {
+      params.user_role = userRole;
+    }
 
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([_, value]) => value !== "")

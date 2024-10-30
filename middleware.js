@@ -3,11 +3,19 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
+    const role = req.nextauth.token?.role;
+    const path = req.nextUrl.pathname;
+
+    if (role === "Super Admin") return NextResponse.next();
+
+    if (role === "Admin" && path === "/dashboard/orders") {
+      return new NextResponse("You are not authorized!");
+    }
+
     if (
-      (req.nextUrl.pathname === "/dashboard/products" ||
-        req.nextUrl.pathname === "/dashboard/orders" ||
-        req.nextUrl.pathname === "/dashboard/ads") &&
-      req.nextauth.token?.role !== "Admin"
+      role !== "Super Admin" &&
+      role !== "Admin" &&
+      (path === "/dashboard/orders" || path === "/dashboard/products")
     ) {
       return new NextResponse("You are not authorized!");
     }
@@ -28,6 +36,5 @@ export const config = {
     "/dashboard/orders",
     "/dashboard/sales",
     "/dashboard/products",
-    "/dashboard/ads",
   ],
 };

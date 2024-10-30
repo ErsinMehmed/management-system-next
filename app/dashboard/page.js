@@ -50,7 +50,9 @@ const Dashboard = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUserRole = localStorage.getItem("userRole");
-      setIsUserAdmin(storedUserRole === "Admin");
+      setIsUserAdmin(
+        storedUserRole === "Admin" || storedUserRole === "Super Admin"
+      );
     }
   }, [setIsUserAdmin]);
 

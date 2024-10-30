@@ -24,13 +24,16 @@ class Sell {
   };
 
   getSales = async (page, perPage, searchText, filterData, orderColumn) => {
+    const userRole = localStorage.getItem("userRole");
+
     return await fetchData(
       "sales",
       page,
       perPage,
       searchText,
       filterData,
-      orderColumn
+      orderColumn,
+      userRole
     );
   };
 

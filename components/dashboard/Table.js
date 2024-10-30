@@ -11,7 +11,9 @@ const Table = (props) => {
 
   useEffect(() => {
     const storedUserRole = localStorage.getItem("userRole");
-    setIsUserAdmin(storedUserRole === "Admin");
+    setIsUserAdmin(
+      storedUserRole === "Admin" || storedUserRole === "Super Admin"
+    );
   }, []);
 
   const renderCellValue = (key, value) => {
@@ -100,12 +102,15 @@ const Table = (props) => {
                   <td className="py-3 px-5 border-b whitespace-nowrap">
                     ОБЩО:
                   </td>
+
                   <td className="py-3 px-5 border-b whitespace-nowrap">
                     {totals.carton.toFixed(1)} бр.
                   </td>
+
                   <td className="py-3 px-5 border-b whitespace-nowrap">
                     {totals.availability} бр.
                   </td>
+
                   {isUserAdmin && (
                     <td className="py-3 px-5 border-b whitespace-nowrap">
                       {formatCurrency(totals.price, 2)}

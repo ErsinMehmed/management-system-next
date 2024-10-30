@@ -38,7 +38,6 @@ class Income {
     }
 
     try {
-      const periodParam = getPeriodParam(period);
       const response = await fetch(
         `/api/get-average-profit?dateFrom=${period.dateFrom}&dateTo=${period.dateTo}`
       );

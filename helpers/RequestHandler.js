@@ -19,6 +19,7 @@ export default class RequestHandler {
     const maxQuantity = request.nextUrl.searchParams.get("max_quantity");
     const sortColumn = request.nextUrl.searchParams.get("sort_column");
     const sortOrder = request.nextUrl.searchParams.get("sort_order");
+    const userRole = request.nextUrl.searchParams.get("user_role");
 
     await connectMongoDB();
 
@@ -55,7 +56,7 @@ export default class RequestHandler {
       queryBuilder.where("quantity").lte(parseInt(maxQuantity));
     }
 
-    if (getUserRecords && userId) {
+    if (getUserRecords && userId && userRole !== "Super Admin") {
       queryBuilder = queryBuilder.where("creator").equals(userId);
     }
 

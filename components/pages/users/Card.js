@@ -4,12 +4,11 @@ import {
   AccordionItem,
   Card,
   CardBody,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
+  Progress,
+  Tooltip,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
 } from "@nextui-org/react";
 import { observer } from "mobx-react-lite";
 import {
@@ -19,13 +18,32 @@ import {
   BsGraphUp,
   BsInfoCircle,
 } from "react-icons/bs";
+import { FaCircleInfo } from "react-icons/fa6";
 import { userStore, expenseStore, incomeStore } from "@/stores/useStore";
-import { formatCurrency } from "@/utils";
 import UserInfo from "@/components/pages/users/UserInfo";
 import SalesTable from "@/components/pages/users/tables/SalesTable";
 import StockTable from "@/components/pages/users/tables/StockTable";
 import ExpensesTable from "@/components/pages/users/tables/ExpensesTable";
 import ProfitTable from "@/components/pages/users/tables/ProfitTable";
+
+const InfoButton = ({ message }) => (
+  <>
+    <Tooltip content={message}>
+      <button className="text-slate-600 ml-1.5 invisible sm:visible">
+        <FaCircleInfo />
+      </button>
+    </Tooltip>
+
+    <Popover placement="right">
+      <PopoverTrigger>
+        <button className="text-slate-600 -ml-2.5 sm:hidden">
+          <FaCircleInfo />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent>{message}</PopoverContent>
+    </Popover>
+  </>
+);
 
 const UserCard = () => {
   const { userSales } = userStore;
@@ -87,98 +105,170 @@ const UserCard = () => {
     content: "text-small",
   };
 
-  return userSalesWithTotals.map((data, index) => (
-    <Card key={index} className="w-full lg:max-w-[550px]">
-      <UserInfo user={data} />
+  const CustomUserTargetLabel = ({ message }) => (
+    <span>
+      Продажби - таргет <InfoButton message={message} />
+    </span>
+  );
 
-      <CardBody>
-        <Accordion
-          showDivider={false}
-          className="p-2 w-full"
-          itemClasses={itemClasses}
-        >
-          <AccordionItem
-            key="1"
-            aria-label="Обща информация"
-            startContent={<BsInfoCircle className="size-7" />}
-            subtitle="Информация за потребителят"
-            title="Обща информация"
-          >
-            {calculateTargetPercentage(data.user_target, data.total_bottles)}
-          </AccordionItem>
+  const UserTooltipText = ({ totalBottleSales, userTarget }) => {
+    const remainingBottles = userTarget - totalBottleSales;
+    const displayRemainingBottles =
+      remainingBottles < 0
+        ? `+${Math.abs(remainingBottles)}`
+        : remainingBottles;
 
-          <AccordionItem
-            key="2"
-            aria-label="Продажби"
-            startContent={<BsCart2 className="size-7" />}
-            subtitle={
-              <p className="flex">
-                Продадени бутилки
-                <span className="font-semibold ml-1">
-                  {data.total_bottles} бр.
-                </span>
-              </p>
-            }
-            title="Продажби"
-          >
-            <SalesTable
-              products={data.products}
-              totalQuantity={data.totalQuantity}
-              totalPrice={data.totalPrice}
-              totalExpenses={data.totalExpenses}
-            />
-          </AccordionItem>
+    return (
+      <div className="flex flex-col gap-y-1.5">
+        <div>
+          Продадени бутилки{" "}
+          <span className="font-semibold">{totalBottleSales} бр.</span>
+        </div>
 
-          <AccordionItem
-            key="3"
-            aria-label="Наличности"
-            startContent={<BsBox className="size-7" />}
-            subtitle={
-              <p className="flex">
-                Налични бутилки
-                <span className="font-semibold ml-1">
-                  {data.totalStock} бр.
-                </span>
-              </p>
-            }
-            title="Наличности"
-          >
-            <StockTable
-              stocks={data.user_stocks}
-              totalStock={data.totalStock}
-            />
-          </AccordionItem>
+        <div>
+          Таргет <span className="font-semibold">{userTarget} бр.</span>
+        </div>
 
-          <AccordionItem
-            key="4"
-            aria-label="Разходи"
-            startContent={<BsCashCoin className="size-7" />}
-            subtitle="За посоченият период"
-            title="Разходи"
-          >
-            <ExpensesTable fuelPrice={fuelExpenses} />
-          </AccordionItem>
+        <div>
+          Оставащи бутилки{" "}
+          <span className="font-semibold">{displayRemainingBottles} бр.</span>
+        </div>
+      </div>
+    );
+  };
 
-          <AccordionItem
-            key="5"
-            aria-label="Печалба"
-            startContent={<BsGraphUp className="size-7" />}
-            subtitle="За посоченият период"
-            title="Печалба"
+  return userSalesWithTotals.map((data, index) => {
+    const targetPercentage = calculateTargetPercentage(
+      data.user_target,
+      data.total_bottles
+    );
+    const isTargetAchieved = targetPercentage >= 100;
+
+    return (
+      <Card key={index} className="w-full lg:max-w-[550px]">
+        <UserInfo user={data} />
+
+        <CardBody>
+          <Accordion
+            showDivider={false}
+            className="p-2 w-full"
+            itemClasses={itemClasses}
           >
-            <ProfitTable
-              saleIncomes={saleIncomes}
-              productExpenses={productExpenses}
-              fuelExpenses={fuelExpenses}
-              additionalExpenses={additionalExpenses}
-              totalProfit={totalProfit}
-              userPercent={data.user_percent}
-            />
-          </AccordionItem>
-        </Accordion>
-      </CardBody>
-    </Card>
-  ));
+            <AccordionItem
+              key="1"
+              aria-label="Обща информация"
+              startContent={<BsInfoCircle className="size-7" />}
+              subtitle="Информация за потребителят"
+              title="Обща информация"
+            >
+              <div
+                className={`p-2.5 ${
+                  isTargetAchieved ? "bg-green-100 shadow-md rounded-xl" : ""
+                }`}
+              >
+                <Progress
+                  size="sm"
+                  radius="sm"
+                  classNames={{
+                    track: "drop-shadow-md",
+                    indicator: isTargetAchieved
+                      ? ""
+                      : "bg-gradient-to-r from-violet-500 to-sky-500",
+                    label: "tracking-wider font-medium text-default-600",
+                    value: `font-semibold ${
+                      isTargetAchieved ? "text-green-600" : "text-foreground/60"
+                    }`,
+                  }}
+                  color={isTargetAchieved ? "success" : undefined}
+                  label={
+                    <CustomUserTargetLabel
+                      message={
+                        <UserTooltipText
+                          totalBottleSales={data.total_bottles}
+                          userTarget={data.user_target}
+                        />
+                      }
+                    />
+                  }
+                  value={targetPercentage}
+                  showValueLabel={true}
+                />
+              </div>
+            </AccordionItem>
+
+            <AccordionItem
+              key="2"
+              aria-label="Продажби"
+              startContent={<BsCart2 className="size-7" />}
+              subtitle={
+                <p className="flex">
+                  Продадени бутилки
+                  <span className="font-semibold ml-1">
+                    {data.total_bottles} бр.
+                  </span>
+                </p>
+              }
+              title="Продажби"
+            >
+              <SalesTable
+                products={data.products}
+                totalQuantity={data.totalQuantity}
+                totalPrice={data.totalPrice}
+                totalExpenses={data.totalExpenses}
+              />
+            </AccordionItem>
+
+            <AccordionItem
+              key="3"
+              aria-label="Наличности"
+              startContent={<BsBox className="size-7" />}
+              subtitle={
+                <p className="flex">
+                  Налични бутилки
+                  <span className="font-semibold ml-1">
+                    {data.totalStock} бр.
+                  </span>
+                </p>
+              }
+              title="Наличности"
+            >
+              <StockTable
+                stocks={data.user_stocks}
+                totalStock={data.totalStock}
+              />
+            </AccordionItem>
+
+            <AccordionItem
+              key="4"
+              aria-label="Разходи"
+              startContent={<BsCashCoin className="size-7" />}
+              subtitle="За посоченият период"
+              title="Разходи"
+            >
+              <ExpensesTable fuelPrice={fuelExpenses} />
+            </AccordionItem>
+
+            <AccordionItem
+              key="5"
+              aria-label="Печалба"
+              startContent={<BsGraphUp className="size-7" />}
+              subtitle="За посоченият период"
+              title="Печалба"
+            >
+              <ProfitTable
+                saleIncomes={saleIncomes}
+                productExpenses={productExpenses}
+                fuelExpenses={fuelExpenses}
+                additionalExpenses={additionalExpenses}
+                totalProfit={totalProfit}
+                userPercent={data.user_percent}
+              />
+            </AccordionItem>
+          </Accordion>
+        </CardBody>
+      </Card>
+    );
+  });
 };
 
 export default observer(UserCard);

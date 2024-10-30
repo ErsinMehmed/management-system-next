@@ -33,31 +33,31 @@ const dashboardLinks = [
   {
     link: "/dashboard",
     text: "Табло",
-    role: ["Admin", "Seller"],
+    role: ["Super Admin", "Admin", "Seller"],
     icon: <BsHouse className="w-5 h-5" />,
   },
   {
     link: "/dashboard/orders",
     text: "Поръчки",
-    role: ["Admin"],
+    role: ["Super Admin"],
     icon: <BsTruck className="w-5 h-5" />,
   },
   {
     link: "/dashboard/products",
     text: "Продукти",
-    role: ["Admin"],
+    role: ["Super Admin", "Admin"],
     icon: <BsBox className="w-5 h-5" />,
   },
   {
     link: "/dashboard/sales",
     text: "Продажби",
-    role: ["Admin", "Seller"],
+    role: ["Super Admin", "Admin", "Seller"],
     icon: <BsCart2 className="w-5 h-5" />,
   },
   {
     link: "/dashboard/users/sales",
     text: "Потребители",
-    role: ["Admin", "Seller"],
+    role: ["Super Admin", "Admin", "Seller"],
     icon: <BsPeople className="w-5 h-5" />,
   },
 ];
