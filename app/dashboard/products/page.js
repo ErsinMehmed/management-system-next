@@ -1,4 +1,5 @@
 "use client";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
@@ -19,6 +20,14 @@ const DashboardProducts = () => {
     loadProducts,
   } = productStore;
   const { errorFields } = commonStore;
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUserRole = localStorage.getItem("userRole");
+      setIsUserAdmin(storedUserRole === "Super Admin");
+    }
+  }, [setIsUserAdmin]);
 
   const handleFieldChange = (name, value, index) => {
     let updatedData = { ...productData };
@@ -63,51 +72,57 @@ const DashboardProducts = () => {
   };
 
   return (
-    <Layout title='Наличности'>
-      <Modal
-        title='Редактирай продукти'
-        showFooter={true}
-        openButton={
-          <button className='text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
-            Видимост
-          </button>
-        }>
-        <div className='border-b pb-6 w-full'>
-          {products.map((product, index) => (
-            <div
-              key={index}
-              className={`grid grid-cols-4 gap-4 place-content-around ${
-                index === products.length - 1 ? "pt-2" : "border-b py-2"
-              }`}>
-              <div className='col-span-2 font-semibold text-slate-700'>
-                {productTitle(product)}
+    <Layout title="Наличности">
+      {isUserAdmin && (
+        <Modal
+          title="Редактирай продукти"
+          showFooter={true}
+          openButton={
+            <button className="text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
+              Видимост
+            </button>
+          }
+        >
+          <div className="border-b pb-6 w-full">
+            {products.map((product, index) => (
+              <div
+                key={index}
+                className={`grid grid-cols-4 gap-4 place-content-around ${
+                  index === products.length - 1 ? "pt-2" : "border-b py-2"
+                }`}
+              >
+                <div className="col-span-2 font-semibold text-slate-700">
+                  {productTitle(product)}
+                </div>
+
+                <Chip
+                  classNames={{
+                    base: !product.hidden
+                      ? "bg-green-400 text-white"
+                      : "bg-red-400 text-white",
+                  }}
+                >
+                  {!product.hidden ? "Видим" : "Скрит"}
+                </Chip>
+
+                <Switch
+                  isSelected={!product.hidden}
+                  onValueChange={() => updateProductAndReload(product)}
+                />
               </div>
+            ))}
+          </div>
+        </Modal>
+      )}
 
-              <Chip
-                classNames={{
-                  base: !product.hidden
-                    ? "bg-green-400 text-white"
-                    : "bg-red-400 text-white",
-                }}>
-                {!product.hidden ? "Видим" : "Скрит"}
-              </Chip>
-
-              <Switch
-                isSelected={!product.hidden}
-                onValueChange={() => updateProductAndReload(product)}
-              />
-            </div>
-          ))}
-        </div>
-      </Modal>
-
-      <div className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8'>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8">
         {products.map(
           (product, index) =>
-            !product.hidden && (
+            !product.hidden &&
+            (isUserAdmin ? (
               <Modal
                 key={index}
-                title='Редактирай продукт'
+                title="Редактирай продукт"
                 isRecordCreated={isProductUpdated}
                 saveBtnAction={() => {
                   return updateProduct(product._id, productData);
@@ -120,7 +135,8 @@ const DashboardProducts = () => {
                     }}
                     data={product}
                   />
-                }>
+                }
+              >
                 <ProductForm
                   addData={addData}
                   data={productData}
@@ -129,7 +145,15 @@ const DashboardProducts = () => {
                   handleFieldChange={handleFieldChange}
                 />
               </Modal>
-            )
+            ) : (
+              <Box
+                onClick={() => {
+                  setProductData({});
+                  fetchProductData(product._id);
+                }}
+                data={product}
+              />
+            ))
         )}
       </div>
     </Layout>

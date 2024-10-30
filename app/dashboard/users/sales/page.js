@@ -20,6 +20,7 @@ const UserSales = () => {
     start: parseDate(moment().subtract(7, "days").format("YYYY-MM-DD")),
     end: parseDate(moment().format("YYYY-MM-DD")),
   });
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
 
   const transformDateRange = (range) => {
     const formatDate = (dateObj) => {
@@ -46,6 +47,15 @@ const UserSales = () => {
     loadUsers();
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUserRole = localStorage.getItem("userRole");
+      setIsUserAdmin(
+        storedUserRole === "Admin" || storedUserRole === "Super Admin"
+      );
+    }
+  }, [setIsUserAdmin]);
+
   const handleDateChange = (newValue) => {
     const period = transformDateRange(newValue);
     setDateRange(newValue);
@@ -66,10 +76,12 @@ const UserSales = () => {
             onChange={handleDateChange}
           />
 
-          <div className="flex items-center gap-x-3.5">
-            <UserInformation period={transformDateRange(dateRange)} />
-            <UserAviability period={transformDateRange(dateRange)} />
-          </div>
+          {isUserAdmin && (
+            <div className="flex items-center gap-x-3.5">
+              <UserInformation period={transformDateRange(dateRange)} />
+              <UserAviability period={transformDateRange(dateRange)} />
+            </div>
+          )}
         </div>
       </div>
 
