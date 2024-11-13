@@ -45,26 +45,26 @@ export async function POST(request) {
       );
     }
 
-    const userStock = await UserStock.findOne({
-      user: userId,
-      product: data.product,
-    });
+    // const userStock = await UserStock.findOne({
+    //   user: userId,
+    //   product: data.product,
+    // });
 
-    if (!userStock || userStock.stock < data.quantity) {
-      return NextResponse.json(
-        {
-          message: "Недостатъчна наличност от продукта за този потребител",
-          status: false,
-        },
-        { status: 400 }
-      );
-    }
+    // if (!userStock || userStock.stock < data.quantity) {
+    //   return NextResponse.json(
+    //     {
+    //       message: "Недостатъчна наличност от продукта за този потребител",
+    //       status: false,
+    //     },
+    //     { status: 400 }
+    //   );
+    // }
+
+    // userStock.stock -= data.quantity;
+    // await userStock.save();
 
     product.availability -= data.quantity;
     await product.save();
-
-    userStock.stock -= data.quantity;
-    await userStock.save();
 
     await Sell.create(data);
 
