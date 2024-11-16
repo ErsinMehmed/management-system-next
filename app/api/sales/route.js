@@ -119,23 +119,23 @@ export async function DELETE(request) {
       );
     }
 
-    const userStock = await UserStock.findOne({
-      user: sellToDelete.creator,
-      product: sellToDelete.product,
-    });
+    // const userStock = await UserStock.findOne({
+    //   user: sellToDelete.creator,
+    //   product: sellToDelete.product,
+    // });
 
-    if (userStock) {
-      userStock.stock += sellToDelete.quantity;
-      await userStock.save();
-    } else {
-      return NextResponse.json(
-        {
-          message: "Не бяха намерени наличности за този потребител и продукт",
-          status: false,
-        },
-        { status: 404 }
-      );
-    }
+    // if (userStock) {
+    //   userStock.stock += sellToDelete.quantity;
+    //   await userStock.save();
+    // } else {
+    //   return NextResponse.json(
+    //     {
+    //       message: "Не бяха намерени наличности за този потребител и продукт",
+    //       status: false,
+    //     },
+    //     { status: 404 }
+    //   );
+    // }
 
     product.availability += sellToDelete.quantity;
 

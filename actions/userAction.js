@@ -34,7 +34,7 @@ class User {
     }
   };
 
-  getDisributors = async () => {
+  getDistributors = async () => {
     try {
       const response = await fetch("/api/distributors");
 

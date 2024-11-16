@@ -1,4 +1,6 @@
 import { makeObservable, observable, action } from "mobx";
+import { incomeRules as getIncomeRules } from "@/rules/income";
+import { validateFields } from "@/utils";
 import incomeAction from "@/actions/incomeAction";
 import commonStore from "./commonStore";
 
@@ -8,7 +10,7 @@ class Income {
   averageProfitData = [];
   isLoadingAverageProfit = true;
   saleIncomes = [];
-  allIcomes = [];
+  allIncomes = [];
   isLoading = true;
   currentPage = 1;
   perPage = "10";
@@ -25,6 +27,7 @@ class Income {
     // minQuantity: "",
     // maxQuantity: "",
   };
+  isIncomeCreated = false;
 
   constructor() {
     makeObservable(this, {
@@ -39,8 +42,9 @@ class Income {
       filterData: observable,
       showFilter: observable,
       orderColumn: observable,
-      allIcomes: observable,
+      allIncomes: observable,
       isLoading: observable,
+      isIncomeCreated: observable,
       setIncomes: action,
       setAdditionalIncomes: action,
       setCurrentPage: action,
@@ -65,7 +69,7 @@ class Income {
     this.perPage = perPage;
 
     const newTotalPages = Math.ceil(
-      this.sales.pagination?.total_results / perPage
+      this.allIncomes.pagination?.total_results / perPage
     );
 
     this.setCurrentPage(
@@ -98,7 +102,7 @@ class Income {
   };
 
   setAllIncomes = (data) => {
-    this.allIcomes = data;
+    this.allIncomes = data;
   };
 
   setIncomes = (data) => {
@@ -159,6 +163,61 @@ class Income {
     if (response.status) {
       this.saleIncomes = response.total_amount_sales;
     }
+  };
+
+  createIncome = async (data) => {
+    this.isIncomeCreated = true;
+    commonStore.setErrorFields({});
+    commonStore.setErrorMessage("");
+    commonStore.setSuccessMessage("");
+
+    const incomeRules = getIncomeRules();
+    const errorFields = validateFields(data, incomeRules);
+
+    if (errorFields) {
+      commonStore.setErrorFields(errorFields);
+      this.isIncomeCreated = false;
+
+      return false;
+    }
+
+    const response = await incomeAction.createIncome(data);
+
+    if (response.status) {
+      commonStore.setSuccessMessage(response.message);
+      this.loadAllIncomes();
+      this.isIncomeCreated = false;
+
+      return true;
+    } else if (!response.status) {
+      commonStore.setErrorMessage(response.message);
+      this.isIncomeCreated = false;
+    }
+
+    this.isIncomeCreated = false;
+
+    return false;
+  };
+
+  deleteIncome = async (id) => {
+    const response = await incomeAction.IncomeSell(id);
+
+    if (response.status) {
+      commonStore.setSuccessMessage(response.message);
+      this.loadAllIncomes();
+    }
+  };
+
+  handlePageChange = (direction) => {
+    const newPage =
+      direction === "next" ? this.currentPage + 1 : this.currentPage - 1;
+    this.setCurrentPage(newPage);
+    this.loadAllIncomes();
+  };
+
+  handlePageClick = (page) => {
+    this.setCurrentPage(page);
+    this.loadAllIncomes();
   };
 }
 

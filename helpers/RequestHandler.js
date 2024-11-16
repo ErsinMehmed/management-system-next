@@ -86,8 +86,18 @@ export default class RequestHandler {
       });
     }
 
+    if (request.nextUrl.pathname === "/api/get-additional-incomes") {
+      queryBuilder = queryBuilder.populate({
+        path: "distributor",
+        select: "name",
+      });
+    }
+
     if (getCreator) {
-      queryBuilder = queryBuilder.populate({ path: "creator", select: "name" });
+      queryBuilder = queryBuilder.populate({
+        path: "creator",
+        select: "name",
+      });
     }
 
     const items = await queryBuilder.skip((page - 1) * perPage).limit(perPage);

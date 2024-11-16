@@ -1,6 +1,22 @@
 import { getPeriodParam, fetchData } from "@/utils";
 
 class Income {
+  createIncome = async (data) => {
+    try {
+      const response = await fetch("/api/additional-incomes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   getIncomes = async (period) => {
     try {
       const periodParam = getPeriodParam(period);
@@ -76,6 +92,22 @@ class Income {
       "",
       orderColumn
     );
+  };
+
+  IncomeSell = async (id) => {
+    try {
+      const response = await fetch(`/api/additional-incomes?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
   };
 }
 
