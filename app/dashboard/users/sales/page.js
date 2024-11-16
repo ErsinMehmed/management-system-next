@@ -67,8 +67,8 @@ const UserSales = () => {
   };
 
   return (
-    <Layout title="Продажби по потребители">
-      <div className="grid xl:grid-cols-2">
+    <Layout title='Продажби по потребители'>
+      {/* <div className="grid xl:grid-cols-2">
         <div className="col-span-1 flex flex-col lg:flex-row items-center bg-white p-3 gap-3.5 w-full rounded-md shadow-md mb-5">
           <DateRangePicker
             label="Избери дата"
@@ -87,7 +87,7 @@ const UserSales = () => {
 
       <div className="grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
         {isUserSalesLoad ? <SkeletonLoader /> : <UserCard />}
-      </div>
+      </div> */}
     </Layout>
   );
 };
