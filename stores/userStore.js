@@ -5,6 +5,7 @@ class User {
   userSales = [];
   userStocks = [];
   users = [];
+  disributors = [];
   isUserSalesLoad = true;
 
   constructor() {
@@ -13,6 +14,7 @@ class User {
       userStocks: observable,
       users: observable,
       isUserSalesLoad: observable,
+      disributors: observable,
       setUsers: action,
     });
   }
@@ -38,6 +40,14 @@ class User {
 
     if (response.status) {
       this.users = response.users;
+    }
+  };
+
+  loadDisributors = async () => {
+    const response = await userAction.getDisributors();
+
+    if (response.status) {
+      this.disributors = response.disributors;
     }
   };
 }

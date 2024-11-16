@@ -34,6 +34,16 @@ class User {
     }
   };
 
+  getDisributors = async () => {
+    try {
+      const response = await fetch("/api/distributors");
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   updateUserStocks = async (data) => {
     try {
       const response = await fetch(`/api/user-stocks`, {

@@ -8,7 +8,12 @@ export default class RequestHandler {
     this.Model = Model;
   }
 
-  async handleRequest(request, getCreator = false, getUserRecords = false) {
+  async handleRequest(
+    request,
+    getCreator = false,
+    getUserRecords = false,
+    populateProduct = true
+  ) {
     const page = request.nextUrl.searchParams.get("page") || 1;
     const perPage = request.nextUrl.searchParams.get("per_page") || 10;
     const searchText = request.nextUrl.searchParams.get("search");
@@ -69,14 +74,17 @@ export default class RequestHandler {
     }
 
     const totalItems = await this.Model.countDocuments(queryBuilder);
-    queryBuilder = queryBuilder.populate({
-      path: "product",
-      select: "name weight flavor count category",
-      populate: {
-        path: "category",
-        select: "name",
-      },
-    });
+
+    if (populateProduct) {
+      queryBuilder = queryBuilder.populate({
+        path: "product",
+        select: "name weight flavor count category",
+        populate: {
+          path: "category",
+          select: "name",
+        },
+      });
+    }
 
     if (getCreator) {
       queryBuilder = queryBuilder.populate({ path: "creator", select: "name" });

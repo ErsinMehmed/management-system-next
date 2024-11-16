@@ -1,4 +1,4 @@
-import { getPeriodParam } from "@/utils";
+import { getPeriodParam, fetchData } from "@/utils";
 
 class Income {
   getIncomes = async (period) => {
@@ -59,6 +59,23 @@ class Income {
     } catch (error) {
       throw error;
     }
+  };
+
+  getAllIncomes = async (
+    page,
+    perPage,
+    searchText,
+    filterData,
+    orderColumn
+  ) => {
+    return await fetchData(
+      "get-additional-incomes",
+      page,
+      perPage,
+      "",
+      "",
+      orderColumn
+    );
   };
 }
 

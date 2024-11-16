@@ -1,7 +1,7 @@
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { HiOutlineFilter } from "react-icons/hi";
 
-const Select = (props) => {
+const SearchBar = (props) => {
   const handleChange = (event) => {
     if (props.onChange) {
       props.onChange(event.target.value);
@@ -61,4 +61,4 @@ const Select = (props) => {
   );
 };
 
-export default Select;
+export default SearchBar;

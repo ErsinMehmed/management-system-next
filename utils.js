@@ -162,27 +162,20 @@ export async function fetchData(
 ) {
   try {
     const params = {
-      page: page || 1,
-      per_page: perPage || 10,
-      search: searchText,
-      date_from: filterData?.dateFrom,
-      date_to: filterData?.dateTo,
-      product: filterData?.product,
-      min_quantity: filterData?.minQuantity,
-      max_quantity: filterData?.maxQuantity,
-      sort_column: orderColumn?.name,
-      sort_order: orderColumn?.order,
+      ...(page && { page }),
+      ...(perPage && { per_page: perPage }),
+      ...(searchText && { search: searchText }),
+      ...(filterData?.dateFrom && { date_from: filterData.dateFrom }),
+      ...(filterData?.dateTo && { date_to: filterData.dateTo }),
+      ...(filterData?.product && { product: filterData.product }),
+      ...(filterData?.minQuantity && { min_quantity: filterData.minQuantity }),
+      ...(filterData?.maxQuantity && { max_quantity: filterData.maxQuantity }),
+      ...(orderColumn?.name && { sort_column: orderColumn.name }),
+      ...(orderColumn?.order && { sort_order: orderColumn.order }),
+      ...(userRole && { user_role: userRole }),
     };
 
-    if (userRole) {
-      params.user_role = userRole;
-    }
-
-    const filteredParams = Object.fromEntries(
-      Object.entries(params).filter(([_, value]) => value !== "")
-    );
-
-    const urlParams = new URLSearchParams(filteredParams);
+    const urlParams = new URLSearchParams(params);
     const url = `/api/${resource}${
       urlParams.toString() ? `?${urlParams.toString()}` : ""
     }`;

@@ -1,4 +1,11 @@
-import { BsBox, BsCart2, BsTruck, BsHouse, BsPeople } from "react-icons/bs";
+import {
+  BsBox,
+  BsCart2,
+  BsTruck,
+  BsHouse,
+  BsPeople,
+  BsCashCoin,
+} from "react-icons/bs";
 
 const perPageResult = [
   { value: "5" },
@@ -53,6 +60,12 @@ const dashboardLinks = [
     text: "Продажби",
     role: ["Super Admin", "Admin", "Seller"],
     icon: <BsCart2 className="w-5 h-5" />,
+  },
+  {
+    link: "/dashboard/incomes",
+    text: "Приходи",
+    role: ["Super Admin", "Admin"],
+    icon: <BsCashCoin className="w-5 h-5" />,
   },
   {
     link: "/dashboard/users/sales",

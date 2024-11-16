@@ -15,7 +15,9 @@ export default withAuth(
     if (
       role !== "Super Admin" &&
       role !== "Admin" &&
-      (path === "/dashboard/orders" || path === "/dashboard/products")
+      (path === "/dashboard/orders" ||
+        path === "/dashboard/products" ||
+        path === "/dashboard/incomes")
     ) {
       return new NextResponse("You are not authorized!");
     }
@@ -36,5 +38,6 @@ export const config = {
     "/dashboard/orders",
     "/dashboard/sales",
     "/dashboard/products",
+    "/dashboard/incomes",
   ],
 };
