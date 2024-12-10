@@ -22,7 +22,7 @@ import Box from "@/components/dashboard/Box";
 import { categories, periods } from "@/data";
 import { formatCurrency } from "@/utils";
 import LineChart from "@/components/charts/LineChart";
-import UploadTest from "@/components/UploadTest";
+// import UploadTest from "@/components/UploadTest";
 
 const Dashboard = () => {
   const [isUserAdmin, setIsUserAdmin] = useState(false);
@@ -314,7 +314,8 @@ const Dashboard = () => {
           <BarChart />
         </div>
       )}
-      <UploadTest />
+
+      {/* <UploadTest /> */}
     </Layout>
   );
 };
