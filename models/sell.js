@@ -13,6 +13,7 @@ const sellSchema = new Schema(
     fuel_consumption: Number,
     diesel_price: Number,
     fuel_price: Number,
+    is_wholesale: Boolean,
     creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
   },
