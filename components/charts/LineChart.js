@@ -17,6 +17,9 @@ const LineChart = (props) => {
       toolbar: {
         show: false,
       },
+      zoom: {
+        enabled: false, // Изключва zoom функционалността
+      },
     },
     stroke: {
       curve: "smooth",
@@ -66,29 +69,29 @@ const LineChart = (props) => {
   };
 
   return (
-    <div className="bg-white rounded-md shadow-md ">
-      <div className="px-5 py-4 border-b border-slate-100">
-        <div className="ml-4 md:ml-5 text-xl font-bold leading-none text-slate-800">
+    <div className='bg-white rounded-md shadow-md '>
+      <div className='px-5 py-4 border-b border-slate-100'>
+        <div className='ml-4 md:ml-5 text-xl font-bold leading-none text-slate-800'>
           Продажби на бутилки за посоченият период
         </div>
       </div>
 
-      <div className="overflow-x-auto p-4 md:p-5">
-        <div className="min-w-[800px] h-80 md:h-96 overflow-y-hidden">
+      <div className='overflow-x-auto p-4 md:p-5'>
+        <div className='min-w-[800px] h-80 md:h-96 overflow-y-hidden'>
           {isLoadingLineChartStats ? (
-            <div className="h-full w-full center-element font-semibold text-slate-700 text-center">
+            <div className='h-full w-full center-element font-semibold text-slate-700 text-center'>
               <Spinner classNames={{ wrapper: "w-20 h-20" }} />
             </div>
           ) : lineChartSaleStats?.data ? (
             <ReactApexChart
               options={options}
               series={series}
-              type="area"
+              type='area'
               height={"100%"}
               width={"100%"}
             />
           ) : (
-            <p className="h-full w-full center-element font-semibold text-slate-700 text-center">
+            <p className='h-full w-full center-element font-semibold text-slate-700 text-center'>
               Няма намерени данни
             </p>
           )}
