@@ -18,7 +18,7 @@ const LineChart = (props) => {
         show: false,
       },
       zoom: {
-        enabled: false, // Изключва zoom функционалността
+        enabled: false,
       },
     },
     stroke: {

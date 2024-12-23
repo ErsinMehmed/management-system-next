@@ -4,7 +4,6 @@ import { validateFields } from "@/utils";
 import { sellRules as getSellRules } from "@/rules/sell";
 import { valueRules as getValueRules } from "@/rules/values";
 import commonStore from "./commonStore";
-import productStore from "./productStore";
 
 class Sell {
   sales = [];
@@ -18,6 +17,7 @@ class Sell {
     diesel_price: null,
     fuel_consumption: null,
     additional_costs: null,
+    is_wholesale: true,
     date: "",
     product: "",
     message: "",
@@ -199,6 +199,7 @@ class Sell {
       diesel_price: this.dieselPrice,
       fuel_consumption: this.fuelConsumption,
       additional_costs: null,
+      is_wholesale: true,
       date: "",
       product: "",
       message: "",
