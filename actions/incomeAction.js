@@ -48,7 +48,7 @@ class Income {
       const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
 
       period = {
-        dateFrom: startOfYear.toISOString().split("T")[0],
+        dateFrom: "2023-12-31" /*startOfYear.toISOString().split("T")[0]*/,
         dateTo: currentDate.toISOString().split("T")[0],
       };
     }

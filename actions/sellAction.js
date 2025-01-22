@@ -77,8 +77,11 @@ class Sell {
         case "Последната година":
           period = "lastYear";
           break;
+        case "Всички резултати":
+          period = "all";
+          break;
         default:
-          period = "lastYear";
+          period = "all";
           break;
       }
 

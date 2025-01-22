@@ -19,55 +19,68 @@ export async function GET(request) {
 
   const userObjectId = new mongoose.Types.ObjectId(userId);
 
-  let startDate;
+  const period = request.nextUrl.searchParams.get("period");
 
-  switch (request.nextUrl.searchParams.get("period")) {
-    case "today":
-      startDate = new Date();
-      startDate.setHours(0, 0, 0, 0);
-      break;
-    case "yesterday":
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - 1);
-      startDate.setHours(0, 0, 0, 0);
-      break;
-    case "last7days":
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - 7);
-      break;
-    case "lastMonth":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 1);
-      break;
-    case "last3Months":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 3);
-      break;
-    case "last6Months":
-      startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 6);
-      break;
-    case "lastYear":
-      startDate = new Date();
-      startDate.setFullYear(startDate.getFullYear() - 1);
-      break;
-    default:
-      startDate = new Date(0);
+  let matchConditions = {
+    creator: userObjectId,
+  };
+
+  if (period !== "all") {
+    let startDate;
+
+    switch (period) {
+      case "today":
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "yesterday":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 1);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case "last7days":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case "lastMonth":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case "last3Months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case "last6Months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 6);
+        break;
+      case "lastYear":
+        startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        startDate = new Date(0);
+    }
+
+    matchConditions.date =
+      period === "yesterday"
+        ? {
+            $gte: startDate,
+            $lt: new Date(startDate.getTime() + 24 * 60 * 60 * 1000),
+          }
+        : { $gte: startDate };
   }
 
-  const sales = await Sell.aggregate([
-    {
-      $match: {
-        creator: userObjectId,
-        date:
-          request.nextUrl.searchParams.get("period") === "yesterday"
-            ? {
-                $gte: startDate,
-                $lt: new Date(startDate.getTime() + 24 * 60 * 60 * 1000),
-              }
-            : { $gte: startDate },
-      },
-    },
+  const pipeline = [];
+
+  // Добавяме $match само ако периодът не е "all"
+  if (period !== "all") {
+    pipeline.push({
+      $match: matchConditions,
+    });
+  }
+
+  pipeline.push(
     {
       $group: {
         _id: "$product",
@@ -119,8 +132,10 @@ export async function GET(request) {
       $sort: {
         total_quantity: 1,
       },
-    },
-  ]);
+    }
+  );
+
+  const sales = await Sell.aggregate(pipeline);
 
   if (sales.length === 0) {
     return NextResponse.json({

@@ -40,7 +40,7 @@ class Sell {
     minQuantity: "",
     maxQuantity: "",
   };
-  pieChartPeriod = ["Последната година"];
+  pieChartPeriod = ["Всички резултати"];
   isSellCreated = false;
 
   constructor() {
