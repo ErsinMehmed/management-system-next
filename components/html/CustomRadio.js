@@ -1,4 +1,4 @@
-import { useRadio, VisuallyHidden, cn } from "@nextui-org/react";
+import { useRadio, VisuallyHidden, cn } from "@heroui/react";
 
 const CustomRadio = (props) => {
   const {

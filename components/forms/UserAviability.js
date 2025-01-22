@@ -12,7 +12,7 @@ import {
   TableCell,
   Button,
   Spinner,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { FaCheck } from "react-icons/fa6";
 import { FiPlus } from "react-icons/fi";
 import { productTitle } from "@/utils";

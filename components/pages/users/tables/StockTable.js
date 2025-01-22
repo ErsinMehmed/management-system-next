@@ -6,7 +6,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 const StockTable = ({ stocks, totalStock }) => (
   <Table isStriped>

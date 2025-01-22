@@ -1,5 +1,5 @@
 import React from "react";
-import { CardHeader, Avatar, Divider } from "@nextui-org/react";
+import { CardHeader, Avatar, Divider } from "@heroui/react";
 
 const UserInfo = ({ user }) => (
   <>

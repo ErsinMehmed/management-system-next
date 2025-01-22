@@ -7,7 +7,7 @@ import {
   DropdownMenu,
   DropdownItem,
   Avatar,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 
 const AccountDropdown = () => {

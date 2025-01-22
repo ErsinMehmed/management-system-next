@@ -10,7 +10,7 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import moment from "moment";
 import "moment/locale/bg";
 import { FaCircleInfo } from "react-icons/fa6";

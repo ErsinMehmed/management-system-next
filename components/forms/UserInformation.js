@@ -11,7 +11,7 @@ import {
   TableRow,
   TableCell,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { FaCheck } from "react-icons/fa6";
 
 const UserInformation = (props) => {

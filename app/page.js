@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { authStore, commonStore } from "@/stores/useStore";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";

@@ -11,7 +11,7 @@ import {
   Spinner,
   Accordion,
   AccordionItem,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { dropdownPeriods } from "@/data";
 import dynamic from "next/dynamic";
 import { formatCurrency } from "@/utils";

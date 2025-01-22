@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { authStore, commonStore } from "@/stores/useStore";
 import Alert from "@/components/Alert";
 import Select from "@/components/html/Select";

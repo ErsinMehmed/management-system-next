@@ -1,5 +1,5 @@
 import React from "react";
-import { DateRangePicker } from "@nextui-org/react";
+import { DateRangePicker } from "@heroui/react";
 import { getLocalTimeZone, today } from "@internationalized/date";
 
 const DateRangePickerComponent = (props) => {

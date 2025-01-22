@@ -10,7 +10,7 @@ import {
 } from "@/stores/useStore";
 import { MdAttachMoney } from "react-icons/md";
 import { TbMoneybag } from "react-icons/tb";
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab } from "@heroui/react";
 import Layout from "@/components/layout/Dashboard";
 import PieChart from "@/components/charts/PieChart";
 import BarChart from "@/components/charts/BarChart";

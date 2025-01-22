@@ -5,7 +5,7 @@ import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
 import Box from "@/components/product/Box";
 import { commonStore, productStore } from "@/stores/useStore";
-import { Switch, Chip } from "@nextui-org/react";
+import { Switch, Chip } from "@heroui/react";
 import { productTitle } from "@/utils";
 import ProductForm from "@/components/forms/Product";
 import productAction from "@/actions/productAction";

@@ -9,7 +9,7 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { observer } from "mobx-react-lite";
 import {
   BsBox,

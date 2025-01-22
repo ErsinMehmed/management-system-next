@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { AiOutlineEye } from "react-icons/ai";
 import { AiOutlineEyeInvisible } from "react-icons/ai";
 

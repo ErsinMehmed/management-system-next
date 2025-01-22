@@ -1,6 +1,6 @@
 import { BsTrash3 } from "react-icons/bs";
 import { HiOutlinePlus } from "react-icons/hi2";
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from "@heroui/react";
 import Input from "@/components/html/Input";
 import { formatCurrency } from "@/utils";
 

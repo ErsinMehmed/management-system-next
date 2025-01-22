@@ -3,7 +3,7 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { formatCurrency } from "@/utils";
 
 const TabSection = (props) => {

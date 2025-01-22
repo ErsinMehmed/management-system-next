@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from "@heroui/react";
 import { formatCurrency } from "@/utils";
 import { productStore } from "@/stores/useStore";
 

@@ -5,7 +5,7 @@ import {
   CardBody,
   Divider,
   Skeleton,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 const SkeletonCardLoader = () => {
   return [...Array(4)].map((_, index) => (

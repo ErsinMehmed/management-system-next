@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import { sellStore } from "@/stores/useStore";
 
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from "@heroui/react";
 
 const LineChart = (props) => {
   const { lineChartSaleStats, isLoadingLineChartStats } = sellStore;

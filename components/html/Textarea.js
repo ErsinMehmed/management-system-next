@@ -1,4 +1,4 @@
-import { Textarea } from "@nextui-org/react";
+import { Textarea } from "@heroui/react";
 
 const TextareaComponent = (props) => {
   const handleChange = (event) => {

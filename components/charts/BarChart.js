@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { incomeStore } from "@/stores/useStore";
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from "@heroui/react";
 import { formatCurrency } from "@/utils";
 
 const BarChart = () => {
