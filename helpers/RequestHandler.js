@@ -78,7 +78,7 @@ export default class RequestHandler {
     if (populateProduct) {
       queryBuilder = queryBuilder.populate({
         path: "product",
-        select: "name weight flavor count category",
+        select: "name weight flavor count category units_per_box",
         populate: {
           path: "category",
           select: "name",
