@@ -10,7 +10,7 @@ const Alert = () => {
         if (errorMessage) {
             addToast({
                 description: errorMessage,
-                color: "red",
+                color: "danger",
                 hideIcon: false,
             });
 
