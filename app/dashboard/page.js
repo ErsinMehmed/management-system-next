@@ -1,5 +1,5 @@
 "use client";
-import React, {useState, useEffect, useCallback} from "react";
+import React, {useState, useEffect, useCallback, useMemo} from "react";
 import {observer} from "mobx-react-lite";
 import {
     sellStore,
@@ -10,19 +10,17 @@ import {
 } from "@/stores/useStore";
 import {MdAttachMoney} from "react-icons/md";
 import {TbMoneybag} from "react-icons/tb";
-import {Tabs, Tab, DatePicker} from "@heroui/react";
+import {Tabs, Tab} from "@heroui/react";
 import Layout from "@/components/layout/Dashboard";
 import PieChart from "@/components/charts/PieChart";
 import BarChart from "@/components/charts/BarChart";
-import Select from "@/components/html/Select";
-import Input from "@/components/html/Input";
 import TabSection from "@/components/dashboard/TabSection";
+import DashboardDateFilters from "@/components/dashboard/DashboardDateFilters";
 import Table from "@/components/dashboard/Table";
 import Box from "@/components/dashboard/Box";
-import {categories, periods} from "@/data";
+import {categories} from "@/data";
 import {formatCurrency} from "@/utils";
 import LineChart from "@/components/charts/LineChart";
-import {parseDate, today, getLocalTimeZone} from "@internationalized/date";
 // import UploadTest from "@/components/UploadTest";
 
 const Dashboard = () => {
@@ -41,12 +39,23 @@ const Dashboard = () => {
     const [selectedCategory, setSelectedCategory] = useState("Бутилки");
 
     useEffect(() => {
-        loadAdditionalIncomes();
-        loadSaleStats();
-        loadExpenses();
-        loadIncomes();
-        loadLineChartSaleStats();
-        loadAverageProfit();
+        const { dateFrom, dateTo } = dashboardBoxPeriod;
+
+        const promises = [
+            loadSaleStats(),
+            loadLineChartSaleStats(),
+            loadAverageProfit()
+        ];
+
+        if (!dateFrom && !dateTo) {
+            promises.push(
+                loadAdditionalIncomes(),
+                loadExpenses(),
+                loadIncomes()
+            );
+        }
+
+        Promise.all(promises);
     }, []);
 
     useEffect(() => {
@@ -74,9 +83,11 @@ const Dashboard = () => {
         [dashboardBoxPeriod, setDashboardBoxPeriod]
     );
 
-    const filteredProducts = products.filter(
-        (product) => product.category.name === "Бутилки" && product.availability > 0
-    );
+    const filteredProducts = useMemo(() =>
+            products.filter(
+                (product) => product.category.name === "Бутилки" && product.availability > 0
+            ),
+        [products]);
 
     const filteredProductAvailabilities = filteredProducts?.map(
         ({name, weight, image_url, availability, price, units_per_box}) => {
@@ -113,42 +124,10 @@ const Dashboard = () => {
 
     return (
         <Layout title='Администраторско табло'>
-            <div className='grid grid-cols-3'>
-                <div
-                    className='col-span-3 lg:col-span-2 lg:col-start-2 lg:ml-2 flex flex-col lg:flex-row items-center bg-white p-3 gap-3.5 w-full rounded-md shadow-md mb-5'>
-                    <DatePicker
-                        showMonthAndYearPickers
-                        label="От"
-                        maxValue={dashboardBoxPeriod.dateTo ? parseDate(dashboardBoxPeriod.dateTo) : today(getLocalTimeZone())}
-                        value={dashboardBoxPeriod.dateFrom ? parseDate(dashboardBoxPeriod.dateFrom) : undefined}
-                        onChange={(value) => handleFieldChange("dateFrom", value.toString())}
-                        classNames={{
-                            inputWrapper: "h-12",
-                            input: "py-1"
-                        }}
-                    />
-
-                    <DatePicker
-                        showMonthAndYearPickers
-                        label="До"
-                        maxValue={today(getLocalTimeZone())}
-                        minValue={dashboardBoxPeriod.dateFrom ? parseDate(dashboardBoxPeriod.dateFrom) : undefined}
-                        value={dashboardBoxPeriod.dateTo ? parseDate(dashboardBoxPeriod.dateTo) : undefined}
-                        onChange={(value) => handleFieldChange("dateTo", value.toString())}
-                        classNames={{
-                            inputWrapper: "h-12",
-                            input: "py-1"
-                        }}
-                    />
-
-                    <Select
-                        items={periods}
-                        label='Избери период'
-                        value={dashboardBoxPeriod.period || ""}
-                        onChange={(value) => handleFieldChange("period", value)}
-                    />
-                </div>
-            </div>
+            <DashboardDateFilters
+                dashboardBoxPeriod={dashboardBoxPeriod}
+                handleFieldChange={handleFieldChange}
+            />
 
             <div
                 className={`grid grid-cols-1 ${
