@@ -7,23 +7,33 @@ import commonStore from "@/stores/commonStore";
 import productStore from "@/stores/productStore";
 import { debounce } from "lodash";
 
+const initialSellData = {
+  quantity: null,
+  mileage: null,
+  price: null,
+  diesel_price: null,
+  fuel_consumption: null,
+  additional_costs: null,
+  is_wholesale: true,
+  date: "",
+  product: "",
+  message: "",
+};
+
+const initialFilterData = {
+  dateFrom: "",
+  dateTo: "",
+  product: "",
+  minQuantity: "",
+  maxQuantity: "",
+};
+
 class Sell {
   sales = [];
   sellStats = [];
   lineChartSaleStats = [];
   isLoadingLineChartStats = true;
-  sellData = {
-    quantity: null,
-    mileage: null,
-    price: null,
-    diesel_price: null,
-    fuel_consumption: null,
-    additional_costs: null,
-    is_wholesale: true,
-    date: "",
-    product: "",
-    message: "",
-  };
+  sellData = { ...initialSellData };
   orderColumn = {
     name: "",
     order: "",
@@ -35,13 +45,7 @@ class Sell {
   isLoading = true;
   searchText = "";
   showFilter = false;
-  filterData = {
-    dateFrom: "",
-    dateTo: "",
-    product: "",
-    minQuantity: "",
-    maxQuantity: "",
-  };
+  filterData = { ...initialFilterData };
   pieChartPeriod = ["Всички резултати"];
   isSellCreated = false;
 
@@ -120,11 +124,14 @@ class Sell {
   };
 
   loadSaleStats = async (period) => {
-    this.setSellStats(
-      await sellAction.getStats(period?.currentKey ?? this.pieChartPeriod)
-    );
-
-    this.setIsLoading(false);
+    try {
+      const stats = await sellAction.getStats(
+        period?.currentKey ?? this.pieChartPeriod
+      );
+      this.setSellStats(stats);
+    } finally {
+      this.setIsLoading(false);
+    }
   };
 
   loadLineChartSaleStats = async (period) => {
@@ -138,56 +145,48 @@ class Sell {
   };
 
   loadValues = async () => {
-    const response = await sellAction.getValues();
+    try {
+      const response = await sellAction.getValues();
 
-    this.setFuelConsumption(response[0].fuel_consumption);
-    this.setDieselPrice(response[0].diesel_price);
-
-    this.sellData = {
-      ...this.sellData,
-      diesel_price: response[0].diesel_price,
-      fuel_consumption: response[0].fuel_consumption,
-    };
+      this.setFuelConsumption(response[0].fuel_consumption);
+      this.setDieselPrice(response[0].diesel_price);
+      this.setSellData({
+        ...this.sellData,
+        diesel_price: response[0].diesel_price,
+        fuel_consumption: response[0].fuel_consumption,
+      });
+    } catch {
+      commonStore.setErrorMessage("Грешка при зареждане на стойностите");
+    }
   };
 
-  loadSales = async (newPage) => {
-    this.setSales(
-      await sellAction.getSales(
-        newPage ?? this.currentPage,
+  loadSales = async (page = this.currentPage) => {
+    try {
+      const sales = await sellAction.getSales(
+        page,
         this.perPage,
         this.searchText,
         this.filterData,
         this.orderColumn
-      )
-    );
-
-    this.setIsLoading(false);
+      );
+      this.setSales(sales);
+    } catch {
+      commonStore.setErrorMessage("Неуспешно зареждане на продажбите");
+    } finally {
+      this.setIsLoading(false);
+    }
   };
 
   clearSellData = () => {
     this.sellData = {
-      quantity: null,
-      mileage: null,
-      price: null,
+      ...initialSellData,
       diesel_price: this.dieselPrice,
       fuel_consumption: this.fuelConsumption,
-      additional_costs: null,
-      is_wholesale: true,
-      date: "",
-      product: "",
-      message: "",
     };
   };
 
   clearFilterData = () => {
-    this.setFilterData({
-      dateFrom: "",
-      dateTo: "",
-      product: "",
-      minQuantity: "",
-      maxQuantity: "",
-    });
-
+    this.setFilterData({ ...initialFilterData });
     this.loadSales();
   };
 
@@ -237,26 +236,31 @@ class Sell {
     this.loadSales();
   };
 
+  hasInvalidQuantityRange = () => {
+    const { minQuantity, maxQuantity } = this.filterData;
+
+    return (
+      minQuantity && maxQuantity && Number(minQuantity) > Number(maxQuantity)
+    );
+  };
+
+  hasInvalidDateRange = () => {
+    const { dateFrom, dateTo } = this.filterData;
+
+    return dateFrom && dateTo && dateFrom > dateTo;
+  };
+
   searchSales = () => {
     commonStore.setErrorMessage("");
     this.setSearchText("");
 
-    if (
-      this.filterData?.minQuantity &&
-      this.filterData?.maxQuantity &&
-      Number(this.filterData?.minQuantity) >
-        Number(this.filterData?.maxQuantity)
-    ) {
+    if (this.hasInvalidQuantityRange()) {
       commonStore.setErrorMessage("Невалидено мин и макс количество");
 
       return;
     }
 
-    if (
-      this.filterData?.dateFrom &&
-      this.filterData?.dateTo &&
-      this.filterData?.dateFrom > this.filterData?.dateTo
-    ) {
+    if (this.hasInvalidDateRange()) {
       commonStore.setErrorMessage("Невалиден период от време");
 
       return;
@@ -267,12 +271,16 @@ class Sell {
   };
 
   deleteSell = async (id) => {
-    const response = await sellAction.deleteSell(id);
+    try {
+      const response = await sellAction.deleteSell(id);
 
-    if (response.status) {
-      commonStore.setSuccessMessage(response.message);
-      this.loadSales();
-      productStore.loadProducts();
+      if (response.status) {
+        commonStore.setSuccessMessage(response.message);
+        this.loadSales();
+        productStore.loadProducts();
+      }
+    } catch (error) {
+      commonStore.setErrorMessage("Неуспешно изтриване на грешката");
     }
   };
 

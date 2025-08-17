@@ -6,6 +6,14 @@ import commonStore from "@/stores/commonStore";
 import productStore from "@/stores/productStore";
 import { debounce } from "lodash";
 
+const initialFilterData = {
+  dateFrom: "",
+  dateTo: "",
+  product: "",
+  minQuantity: "",
+  maxQuantity: "",
+};
+
 class Order {
   orders = [];
   orderData = {
@@ -25,13 +33,7 @@ class Order {
   isLoading = true;
   searchText = "";
   showFilter = false;
-  filterData = {
-    dateFrom: "",
-    dateTo: "",
-    product: "",
-    minQuantity: "",
-    maxQuantity: "",
-  };
+  filterData = { ...initialFilterData };
   isOrderCreated = false;
 
   constructor() {
@@ -116,14 +118,7 @@ class Order {
   };
 
   clearFilterData = () => {
-    this.setFilterData({
-      dateFrom: "",
-      dateTo: "",
-      product: "",
-      minQuantity: "",
-      maxQuantity: "",
-    });
-
+    this.setFilterData({ ...initialFilterData });
     this.loadOrders();
   };
 
