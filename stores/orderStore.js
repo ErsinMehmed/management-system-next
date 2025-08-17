@@ -1,9 +1,10 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import orderAction from "@/actions/orderAction";
 import { validateFields } from "@/utils";
 import { orderRules as getOrderRules } from "@/rules/order";
 import commonStore from "@/stores/commonStore";
 import productStore from "@/stores/productStore";
+import { debounce } from "lodash";
 
 class Order {
   orders = [];
@@ -34,26 +35,8 @@ class Order {
   isOrderCreated = false;
 
   constructor() {
-    makeObservable(this, {
-      orders: observable,
-      orderData: observable,
-      currentPage: observable,
-      perPage: observable,
-      isLoading: observable,
-      searchText: observable,
-      filterData: observable,
-      showFilter: observable,
-      orderColumn: observable,
-      setOrders: action,
-      setOrderData: action,
-      setCurrentPage: action,
-      setPerPage: action,
-      setIsLoading: action,
-      setSearchText: action,
-      setFilterData: action,
-      setShowFilter: action,
-      setOrderColumn: action,
-    });
+    makeAutoObservable(this);
+    this.debouncedLoadOrders = debounce(this.loadOrders, 300);
   }
 
   setOrders = (data) => {
@@ -97,7 +80,7 @@ class Order {
   setSearchText = (data) => {
     this.searchText = data;
     this.setCurrentPage(1);
-    this.loadOrders();
+    this.debouncedLoadOrders();
   };
 
   setFilterData = (data) => {

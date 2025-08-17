@@ -2,7 +2,7 @@ import { makeObservable, observable, action } from "mobx";
 import { incomeRules as getIncomeRules } from "@/rules/income";
 import { validateFields } from "@/utils";
 import incomeAction from "@/actions/incomeAction";
-import commonStore from "./commonStore";
+import commonStore from "@/stores/commonStore";
 
 class Income {
   incomes = [];

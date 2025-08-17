@@ -1,7 +1,6 @@
-import { makeObservable, observable, action } from "mobx";
-import incomeStore from "./incomeStore";
-import expenseStore from "./expenseStore";
-import sellStore from "./sellStore";
+import { makeAutoObservable } from "mobx";
+import incomeStore from "@/stores/incomeStore";
+import expenseStore from "@/stores/expenseStore";
 
 class Common {
   errorFields = {};
@@ -15,18 +14,7 @@ class Common {
   };
 
   constructor() {
-    makeObservable(this, {
-      errorFields: observable,
-      errorMessage: observable,
-      successMessage: observable,
-      isLoading: observable,
-      dashboardBoxPeriod: observable,
-      setErrorFields: action,
-      setErrorMessage: action,
-      setSuccessMessage: action,
-      setIsLoading: action,
-      setDashboardBoxPeriod: action,
-    });
+    makeAutoObservable(this);
   }
 
   setErrorFields = (errorFields) => {

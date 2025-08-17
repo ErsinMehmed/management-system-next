@@ -1,4 +1,4 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import authAction from "@/actions/authAction";
 import roleApi from "@/actions/roleAction";
 import commonStore from "./commonStore";
@@ -23,13 +23,7 @@ class Auth {
   roles = [];
 
   constructor() {
-    makeObservable(this, {
-      userData: observable,
-      loginData: observable,
-      roles: observable,
-      setUserData: action,
-      setLoginData: action,
-    });
+    makeAutoObservable(this);
   }
 
   setUserData = (userData) => {

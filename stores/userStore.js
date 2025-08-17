@@ -1,4 +1,4 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import userAction from "@/actions/userAction";
 
 class User {
@@ -9,14 +9,7 @@ class User {
   isUserSalesLoad = true;
 
   constructor() {
-    makeObservable(this, {
-      userSales: observable,
-      userStocks: observable,
-      users: observable,
-      isUserSalesLoad: observable,
-      distributors: observable,
-      setUsers: action,
-    });
+    makeAutoObservable(this);
   }
 
   setUsers = (data) => {

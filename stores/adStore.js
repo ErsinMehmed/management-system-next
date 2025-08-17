@@ -1,6 +1,6 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { validateFields } from "@/utils";
-import commonStore from "./commonStore";
+import commonStore from "@/stores/commonStore";
 import adAction from "@/actions/adAction";
 import { adRules as getAdRules } from "@/rules/ad";
 
@@ -13,12 +13,7 @@ class Ad {
   };
 
   constructor() {
-    makeObservable(this, {
-      ads: observable,
-      adData: observable,
-      setAds: action,
-      setAdData: action,
-    });
+    makeAutoObservable(this);
   }
 
   setAds = (data) => {

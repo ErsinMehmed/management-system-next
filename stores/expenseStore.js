@@ -1,4 +1,4 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import expenseAction from "@/actions/expenseAction";
 
 class Expense {
@@ -8,13 +8,7 @@ class Expense {
   additionalExpenses = [];
 
   constructor() {
-    makeObservable(this, {
-      expenses: observable,
-      productExpenses: observable,
-      fuelExpenses: observable,
-      additionalExpenses: observable,
-      setExpenses: action,
-    });
+    makeAutoObservable(this);
   }
 
   setExpenses = (data) => {

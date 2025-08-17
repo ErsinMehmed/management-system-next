@@ -1,10 +1,11 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import sellAction from "@/actions/sellAction";
 import { validateFields } from "@/utils";
 import { sellRules as getSellRules } from "@/rules/sell";
 import { valueRules as getValueRules } from "@/rules/values";
 import commonStore from "@/stores/commonStore";
 import productStore from "@/stores/productStore";
+import { debounce } from "lodash";
 
 class Sell {
   sales = [];
@@ -45,37 +46,8 @@ class Sell {
   isSellCreated = false;
 
   constructor() {
-    makeObservable(this, {
-      sales: observable,
-      sellData: observable,
-      currentPage: observable,
-      perPage: observable,
-      isLoading: observable,
-      searchText: observable,
-      filterData: observable,
-      showFilter: observable,
-      sellStats: observable,
-      pieChartPeriod: observable,
-      fuelConsumption: observable,
-      dieselPrice: observable,
-      orderColumn: observable,
-      isSellCreated: observable,
-      lineChartSaleStats: observable,
-      isLoadingLineChartStats: observable,
-      setSales: action,
-      setSellData: action,
-      setCurrentPage: action,
-      setPerPage: action,
-      setIsLoading: action,
-      setSearchText: action,
-      setFilterData: action,
-      setShowFilter: action,
-      setSellStats: action,
-      setPieChartPeriod: action,
-      setFuelConsumption: action,
-      setDieselPrice: action,
-      setOrderColumn: action,
-    });
+    makeAutoObservable(this);
+    this.debouncedLoadSales = debounce(this.loadSales, 300);
   }
 
   setSales = (data) => {
@@ -119,7 +91,7 @@ class Sell {
   setSearchText = (data) => {
     this.searchText = data;
     this.setCurrentPage(1);
-    this.loadSales();
+    this.debouncedLoadSales();
   };
 
   setFilterData = (data) => {
