@@ -193,9 +193,7 @@ class Sell {
 
   createSell = async () => {
     this.isSellCreated = true;
-    commonStore.setErrorFields({});
-    commonStore.setErrorMessage("");
-    commonStore.setSuccessMessage("");
+    commonStore.resetMessages();
 
     const sellRules = getSellRules();
     const errorFields = validateFields(this.sellData, sellRules);
@@ -203,6 +201,7 @@ class Sell {
     if (errorFields) {
       commonStore.setErrorFields(errorFields);
       this.isSellCreated = false;
+
       return false;
     }
 
@@ -249,6 +248,7 @@ class Sell {
         Number(this.filterData?.maxQuantity)
     ) {
       commonStore.setErrorMessage("Невалидено мин и макс количество");
+
       return;
     }
 
@@ -258,6 +258,7 @@ class Sell {
       this.filterData?.dateFrom > this.filterData?.dateTo
     ) {
       commonStore.setErrorMessage("Невалиден период от време");
+
       return;
     }
 
@@ -276,15 +277,14 @@ class Sell {
   };
 
   updateValues = async (id, data) => {
-    commonStore.setErrorFields({});
-    commonStore.setErrorMessage(null);
-    commonStore.setSuccessMessage(null);
+    commonStore.resetMessages();
 
     const valueRules = getValueRules();
     const errorFields = validateFields(data, valueRules);
 
     if (errorFields) {
       commonStore.setErrorFields(errorFields);
+
       return false;
     }
 

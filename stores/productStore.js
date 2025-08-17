@@ -45,9 +45,7 @@ class Product {
   };
 
   updateProduct = async (id, data) => {
-    commonStore.setErrorFields({});
-    commonStore.setErrorMessage(null);
-    commonStore.setSuccessMessage(null);
+    commonStore.resetMessages();
     this.isProductUpdated = true;
 
     data.price = parseFloat(data.price);

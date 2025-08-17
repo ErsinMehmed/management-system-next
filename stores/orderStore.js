@@ -129,9 +129,7 @@ class Order {
 
   createOrder = async () => {
     this.isOrderCreated = true;
-    commonStore.setErrorFields({});
-    commonStore.setErrorMessage("");
-    commonStore.setSuccessMessage("");
+    commonStore.resetMessages();
 
     const orderRules = getOrderRules();
     const errorFields = validateFields(this.orderData, orderRules);

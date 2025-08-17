@@ -167,9 +167,7 @@ class Income {
 
   createIncome = async (data) => {
     this.isIncomeCreated = true;
-    commonStore.setErrorFields({});
-    commonStore.setErrorMessage("");
-    commonStore.setSuccessMessage("");
+    commonStore.resetMessages();
 
     const incomeRules = getIncomeRules();
     const errorFields = validateFields(data, incomeRules);

@@ -33,6 +33,12 @@ class Common {
     this.isLoading = isLoading;
   };
 
+  resetMessages = () => {
+    this.setErrorFields({});
+    this.setErrorMessage(null);
+    this.setSuccessMessage(null);
+  };
+
   setDashboardBoxPeriod = (data) => {
     const allKeysHaveValues = Object.values(data).every(
       (value) => value === ""

@@ -35,9 +35,7 @@ class Auth {
   };
 
   createUserProfile = async () => {
-    commonStore.setErrorFields({});
-    commonStore.setErrorMessage("");
-    commonStore.setSuccessMessage("");
+    commonStore.resetMessages();
 
     const registerRules = generateRegisterRules();
 

@@ -37,9 +37,7 @@ class Ad {
   };
 
   createAd = async () => {
-    commonStore.setErrorFields({});
-    commonStore.setErrorMessage("");
-    commonStore.setSuccessMessage("");
+    commonStore.resetMessages();
 
     const adRules = getAdRules();
     const errorFields = validateFields(this.adData, adRules);
