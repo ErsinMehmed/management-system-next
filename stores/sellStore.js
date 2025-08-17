@@ -98,6 +98,10 @@ class Sell {
     this.debouncedLoadSales();
   };
 
+  clearSearchText = () => {
+    this.searchText = "";
+  };
+
   setFilterData = (data) => {
     this.filterData = data;
   };
@@ -252,7 +256,7 @@ class Sell {
 
   searchSales = () => {
     commonStore.setErrorMessage("");
-    this.setSearchText("");
+    this.clearSearchText();
 
     if (this.hasInvalidQuantityRange()) {
       commonStore.setErrorMessage("Невалидено мин и макс количество");
