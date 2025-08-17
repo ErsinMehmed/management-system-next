@@ -2,7 +2,8 @@ import { makeObservable, observable, action } from "mobx";
 import orderAction from "@/actions/orderAction";
 import { validateFields } from "@/utils";
 import { orderRules as getOrderRules } from "@/rules/order";
-import commonStore from "./commonStore";
+import commonStore from "@/stores/commonStore";
+import productStore from "@/stores/productStore";
 
 class Order {
   orders = [];
@@ -165,6 +166,7 @@ class Order {
       commonStore.setSuccessMessage(response.message);
       this.clearOrderData();
       this.loadOrders();
+      productStore.loadProducts();
       this.isOrderCreated = false;
 
       return true;
@@ -220,6 +222,7 @@ class Order {
     if (response.status) {
       commonStore.setSuccessMessage(response.message);
       this.loadOrders();
+      productStore.loadProducts();
     }
   };
 }

@@ -3,7 +3,8 @@ import sellAction from "@/actions/sellAction";
 import { validateFields } from "@/utils";
 import { sellRules as getSellRules } from "@/rules/sell";
 import { valueRules as getValueRules } from "@/rules/values";
-import commonStore from "./commonStore";
+import commonStore from "@/stores/commonStore";
+import productStore from "@/stores/productStore";
 
 class Sell {
   sales = [];
@@ -238,6 +239,7 @@ class Sell {
     if (response.status) {
       commonStore.setSuccessMessage(response.message);
       this.clearSellData();
+      productStore.loadProducts();
       this.loadSales();
       this.isSellCreated = false;
 
@@ -297,6 +299,7 @@ class Sell {
     if (response.status) {
       commonStore.setSuccessMessage(response.message);
       this.loadSales();
+      productStore.loadProducts();
     }
   };
 
