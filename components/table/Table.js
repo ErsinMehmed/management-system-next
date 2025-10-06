@@ -202,7 +202,7 @@ const Table = (props) => {
                   <tr>
                     {props.columns.map((column, index) => (
                       <th
-                        className='px-4 py-3.5 border-b-2 items-center border-[#ebf4ff] bg-[#ebf4ff] text-left text-sm font-bold text-slate-700 uppercase tracking-wider cursor-pointer'
+                        className='table-header-cell cursor-pointer'
                         key={index}
                         onClick={() => handleColumnClick(column)}>
                         <div className='flex items-center'>
@@ -221,9 +221,7 @@ const Table = (props) => {
                       </th>
                     ))}
 
-                    <th className='px-5 text-center py-3.5 border-b-2 border-[#ebf4ff] bg-[#ebf4ff] text-sm font-bold text-slate-800 uppercase tracking-wider'>
-                      Действия
-                    </th>
+                    <th className='table-header-cell'>Действия</th>
                   </tr>
                 </thead>
 
@@ -237,11 +235,9 @@ const Table = (props) => {
                           key !== "_id" &&
                           key !== "message" && (
                             <td
-                              className={`${
-                                cellIndex === 1
-                                  ? "font-semibold text-slate-800"
-                                  : "text-slate-600"
-                              } px-4 py-4 border-b border-[#ebf4ff] text-sm whitespace-nowrap `}
+                              className={`table-body-cell ${
+                                cellIndex === 1 ? "emphasized" : ""
+                              }`}
                               key={cellIndex}>
                               {renderCellValue(key, value)}
 
@@ -315,12 +311,12 @@ const Table = (props) => {
             )}
           </table>
 
-          <div className='px-5 py-4 bg-white border-t flex  items-center justify-between'>
+          <div className='px-5 py-4 bg-white border-t border-slate-200 flex items-center justify-between'>
             <div className='w-32 h-0 -mt-10'>
               {props.isLoading ? (
                 <div className='bg-[#f4f4f5] w-14 h-8 rounded-lg px-2 pt-2 mt-1'>
-                  <div className='h-1 animate-pulse bg-gray-200 rounded-full w-10/12 mb-2'></div>
-                  <div className='h-1 animate-pulse bg-gray-200 rounded-full'></div>
+                  <div className='skeleton-loader w-10/12 mb-2'></div>
+                  <div className='skeleton-loader'></div>
                 </div>
               ) : (
                 <Select

@@ -1,17 +1,42 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2563eb;
+  --color-secondary: #64748b;
+  --color-tableHeader: #ebf4ff;
+  --font-sans: "Inter", sans-serif;
+}
 
 @layer components {
-    .center-element {
-        @apply flex justify-center items-center;
-    }
+  .center-element {
+    @apply flex justify-center items-center;
+  }
 
-    .flex-container {
-        @apply flex justify-between items-center;
-    }
+  .flex-container {
+    @apply flex justify-between items-center;
+  }
 
-    .income-display {
-        @apply bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md
-    }
+  .income-display {
+    @apply bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md;
+  }
+
+  .table-header-cell {
+    @apply px-4 py-3.5 border-b-2 border-tableHeader bg-tableHeader text-left text-sm font-bold text-slate-700 uppercase tracking-wider;
+  }
+
+  .table-body-cell {
+    @apply px-4 py-4 border-b border-tableHeader text-sm whitespace-nowrap;
+  }
+
+  .table-body-cell.emphasized {
+    @apply font-semibold text-slate-800;
+  }
+
+  .skeleton-loader {
+    @apply h-1 animate-pulse bg-gray-200 rounded-full;
+  }
 }
+
+ @plugin '../hero.js';
+ @source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+ @custom-variant dark (&:is(.dark *));
