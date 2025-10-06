@@ -1,6 +1,6 @@
-import { BsTrash3 } from "react-icons/bs";
+import { FaTrash } from "react-icons/fa";
 import { HiOutlinePlus } from "react-icons/hi2";
-import { Spinner } from "@heroui/react";
+import { Spinner, Button } from "@heroui/react";
 import Input from "@/components/html/Input";
 import { formatCurrency } from "@/utils";
 
@@ -15,7 +15,7 @@ const ProductForm = (props) => {
 
   return (
     <>
-      <div className='border-b pb-6'>
+      <div className='border-b border-slate-200 pb-6'>
         <div className='text-slate-700 font-semibold mb-2'>
           Цена за зареждане
         </div>
@@ -29,7 +29,7 @@ const ProductForm = (props) => {
         />
       </div>
 
-      <div className='border-b pb-6'>
+      <div className='border-b border-slate-200 pb-6'>
         <div className='text-slate-700 font-semibold mb-2'>Наличност</div>
 
         <Input
@@ -50,11 +50,15 @@ const ProductForm = (props) => {
               key={index}
               className='flex items-center'>
               {props.data.sell_prices.length > 1 && (
-                <button
-                  className='rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95 mr-2'
-                  onClick={() => props.removeData(index)}>
-                  <BsTrash3 />
-                </button>
+                <Button
+                  onPress={() => props.removeData(index)}
+                  isIconOnly
+                  radius='full'
+                  className='mr-2.5'
+                  color='danger'>
+                  {" "}
+                  <FaTrash />
+                </Button>
               )}
 
               <div className='flex items-center space-x-2.5 w-full'>
@@ -79,11 +83,12 @@ const ProductForm = (props) => {
           ))}
 
           <div className='center-element mt-4 w-full'>
-            <button
-              className='rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95'
-              onClick={props.addData}>
+            <Button
+              onPress={props.addData}
+              color='default'
+              radius='full'>
               <HiOutlinePlus />
-            </button>
+            </Button>
           </div>
         </div>
       </div>
