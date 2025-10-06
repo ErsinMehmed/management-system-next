@@ -25,7 +25,6 @@ export async function PUT(request, { params }) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(error);
     return NextResponse.json(
       { message: "Възникна грешка при обновяване", status: false },
       { status: 500 }
@@ -52,7 +51,6 @@ export async function GET(request, { params }) {
 
     return NextResponse.json(product, { status: 200 });
   } catch (error) {
-    console.error(error);
     return NextResponse.json(
       { message: "Възникна грешка при зареждане", status: false },
       { status: 500 }

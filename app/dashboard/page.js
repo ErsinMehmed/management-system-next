@@ -218,7 +218,7 @@ const Dashboard = () => {
                       )}
 
                       {expenses.total_ad_expenses > 0 && (
-                        <dl className='flex-container py-2.5 px-3 text-sm border-t'>
+                        <dl className='flex-container py-2.5 px-3 text-sm border-t border-slate-200'>
                           <dt className='text-gray-500 font-semibold'>
                             Реклами
                           </dt>
@@ -230,7 +230,7 @@ const Dashboard = () => {
                       )}
 
                       {expenses.total_additional_expenses > 0 && (
-                        <dl className='flex-container py-2.5 px-3 text-sm border-t'>
+                        <dl className='flex-container py-2.5 px-3 text-sm border-t border-slate-200'>
                           <dt className='text-gray-500 font-semibold'>
                             Допълнителни
                           </dt>
@@ -248,7 +248,7 @@ const Dashboard = () => {
                         expenses.total_additional_expenses > 0) ||
                         (expenses.total_fuel_expenses > 0 &&
                           expenses.total_ad_expenses > 0)) && (
-                        <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t'>
+                        <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t border-slate-200'>
                           <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
                             {formatCurrency(
                               expenses.total_fuel_expenses +

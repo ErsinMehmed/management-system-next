@@ -1,4 +1,4 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { incomeRules as getIncomeRules } from "@/rules/income";
 import { validateFields } from "@/utils";
 import incomeAction from "@/actions/incomeAction";
@@ -30,31 +30,7 @@ class Income {
   isIncomeCreated = false;
 
   constructor() {
-    makeObservable(this, {
-      incomes: observable,
-      additionalIncomes: observable,
-      averageProfitData: observable,
-      isLoadingAverageProfit: observable,
-      saleIncomes: observable,
-      currentPage: observable,
-      perPage: observable,
-      searchText: observable,
-      filterData: observable,
-      showFilter: observable,
-      orderColumn: observable,
-      allIncomes: observable,
-      isLoading: observable,
-      isIncomeCreated: observable,
-      setIncomes: action,
-      setAdditionalIncomes: action,
-      setCurrentPage: action,
-      setPerPage: action,
-      setSearchText: action,
-      setFilterData: action,
-      setShowFilter: action,
-      setAllIncomes: action,
-      setIsLoading: action,
-    });
+    makeAutoObservable(this);
   }
 
   setSales = (data) => {

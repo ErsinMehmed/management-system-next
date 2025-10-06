@@ -1,4 +1,4 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import productAction from "@/actions/productAction";
 import { validateFields } from "@/utils";
 import { productRules as getProductRules } from "@/rules/product";
@@ -11,14 +11,7 @@ class Product {
   isProductUpdated = false;
 
   constructor() {
-    makeObservable(this, {
-      products: observable,
-      productData: observable,
-      isProductUpdated: observable,
-      isLoading: observable,
-      setProducts: action,
-      setProductData: action,
-    });
+    makeAutoObservable(this);
   }
 
   setProducts = (data) => {
@@ -48,32 +41,41 @@ class Product {
     commonStore.resetMessages();
     this.isProductUpdated = true;
 
-    data.price = parseFloat(data.price);
-    data.availability = parseFloat(data.availability);
+    try {
+      data.price = parseFloat(data.price);
+      data.availability = parseFloat(data.availability);
 
-    const productRules = getProductRules();
-    const errorFields = validateFields(this.productData, productRules);
+      const productRules = getProductRules();
+      const errorFields = validateFields(this.productData, productRules);
 
-    if (errorFields) {
-      commonStore.setErrorFields(errorFields);
+      if (errorFields) {
+        commonStore.setErrorFields(errorFields);
+        this.isProductUpdated = false;
+
+        return false;
+      }
+
+      const response = await productAction.updateProduct(id, data);
+
+      if (response.status) {
+        commonStore.setSuccessMessage(response.message);
+        this.loadProducts();
+        this.isProductUpdated = false;
+
+        return true;
+      }
+
       this.isProductUpdated = false;
 
       return false;
-    }
-
-    const response = await productAction.updateProduct(id, data);
-
-    if (response.status) {
-      commonStore.setSuccessMessage(response.message);
-      this.loadProducts();
+    } catch (error) {
       this.isProductUpdated = false;
+      commonStore.setErrorMessage(
+        error.message || "Възникна грешка при обновяването на продукта"
+      );
 
-      return true;
+      return false;
     }
-
-    this.isProductUpdated = false;
-
-    return false;
   };
 }
 
