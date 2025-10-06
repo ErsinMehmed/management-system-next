@@ -21,7 +21,7 @@
   }
 
   .table-header-cell {
-    @apply px-4 py-3.5 border-b-2 border-tableHeader bg-tableHeader text-left text-sm font-bold text-slate-700 uppercase tracking-wider;
+    @apply px-4 py-3.5 border-b-2 border-tableHeader bg-tableHeader text-left text-sm font-semibold text-slate-700 uppercase tracking-wider;
   }
 
   .table-body-cell {

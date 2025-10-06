@@ -41,7 +41,7 @@ const Table = (props) => {
   return (
     <div className='col-span-full xl:col-span-8 bg-white rounded-md h-full shadow-md'>
       <div className='px-5 py-4 border-b border-slate-100'>
-        <div className='text-xl font-bold leading-none text-slate-800'>
+        <div className='text-xl font-semibold leading-none text-slate-800'>
           {props.title}
         </div>
       </div>

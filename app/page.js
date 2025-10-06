@@ -34,26 +34,25 @@ const Login = () => {
       <section
         className={`center-element min-h-screen w-full bg-[#f3f7fd] ${
           isLoading && "animate-pulse pointer-events-none"
-        }`}
-      >
-        <div className="center-element flex-col px-6 py-8 w-full sm:mx-auto lg:py-0">
-          <div className="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-sm xl:p-0">
-            <div className="p-6 space-y-5 md:space-y-6 sm:p-8">
-              <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-800">
+        }`}>
+        <div className='center-element flex-col px-6 py-8 w-full sm:mx-auto lg:py-0'>
+          <div className='w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-sm xl:p-0'>
+            <div className='p-6 space-y-5 md:space-y-6 sm:p-8'>
+              <h1 className='text-xl font-semibold leading-tight tracking-tight text-gray-800'>
                 Влезте в акаунта си
               </h1>
 
               <Input
-                type="email"
-                label="Имейл"
+                type='email'
+                label='Имейл'
                 errorMessage={errorFields.error}
                 onChange={(value) => handleFieldChange("email", value)}
                 onEnterPress={login}
               />
 
               <Input
-                label="Парола"
-                type="password"
+                label='Парола'
+                type='password'
                 errorMessage={errorFields.error}
                 onChange={(value) => handleFieldChange("password", value)}
                 onEnterPress={login}
@@ -61,10 +60,9 @@ const Login = () => {
 
               <Button
                 isDisabled={isLoading}
-                className="w-full font-semibold"
-                color="primary"
-                onClick={login}
-              >
+                className='w-full font-semibold'
+                color='primary'
+                onClick={login}>
                 Вход
               </Button>
 
