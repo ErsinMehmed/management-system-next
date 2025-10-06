@@ -155,7 +155,7 @@ const Pie = (props) => {
     <div className='bg-white rounded-md shadow-md p-4 md:p-5'>
       <div className='flex justify-between items-start w-full mb-5'>
         <div className='flex-col items-center w-full'>
-          <h5 className='text-xl font-semibold leading-none text-gray-800 me-1 mb-3'>
+          <h5 className='text-xl font-semibold leading-none text-gray-700 me-1 mb-3'>
             Продажби по бутилки
           </h5>
 

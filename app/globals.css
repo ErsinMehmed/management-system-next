@@ -17,7 +17,7 @@
   }
 
   .income-display {
-    @apply bg-gray-100 text-gray-800 text-xs inline-flex items-center px-2.5 py-1 rounded-md;
+    @apply bg-gray-100 text-gray-700 text-xs inline-flex items-center px-2.5 py-1 rounded-md;
   }
 
   .table-header-cell {
@@ -29,7 +29,7 @@
   }
 
   .table-body-cell.emphasized {
-    @apply font-semibold text-slate-800;
+    @apply font-semibold text-slate-700;
   }
 
   .skeleton-loader {

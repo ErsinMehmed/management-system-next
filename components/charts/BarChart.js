@@ -103,7 +103,7 @@ const BarChart = () => {
   return (
     <div className='bg-white rounded-md shadow-md mt-5 2xl:mt-0'>
       <div className='px-5 py-4 border-b border-slate-100'>
-        <div className='ml-4 md:ml-5 text-xl font-semibold leading-none text-slate-800'>
+        <div className='ml-4 md:ml-5 text-xl font-semibold leading-none text-slate-700'>
           Средна печалба по бутилка
         </div>
       </div>

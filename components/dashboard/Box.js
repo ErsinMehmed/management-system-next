@@ -16,7 +16,7 @@ const Box = (props) => {
           </span>
 
           <div>
-            <h2 className='text-lg font-semibold text-slate-800 mb-0.5'>
+            <h2 className='text-lg font-semibold text-slate-700 mb-0.5'>
               {props.title}
             </h2>
 
@@ -39,7 +39,7 @@ const Box = (props) => {
             <div className='h-2 animate-pulse bg-gray-200 rounded-full' />
           </>
         ) : (
-          <div className='text-3xl font-semibold text-slate-800 mr-2'>
+          <div className='text-3xl font-semibold text-slate-700 mr-2'>
             {isNaN(props.value) ? "00.00" : formatCurrency(props.value, 2)}
           </div>
         )}

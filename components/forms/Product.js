@@ -7,7 +7,7 @@ import { formatCurrency } from "@/utils";
 const ProductForm = (props) => {
   if (Object.keys(props.data).length === 0) {
     return (
-      <div className="py-32 mx-auto">
+      <div className='py-32 mx-auto'>
         <Spinner classNames={{ wrapper: "w-20 h-20" }} />
       </div>
     );
@@ -15,50 +15,51 @@ const ProductForm = (props) => {
 
   return (
     <>
-      <div className="border-b pb-6">
-        <div className="text-slate-800 font-semibold mb-2">
+      <div className='border-b pb-6'>
+        <div className='text-slate-700 font-semibold mb-2'>
           Цена за зареждане
         </div>
 
         <Input
-          type="text"
-          label="Цена на зареждане"
+          type='text'
+          label='Цена на зареждане'
           value={props.data.price || ""}
           errorMessage={props.errorFields.price}
           onChange={(value) => props.handleFieldChange("price", value)}
         />
       </div>
 
-      <div className="border-b pb-6">
-        <div className="text-slate-800 font-semibold mb-2">Наличност</div>
+      <div className='border-b pb-6'>
+        <div className='text-slate-700 font-semibold mb-2'>Наличност</div>
 
         <Input
-          type="text"
-          label="Начличност на проддукта"
+          type='text'
+          label='Начличност на проддукта'
           value={props.data.availability || null}
           errorMessage={props.errorFields.availability}
           onChange={(value) => props.handleFieldChange("availability", value)}
         />
       </div>
 
-      <div className="pt-1 space-y-2">
-        <div className="text-slate-800 font-semibold">Цена за продажба</div>
+      <div className='pt-1 space-y-2'>
+        <div className='text-slate-700 font-semibold'>Цена за продажба</div>
 
-        <div className="space-y-3.5">
+        <div className='space-y-3.5'>
           {props.data.sell_prices?.map((price, index) => (
-            <div key={index} className="flex items-center">
+            <div
+              key={index}
+              className='flex items-center'>
               {props.data.sell_prices.length > 1 && (
                 <button
-                  className="rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95 mr-2"
-                  onClick={() => props.removeData(index)}
-                >
+                  className='rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95 mr-2'
+                  onClick={() => props.removeData(index)}>
                   <BsTrash3 />
                 </button>
               )}
 
-              <div className="flex items-center space-x-2.5 w-full">
+              <div className='flex items-center space-x-2.5 w-full'>
                 <Input
-                  type="text"
+                  type='text'
                   label={`Цена за ${index + 1}бр.`}
                   value={price || ""}
                   errorMessage={
@@ -70,18 +71,17 @@ const ProductForm = (props) => {
                   }
                 />
 
-                <div className="size-12 bg-[#f4f4f5] rounded-lg center-element text-xs px-2 text-slate-800">
+                <div className='size-12 bg-[#f4f4f5] rounded-lg center-element text-xs px-2 text-slate-700'>
                   {formatCurrency((index + 1) * props.data.price, 0)}
                 </div>
               </div>
             </div>
           ))}
 
-          <div className="center-element mt-4 w-full">
+          <div className='center-element mt-4 w-full'>
             <button
-              className="rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95"
-              onClick={props.addData}
-            >
+              className='rounded-full p-2 bg-white border hover:bg-slate-50 transition-all active:scale-95'
+              onClick={props.addData}>
               <HiOutlinePlus />
             </button>
           </div>

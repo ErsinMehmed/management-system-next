@@ -158,7 +158,7 @@ const DashboardSales = () => {
           </button>
         }>
         <div className='border-b pb-6'>
-          <div className='text-slate-800 font-semibold mb-2'>Константи</div>
+          <div className='text-slate-700 font-semibold mb-2'>Константи</div>
 
           <div className='space-y-3.5'>
             <Input
