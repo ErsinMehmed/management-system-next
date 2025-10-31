@@ -1,5 +1,4 @@
 import Income from "@/models/income";
-import User from "@/models/user";
 import RequestHandler from "@/helpers/RequestHandler";
 import { NextResponse } from "next/server";
 

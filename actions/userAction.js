@@ -5,7 +5,7 @@ class User {
     try {
       const periodParam = getPeriodParam(period);
 
-      const response = await fetch(`/api/get-user-sales?${periodParam}`);
+      const response = await fetch(`/api/sales/users?${periodParam}`);
 
       return await response.json();
     } catch (error) {
@@ -16,7 +16,7 @@ class User {
   getUserStocks = async (userId) => {
     try {
       const user = userId ?? localStorage.getItem("userId");
-      const response = await fetch(`/api/user-stocks?userId=${user}`);
+      const response = await fetch(`/api/users/stock?userId=${user}`);
 
       return await response.json();
     } catch (error) {
@@ -46,7 +46,7 @@ class User {
 
   updateUserStocks = async (data) => {
     try {
-      const response = await fetch(`/api/user-stocks`, {
+      const response = await fetch(`/api/users/stock`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +62,7 @@ class User {
 
   addUserStock = async (data) => {
     try {
-      const response = await fetch(`/api/user-stocks`, {
+      const response = await fetch(`/api/user/stock`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

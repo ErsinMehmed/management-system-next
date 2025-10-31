@@ -95,7 +95,7 @@ class Sell {
 
       const userId = localStorage.getItem("userId");
       const response = await fetch(
-        `/api/pie-chart-sales-stats?period=${period}&userId=${userId}`
+        `/api/sales/statistics?period=${period}&userId=${userId}`
       );
       const stats = response.json();
 
@@ -140,7 +140,7 @@ class Sell {
       }
 
       const response = await fetch(
-        `/api/line-chart-sales-stats?period=${period}`
+        `/api/sales/statistics-line-chart?period=${period}`
       );
       const stats = response.json();
 

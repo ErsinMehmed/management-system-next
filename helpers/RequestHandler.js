@@ -86,7 +86,7 @@ export default class RequestHandler {
       });
     }
 
-    if (request.nextUrl.pathname === "/api/get-additional-incomes") {
+    if (request.nextUrl.pathname === "/api/incomes/additional/list") {
       queryBuilder = queryBuilder.populate({
         path: "distributor",
         select: "name",

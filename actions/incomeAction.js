@@ -3,7 +3,7 @@ import {getPeriodParam, fetchData} from "@/utils";
 class Income {
     createIncome = async (data) => {
         try {
-            const response = await fetch("/api/additional-incomes", {
+            const response = await fetch("/api/incomes/additional", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -34,29 +34,7 @@ class Income {
     getAdditionalIncomes = async (period) => {
         try {
             const periodParam = getPeriodParam(period);
-            const response = await fetch(`/api/additional-incomes?${periodParam}`);
-
-            return await response.json();
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    getAverageProfit = async (period) => {
-        if (!period?.dateFrom && !period?.dateTo) {
-            const currentDate = new Date();
-            const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
-
-            period = {
-                dateFrom: "2023-12-31" /*startOfYear.toISOString().split("T")[0]*/,
-                dateTo: currentDate.toISOString().split("T")[0],
-            };
-        }
-
-        try {
-            const response = await fetch(
-                `/api/get-average-profit?dateFrom=${period.dateFrom}&dateTo=${period.dateTo}`
-            );
+            const response = await fetch(`/api/incomes/additional?${periodParam}`);
 
             return await response.json();
         } catch (error) {
@@ -68,7 +46,7 @@ class Income {
         try {
             const periodParam = getPeriodParam(period);
             const response = await fetch(
-                `/api/sales/get-total-incomes?${periodParam}`
+                `/api/sales/total-incomes?${periodParam}`
             );
 
             return await response.json();
@@ -85,7 +63,7 @@ class Income {
         orderColumn
     ) => {
         return await fetchData(
-            "get-additional-incomes",
+            "incomes/additional/list",
             page,
             perPage,
             "",
@@ -96,7 +74,7 @@ class Income {
 
     IncomeSell = async (id) => {
         try {
-            const response = await fetch(`/api/additional-incomes?id=${id}`, {
+            const response = await fetch(`/api/incomes/additional?id=${id}`, {
                 method: "DELETE",
             });
 

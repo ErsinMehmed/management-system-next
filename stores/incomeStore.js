@@ -7,7 +7,6 @@ import commonStore from "@/stores/commonStore";
 class Income {
   incomes = [];
   additionalIncomes = [];
-  averageProfitData = [];
   isLoadingAverageProfit = true;
   saleIncomes = [];
   allIncomes = [];
@@ -123,14 +122,6 @@ class Income {
     const response = await incomeAction.getAdditionalIncomes(period);
 
     this.setAdditionalIncomes(response);
-  };
-
-  loadAverageProfit = async (period) => {
-    try {
-      this.averageProfitData = await incomeAction.getAverageProfit(period);
-    } finally {
-      this.isLoadingAverageProfit = false;
-    }
   };
 
   loadTotalSaleIncomes = async (period) => {

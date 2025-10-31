@@ -13,7 +13,6 @@ import { TbMoneybag } from "react-icons/tb";
 import { Tabs, Tab } from "@heroui/react";
 import Layout from "@/components/layout/Dashboard";
 import PieChart from "@/components/charts/PieChart";
-import BarChart from "@/components/charts/BarChart";
 import TabSection from "@/components/dashboard/TabSection";
 import DashboardDateFilters from "@/components/dashboard/DashboardDateFilters";
 import Table from "@/components/dashboard/Table";
@@ -30,7 +29,6 @@ const Dashboard = () => {
   const {
     incomes,
     additionalIncomes,
-    loadAverageProfit,
     loadIncomes,
     loadAdditionalIncomes,
   } = incomeStore;
@@ -44,7 +42,6 @@ const Dashboard = () => {
     const promises = [
       loadSaleStats(),
       loadLineChartSaleStats(),
-      loadAverageProfit(),
     ];
 
     if (!dateFrom && !dateTo) {
@@ -299,11 +296,7 @@ const Dashboard = () => {
       </div>
 
       {isUserAdmin && (
-        <div className='2xl:grid grid-cols-1 2xl:grid-cols-2 gap-5'>
-          <LineChart />
-
-          <BarChart />
-        </div>
+        <LineChart />
       )}
 
       {/* <UploadTest /> */}
