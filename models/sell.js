@@ -1,4 +1,6 @@
 import mongoose, { Schema } from "mongoose";
+import Product from "./product.js";
+import User from "./user.js";
 
 const sellSchema = new Schema(
   {

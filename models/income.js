@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import Distributor from "./distributor.js";
 
 const incomeSchema = new Schema(
   {

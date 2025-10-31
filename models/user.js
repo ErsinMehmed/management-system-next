@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import Role from "./role.js";
 
 const userSchema = new Schema(
   {
