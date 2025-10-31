@@ -22,7 +22,7 @@ function Filter(props) {
             collapsed: { opacity: 0, height: 0 },
           }}
           transition={{ duration: 0.4, ease: "easeInOut" }}>
-          <div className='flex-container border-b-2 text-slate-700'>
+          <div className='flex-container border-b-2 border-slate-200 text-slate-700'>
             <div className='p-4 text-lg font-semibold leading-tight'>
               Подробно търсене
             </div>
