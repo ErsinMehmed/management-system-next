@@ -5,10 +5,6 @@ import UserStock from "@/models/userStock";
 import RequestHandler from "@/helpers/RequestHandler";
 import { NextResponse } from "next/server";
 
-export const config = {
-    maxDuration: 15
-};
-
 export async function POST(request) {
   const data = await request.json();
 
