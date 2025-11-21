@@ -19,8 +19,8 @@ export default class RequestHandler {
             request.nextUrl.searchParams
         ]);
 
-        const page = searchParams.get("page") || 1;
-        const perPage = searchParams.get("per_page") || 10;
+        const page = Math.max(1, parseInt(searchParams.get("page")) || 1);
+        const perPage = Math.min(20, Math.max(1, parseInt(searchParams.get("per_page")) || 10));
         const searchText = searchParams.get("search");
         const dateFrom = searchParams.get("date_from");
         const dateTo = searchParams.get("date_to");
