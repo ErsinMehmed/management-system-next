@@ -22,6 +22,8 @@ const TabSection = (props) => {
         return `${item.name} ${item.weight}гр.`;
       case "Балони":
         return `${item.name} ${item.count}бр.`;
+      case "Вейпове":
+        return `${item.name} ${item.puffs}k`;
       default:
         return item.name;
     }

@@ -26,12 +26,8 @@ const Dashboard = () => {
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const { sellStats, loadSaleStats, loadLineChartSaleStats } = sellStore;
   const { expenses, loadExpenses } = expenseStore;
-  const {
-    incomes,
-    additionalIncomes,
-    loadIncomes,
-    loadAdditionalIncomes,
-  } = incomeStore;
+  const { incomes, additionalIncomes, loadIncomes, loadAdditionalIncomes } =
+    incomeStore;
   const { products } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
@@ -39,10 +35,7 @@ const Dashboard = () => {
   useEffect(() => {
     const { dateFrom, dateTo } = dashboardBoxPeriod;
 
-    const promises = [
-      loadSaleStats(),
-      loadLineChartSaleStats(),
-    ];
+    const promises = [loadSaleStats(), loadLineChartSaleStats()];
 
     if (!dateFrom && !dateTo) {
       promises.push(loadAdditionalIncomes(), loadExpenses(), loadIncomes());
@@ -295,9 +288,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {isUserAdmin && (
-        <LineChart />
-      )}
+      {isUserAdmin && <LineChart />}
 
       {/* <UploadTest /> */}
     </Layout>

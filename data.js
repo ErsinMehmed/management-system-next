@@ -36,7 +36,7 @@ const dropdownPeriods = [
   "Всички резултати",
 ];
 
-const categories = ["Бутилки", "Балони"];
+const categories = ["Бутилки", "Вейпове", "Балони"];
 
 const dashboardLinks = [
   {

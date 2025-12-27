@@ -13,6 +13,7 @@ const productSchema = new Schema(
     weight: Number,
     model: String,
     count: Number,
+    puffs: Number,
     availability: Number,
     units_per_box: Number,
     price: Number,
