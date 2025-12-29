@@ -1,6 +1,16 @@
 import React from "react";
-import { DatePicker } from "@heroui/react";
+import dynamic from "next/dynamic";
 import { parseDate } from "@internationalized/date";
+
+const DatePicker = dynamic(
+  () => import("@heroui/react").then((mod) => mod.DatePicker),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='h-12 w-full bg-gray-100 animate-pulse rounded-lg'></div>
+    ),
+  }
+);
 
 const DatePickerComponent = ({
   label,

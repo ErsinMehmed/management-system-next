@@ -5,7 +5,16 @@ const nextConfig = {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   },
   images: {
-    domains: ["res.cloudinary.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "http",
+        hostname: "res.cloudinary.com",
+      },
+    ],
   },
 };
 
