@@ -38,6 +38,8 @@ export const config = {
     "/dashboard/orders",
     "/dashboard/sales",
     "/dashboard/products",
+    "/dashboard/users",
+    "/dashboard/users/sales",
     "/dashboard/incomes",
   ],
 };
