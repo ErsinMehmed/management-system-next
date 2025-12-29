@@ -69,7 +69,7 @@ const Dashboard = () => {
     [dashboardBoxPeriod, setDashboardBoxPeriod]
   );
 
-  const filteredProducts = useMemo(
+  const filteredBottles = useMemo(
     () =>
       products.filter(
         (product) =>
@@ -78,7 +78,7 @@ const Dashboard = () => {
     [products]
   );
 
-  const filteredProductAvailabilities = filteredProducts?.map(
+  const filteredBottleAvailabilities = filteredBottles?.map(
     ({ name, weight, image_url, availability, price, units_per_box }) => {
       const baseData = {
         name: `${name} ${weight}гр.`,
@@ -96,6 +96,39 @@ const Dashboard = () => {
 
       return baseData;
     }
+  );
+
+  const filteredVapes = useMemo(
+    () =>
+      products.filter(
+        (product) =>
+          product.category.name === "Вейпове" && product.availability > 0
+      ),
+    [products]
+  );
+
+  const filteredVapeAvailabilities = useMemo(
+    () =>
+      filteredVapes.map(
+        ({ name, puffs, image_url, availability, price, units_per_box }) => {
+          const baseData = {
+            name: `${name} ${puffs}k`,
+            image_url,
+            carton: (availability / units_per_box).toFixed(1),
+            availability,
+          };
+
+          if (isUserAdmin) {
+            return {
+              ...baseData,
+              price: price * availability,
+            };
+          }
+
+          return baseData;
+        }
+      ),
+    [filteredVapes, isUserAdmin]
   );
 
   const allExpenses = (
@@ -282,7 +315,10 @@ const Dashboard = () => {
         <div className='col-span-2 h-full'>
           <Table
             title='Наличност на бутилки'
-            data={filteredProductAvailabilities}
+            data={{
+              bottles: filteredBottleAvailabilities,
+              vapes: filteredVapeAvailabilities,
+            }}
             columns={columns}
           />
         </div>

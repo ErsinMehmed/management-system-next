@@ -243,7 +243,7 @@ const Pie = (props) => {
         </div>
       </div>
 
-      <div className={props.status ? "h-80" : "h-[28.4rem]"}>
+      <div className={props.status ? "h-[600px]" : "h-[28.4rem]"}>
         {props.data?.length > 0 ? (
           chartComponent
         ) : !props.data?.length && !props.status && props.message ? (
