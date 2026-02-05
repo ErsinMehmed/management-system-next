@@ -45,7 +45,7 @@ const DashboardIncomes = () => {
       _id,
       distributor: distributor?.name ?? "-",
       text: message,
-      amount: amount + " лв.",
+      amount: amount + " €",
     })
   );
 

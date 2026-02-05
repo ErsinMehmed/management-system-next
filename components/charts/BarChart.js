@@ -71,7 +71,7 @@
 //     dataLabels: {
 //       enabled: true,
 //       formatter: function (value) {
-//         return value + " лв";
+//         return value + " €";
 //       },
 //     },
 //     legend: {
@@ -91,7 +91,7 @@
 //       show: true,
 //       labels: {
 //         formatter: function (value) {
-//           return value + " лв.";
+//           return value + " €.";
 //         },
 //       },
 //     },
@@ -116,7 +116,7 @@
 //             </div>
 //
 //             <div className='text-gray-900 font-semibold'>
-//               {averageProfitData.averageProfitOverall}лв.
+//               {averageProfitData.averageProfitOverall}€
 //             </div>
 //           </div>
 //

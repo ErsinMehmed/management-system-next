@@ -104,7 +104,7 @@ const SellForm = (props) => {
           <div className='text-sm'>Продажна цена</div>
 
           <div>
-            {props.data.price ? formatCurrency(props.data.price, 2) : "0.00лв."}
+            {props.data.price ? formatCurrency(props.data.price, 2) : "0.00 €"}
           </div>
         </div>
 
@@ -114,7 +114,7 @@ const SellForm = (props) => {
           <div>
             {props.data.fuel_price
               ? formatCurrency(props.data.fuel_price, 2)
-              : "0.00лв."}
+              : "0.00 €"}
           </div>
         </div>
       </div>

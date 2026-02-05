@@ -292,5 +292,5 @@ export function formatCurrency(amount, fractionDigits) {
     }
   }
 
-  return formattedAmount + " лв.";
+  return formattedAmount + " €";
 }

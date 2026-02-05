@@ -18,7 +18,7 @@ const ExpensesTable = ({ fuelPrice }) => (
     <TableBody>
       <TableRow>
         <TableCell>Гориво</TableCell>
-        <TableCell>{fuelPrice.toFixed(2)} лв.</TableCell>
+        <TableCell>{fuelPrice.toFixed(2)} €</TableCell>
       </TableRow>
     </TableBody>
   </Table>

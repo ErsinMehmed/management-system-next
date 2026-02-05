@@ -102,7 +102,7 @@ const Table = (props) => {
         case "fuel_price":
         case "price":
         case "total_amount":
-          return isNaN(value) ? "0.00 лв." : `${formatCurrency(value, 2)}`;
+          return isNaN(value) ? "0.00 €" : `${formatCurrency(value, 2)}`;
         default:
           return value;
       }

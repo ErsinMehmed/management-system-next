@@ -41,7 +41,7 @@ const OrderForm = (props) => {
           <div className="text-sm">Единична цена</div>
 
           <div>
-            {props.data.price ? formatCurrency(props.data.price, 2) : "0.00лв."}
+            {props.data.price ? formatCurrency(props.data.price, 2) : "0.00 €"}
           </div>
         </div>
 
@@ -51,7 +51,7 @@ const OrderForm = (props) => {
           <div>
             {props.data.total_amount
               ? formatCurrency(props.data.total_amount, 2)
-              : "0.00лв."}
+              : "0.00 €"}
           </div>
         </div>
       </div>
