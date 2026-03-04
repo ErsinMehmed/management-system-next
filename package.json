@@ -11,7 +11,7 @@
       "chat": "node server.js"
    },
    "dependencies": {
-      "@heroui/react": "^2.8.7",
+      "@heroui/react": "^2.8.9",
       "@heroui/toast": "^2.0.19",
       "@internationalized/date": "^3.10.1",
       "bcryptjs": "^2.4.3",
