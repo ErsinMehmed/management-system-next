@@ -98,6 +98,7 @@ export async function GET(request) {
         name: "$product.name",
         weight: "$product.weight",
         flavor: "$product.flavor",
+        puffs: "$product.puffs",
         count: "$product.count",
         category: "$category.name",
         quantity: 1,
