@@ -4,8 +4,6 @@ import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
-let emailFromCredentials;
-
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -15,11 +13,13 @@ export const authOptions = {
       async authorize(credentials) {
         const { email, password } = credentials;
 
-        emailFromCredentials = email;
-
         try {
           await connectMongoDB();
-          const user = await User.findOne({ email });
+
+          const user = await User.findOne({ email }).populate({
+            path: "role",
+            select: "name",
+          });
 
           if (!user) {
             return null;
@@ -51,19 +51,13 @@ export const authOptions = {
       return session;
     },
     async jwt({ token, user }) {
-      const dbUser = await User.findOne({
-        email: emailFromCredentials,
-      }).populate({
-        path: "role",
-        select: "name",
-      });
-
-      if (dbUser) {
-        token.id = dbUser._id;
-        token.name = dbUser.name;
-        token.email = dbUser.email;
-        token.role = dbUser.role.name;
-        token.profile_image = dbUser.profile_image;
+      // user е наличен само при първоначален login — не при всяко опресняване
+      if (user) {
+        token.id = user._id;
+        token.name = user.name;
+        token.email = user.email;
+        token.role = user.role.name;
+        token.profile_image = user.profile_image;
       }
 
       return token;
