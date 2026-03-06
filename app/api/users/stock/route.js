@@ -3,6 +3,8 @@ import UserStock from "@/models/userStock";
 import User from "@/models/user";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import mongoose from "mongoose";
 
 export async function POST(request) {
@@ -99,7 +101,18 @@ export async function POST(request) {
 }
 
 export async function GET(request) {
-  const userId = request.nextUrl.searchParams.get("userId");
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json(
+      { status: false, message: "Не сте оторизирани." },
+      { status: 401 }
+    );
+  }
+
+  // Admin may pass explicit userId; otherwise use the current session user
+  const paramUserId = request.nextUrl.searchParams.get("userId");
+  const userId = paramUserId || session.user.id;
 
   await connectMongoDB();
 
@@ -117,11 +130,6 @@ export async function GET(request) {
           { status: 404 }
         );
       }
-    } else {
-      return NextResponse.json(
-        { message: "Не е посочен потребител", status: false },
-        { status: 404 }
-      );
     }
 
     const transformedStocks = userStocks.map((stock) => ({

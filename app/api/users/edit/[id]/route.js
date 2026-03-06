@@ -1,8 +1,13 @@
+import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import User from "@/models/user";
 import { NextResponse } from "next/server";
 
 export async function PUT(request, { params }) {
+  const { error } = await requireAdmin();
+
+  if (error) return error;
+
   const { id } = params;
   const data = await request.json();
 

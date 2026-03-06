@@ -1,8 +1,12 @@
+import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import Ad from "@/models/ad";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
   const data = await request.json();
 
   await connectMongoDB();
@@ -24,6 +28,9 @@ export async function GET() {
 }
 
 export async function DELETE(request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
   const id = request.nextUrl.searchParams.get("id");
 
   await connectMongoDB();

@@ -3,21 +3,24 @@ import Sell from "@/models/sell";
 import User from "@/models/user";
 import Order from "@/models/order";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getDateCondition } from "@/utils";
 import mongoose from "mongoose";
 
 export async function GET(request) {
-  await connectMongoDB();
+  const session = await getServerSession(authOptions);
 
-  const userId = request.nextUrl.searchParams.get("userId");
-
-  if (!userId) {
-    return NextResponse.json({
-      status: false,
-      message: "Потребителят не е предоставен.",
-    });
+  if (!session) {
+    return NextResponse.json(
+      { status: false, message: "Не сте оторизирани." },
+      { status: 401 }
+    );
   }
 
+  await connectMongoDB();
+
+  const userId = session.user.id;
   const userObjectId = new mongoose.Types.ObjectId(userId);
 
   const dateFrom = request.nextUrl.searchParams.get("dateFrom");
@@ -33,7 +36,7 @@ export async function GET(request) {
 
   const dateCondition = getDateCondition(dateFrom, dateTo, period);
 
-  const matchCondition = {
+const matchCondition = {
     ...dateCondition,
     creator: userObjectId,
   };

@@ -32,7 +32,7 @@ export default class RequestHandler {
     const maxQuantity = searchParams.get("max_quantity");
     const sortColumn = searchParams.get("sort_column");
     const sortOrder = searchParams.get("sort_order");
-    const userRole = searchParams.get("user_role");
+    const userRole = session?.user?.role;
 
     await connectMongoDB();
 

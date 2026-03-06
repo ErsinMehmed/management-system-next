@@ -7,9 +7,7 @@ class Sell {
 
   createSell = async (data) => {
     try {
-      const userId = localStorage.getItem("userId");
-
-      const response = await fetch(`/api/sales?userId=${userId}`, {
+      const response = await fetch("/api/sales", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -24,16 +22,13 @@ class Sell {
   };
 
   getSales = async (page, perPage, searchText, filterData, orderColumn) => {
-    const userRole = localStorage.getItem("userRole");
-
     return await fetchData(
       "sales",
       page,
       perPage,
       searchText,
       filterData,
-      orderColumn,
-      userRole
+      orderColumn
     );
   };
 
@@ -93,10 +88,7 @@ class Sell {
         return this.cache.get("stats");
       }
 
-      const userId = localStorage.getItem("userId");
-      const response = await fetch(
-        `/api/sales/statistics?period=${period}&userId=${userId}`
-      );
+      const response = await fetch(`/api/sales/statistics?period=${period}`);
       const stats = response.json();
 
       this.cache.set("period", period);

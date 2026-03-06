@@ -20,10 +20,7 @@ class Income {
     getIncomes = async (period) => {
         try {
             const periodParam = getPeriodParam(period);
-            const userId = localStorage.getItem("userId");
-            const response = await fetch(
-                `/api/incomes?${periodParam}&userId=${userId}`
-            );
+            const response = await fetch(`/api/incomes?${periodParam}`);
 
             return await response.json();
         } catch (error) {

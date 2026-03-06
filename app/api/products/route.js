@@ -1,8 +1,12 @@
+import { requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
+  const { error } = await requireSuperAdmin();
+  if (error) return error;
+
   const data = await request.json();
 
   await connectMongoDB();

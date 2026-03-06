@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
 import Order from "@/models/order";
@@ -7,6 +8,9 @@ import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
 
 export async function GET(request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
   await connectMongoDB();
 
   const dateFrom = request.nextUrl.searchParams.get("dateFrom");

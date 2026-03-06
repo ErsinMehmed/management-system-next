@@ -3,13 +3,24 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function proxy(req) {
-    const role = req.nextauth.token?.role;
+    const { token } = req.nextauth;
+    const role = token?.role;
     const path = req.nextUrl.pathname;
+
+    if (path.startsWith("/api/")) {
+      if (!token) {
+        return NextResponse.json(
+          { message: "Не сте оторизирани." },
+          { status: 401 }
+        );
+      }
+      return NextResponse.next();
+    }
 
     if (role === "Super Admin") return NextResponse.next();
 
     if (role === "Admin" && path === "/dashboard/orders") {
-      return new NextResponse("You are not authorized!");
+      return new NextResponse("Нямате достъп!");
     }
 
     if (
@@ -19,13 +30,13 @@ export default withAuth(
         path === "/dashboard/products" ||
         path === "/dashboard/incomes")
     ) {
-      return new NextResponse("You are not authorized!");
+      return new NextResponse("Нямате достъп!");
     }
   },
   {
     callbacks: {
-      authorized: (params) => {
-        let { token } = params;
+      authorized: ({ token, req }) => {
+        if (req.nextUrl.pathname.startsWith("/api/")) return true;
         return !!token;
       },
     },
@@ -41,5 +52,6 @@ export const config = {
     "/dashboard/users",
     "/dashboard/users/sales",
     "/dashboard/incomes",
+    "/api/((?!auth).*)",
   ],
 };

@@ -15,8 +15,8 @@ class User {
 
   getUserStocks = async (userId) => {
     try {
-      const user = userId ?? localStorage.getItem("userId");
-      const response = await fetch(`/api/users/stock?userId=${user}`);
+      const url = userId ? `/api/users/stock?userId=${userId}` : "/api/users/stock";
+      const response = await fetch(url);
 
       return await response.json();
     } catch (error) {

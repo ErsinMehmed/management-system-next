@@ -1,11 +1,15 @@
+import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import Income from "@/models/income";
 import User from "@/models/user";
 import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
-import mongoose from "mongoose";
 
 export async function POST(request) {
+  const { error } = await requireAdmin();
+
+  if (error) return error;
+
   const data = await request.json();
 
   await connectMongoDB();
@@ -56,6 +60,9 @@ export async function GET(request) {
 }
 
 export async function DELETE(request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
   const id = request.nextUrl.searchParams.get("id");
 
   await connectMongoDB();

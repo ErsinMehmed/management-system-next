@@ -3,21 +3,23 @@ import Sell from "@/models/sell";
 import Product from "@/models/product";
 import User from "@/models/user";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import mongoose from "mongoose";
 
 export async function GET(request) {
-  await connectMongoDB();
+  const session = await getServerSession(authOptions);
 
-  const userId = request.nextUrl.searchParams.get("userId");
-
-  if (!userId) {
-    return NextResponse.json({
-      status: false,
-      message: "User ID not provided.",
-    });
+  if (!session) {
+    return NextResponse.json(
+      { status: false, message: "Не сте оторизирани." },
+      { status: 401 }
+    );
   }
 
-  const userObjectId = new mongoose.Types.ObjectId(userId);
+  await connectMongoDB();
+
+  const userObjectId = new mongoose.Types.ObjectId(session.user.id);
 
   const period = request.nextUrl.searchParams.get("period");
 
