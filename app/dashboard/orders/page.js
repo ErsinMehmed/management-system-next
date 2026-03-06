@@ -6,6 +6,8 @@ import Modal from "@/components/Modal";
 import Table from "@/components/table/Table";
 import OrderForm from "@/components/forms/Order";
 import Pagination from "@/components/table/Pagination";
+import { useDisclosure } from "@heroui/react";
+import { FiPlus } from "react-icons/fi";
 import {productTitle} from "@/utils";
 import {commonStore, orderStore, productStore} from "@/stores/useStore";
 
@@ -37,6 +39,7 @@ const DashboardOrders = () => {
     } = orderStore;
     const {products} = productStore;
     const {errorFields} = commonStore;
+    const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
     useEffect(() => {
         loadOrders();
@@ -96,21 +99,14 @@ const DashboardOrders = () => {
         setOrderData({...updatedData, [name]: value});
     };
 
-    const modal = (
-        <Modal
-            isButton={true}
-            errorFields={errorFields}
-            saveBtnAction={createOrder}
-            isRecordCreated={isOrderCreated}
-            openBtnText='Добави'
-            title='Добави поръчка'>
-            <OrderForm
-                data={orderData}
-                errorFields={errorFields}
-                updatedProducts={updatedProducts}
-                handleFieldChange={handleFieldChange}
-            />
-        </Modal>
+    const addButton = (
+        <button
+            type="button"
+            className="text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90"
+            onClick={onOpen}>
+            <span className="hidden sm:block">Добави</span>
+            <FiPlus className="w-5 h-5 sm:hidden" />
+        </button>
     );
 
     return (
@@ -133,7 +129,7 @@ const DashboardOrders = () => {
                     totalPages={orders.pagination?.total_pages}
                     isLoading={isLoading}
                     setPerPage={setPerPage}
-                    searchBarButton={modal}
+                    searchBarButton={addButton}
                     searchBarPlaceholder='име на продукт'
                     searchBarValue={searchText}
                     setSearchBarText={setSearchText}
@@ -151,6 +147,20 @@ const DashboardOrders = () => {
                         }}
                     />
                 </Table>
+
+                <Modal
+                    isOpen={isOpen}
+                    onOpenChange={onOpenChange}
+                    title='Добави поръчка'
+                    isLoading={isOrderCreated}
+                    onSave={createOrder}>
+                    <OrderForm
+                        data={orderData}
+                        errorFields={errorFields}
+                        updatedProducts={updatedProducts}
+                        handleFieldChange={handleFieldChange}
+                    />
+                </Modal>
             </div>
         </Layout>
     );

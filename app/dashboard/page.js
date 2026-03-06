@@ -10,8 +10,9 @@ import {
 } from "@/stores/useStore";
 import { MdAttachMoney } from "react-icons/md";
 import { TbMoneybag } from "react-icons/tb";
-import { Tabs, Tab } from "@heroui/react";
+import { Tabs, Tab, useDisclosure } from "@heroui/react";
 import Layout from "@/components/layout/Dashboard";
+import Modal from "@/components/Modal";
 import PieChart from "@/components/charts/PieChart";
 import TabSection from "@/components/dashboard/TabSection";
 import DashboardDateFilters from "@/components/dashboard/DashboardDateFilters";
@@ -31,6 +32,8 @@ const Dashboard = () => {
   const { products } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const [selectedCategory, setSelectedCategory] = useState("Бутилки");
+  const { isOpen: isIncomesOpen, onOpen: onIncomesOpen, onOpenChange: onIncomesOpenChange } = useDisclosure();
+  const { isOpen: isExpensesOpen, onOpen: onExpensesOpen, onOpenChange: onExpensesOpenChange } = useDisclosure();
 
   useEffect(() => {
     const { dateFrom, dateTo } = dashboardBoxPeriod;
@@ -158,139 +161,18 @@ const Dashboard = () => {
         <Box
           title='Приходи'
           period={dashboardBoxPeriod}
-          modalContent={
-            <Tabs
-              aria-label='Options'
-              selectedKey={selectedCategory}
-              onSelectionChange={setSelectedCategory}>
-              {categories.map((category) => (
-                <Tab
-                  key={category}
-                  title={category}>
-                  <TabSection
-                    data={incomes}
-                    kind='incomes'
-                    category={category}
-                    totalKey='total_incomes'
-                  />
-                </Tab>
-              ))}
-
-              {additionalIncomes?.incomes > 0 && (
-                <Tab title='Други'>
-                  <div className='bg-gray-50 rounded-lg'>
-                    <dl className='flex-container py-2.5 px-3 text-sm'>
-                      <dt className='text-gray-500 font-semibold'>
-                        Допълнителни приходи
-                      </dt>
-
-                      <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                        {formatCurrency(additionalIncomes?.incomes, 2)}
-                      </dd>
-                    </dl>
-                  </div>
-                </Tab>
-              )}
-            </Tabs>
-          }
           value={profit}
           icon={<MdAttachMoney className='w-6 h-6' />}
-          modalTitle='Приходи по категории'
-          modal={true}
+          onClick={onIncomesOpen}
         />
 
         {isUserAdmin && (
           <Box
             title='Разходи'
             period={dashboardBoxPeriod}
-            modalContent={
-              <Tabs
-                aria-label='Options'
-                selectedKey={selectedCategory}
-                onSelectionChange={setSelectedCategory}>
-                {categories.map((category) => (
-                  <Tab
-                    key={category}
-                    title={category}>
-                    <TabSection
-                      data={expenses}
-                      kind='expenses'
-                      category={category}
-                      totalKey='total_expenses'
-                    />
-                  </Tab>
-                ))}
-
-                {(expenses.total_fuel_expenses > 0 ||
-                  expenses.total_additional_expenses > 0 ||
-                  expenses.total_ad_expenses > 0) && (
-                  <Tab
-                    key='Други'
-                    title='Други'>
-                    <div className='bg-gray-50 rounded-lg'>
-                      {expenses.total_fuel_expenses > 0 && (
-                        <dl className='flex-container py-2.5 px-3 text-sm'>
-                          <dt className='text-gray-500 font-semibold'>
-                            Гориво
-                          </dt>
-
-                          <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                            {formatCurrency(expenses.total_fuel_expenses, 2)}
-                          </dd>
-                        </dl>
-                      )}
-
-                      {expenses.total_ad_expenses > 0 && (
-                        <dl className='flex-container py-2.5 px-3 text-sm border-t border-slate-200'>
-                          <dt className='text-gray-500 font-semibold'>
-                            Реклами
-                          </dt>
-
-                          <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                            {formatCurrency(expenses.total_ad_expenses, 2)}
-                          </dd>
-                        </dl>
-                      )}
-
-                      {expenses.total_additional_expenses > 0 && (
-                        <dl className='flex-container py-2.5 px-3 text-sm border-t border-slate-200'>
-                          <dt className='text-gray-500 font-semibold'>
-                            Допълнителни
-                          </dt>
-
-                          <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                            {formatCurrency(
-                              expenses.total_additional_expenses,
-                              2
-                            )}
-                          </dd>
-                        </dl>
-                      )}
-
-                      {((expenses.total_fuel_expenses > 0 &&
-                        expenses.total_additional_expenses > 0) ||
-                        (expenses.total_fuel_expenses > 0 &&
-                          expenses.total_ad_expenses > 0)) && (
-                        <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t border-slate-200'>
-                          <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
-                            {formatCurrency(
-                              expenses.total_fuel_expenses +
-                                expenses.total_additional_expenses +
-                                expenses.total_ad_expenses,
-                              2
-                            )}
-                          </dd>
-                        </dl>
-                      )}
-                    </div>
-                  </Tab>
-                )}
-              </Tabs>
-            }
             value={allExpenses}
             icon={<MdAttachMoney className='w-6 h-6' />}
-            modalTitle='Разходи по категории'
-            modal={true}
+            onClick={onExpensesOpen}
           />
         )}
 
@@ -327,6 +209,135 @@ const Dashboard = () => {
       {isUserAdmin && <LineChart />}
 
       {/* <UploadTest /> */}
+
+      <Modal
+        isOpen={isIncomesOpen}
+        onOpenChange={onIncomesOpenChange}
+        title='Приходи по категории'
+        showFooter={false}>
+        <Tabs
+          aria-label='Options'
+          selectedKey={selectedCategory}
+          onSelectionChange={setSelectedCategory}>
+          {categories.map((category) => (
+            <Tab
+              key={category}
+              title={category}>
+              <TabSection
+                data={incomes}
+                kind='incomes'
+                category={category}
+                totalKey='total_incomes'
+              />
+            </Tab>
+          ))}
+
+          {additionalIncomes?.incomes > 0 && (
+            <Tab title='Други'>
+              <div className='bg-gray-50 rounded-lg'>
+                <dl className='flex-container py-2.5 px-3 text-sm'>
+                  <dt className='text-gray-500 font-semibold'>
+                    Допълнителни приходи
+                  </dt>
+
+                  <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
+                    {formatCurrency(additionalIncomes?.incomes, 2)}
+                  </dd>
+                </dl>
+              </div>
+            </Tab>
+          )}
+        </Tabs>
+      </Modal>
+
+      <Modal
+        isOpen={isExpensesOpen}
+        onOpenChange={onExpensesOpenChange}
+        title='Разходи по категории'
+        showFooter={false}>
+        <Tabs
+          aria-label='Options'
+          selectedKey={selectedCategory}
+          onSelectionChange={setSelectedCategory}>
+          {categories.map((category) => (
+            <Tab
+              key={category}
+              title={category}>
+              <TabSection
+                data={expenses}
+                kind='expenses'
+                category={category}
+                totalKey='total_expenses'
+              />
+            </Tab>
+          ))}
+
+          {(expenses.total_fuel_expenses > 0 ||
+            expenses.total_additional_expenses > 0 ||
+            expenses.total_ad_expenses > 0) && (
+            <Tab
+              key='Други'
+              title='Други'>
+              <div className='bg-gray-50 rounded-lg'>
+                {expenses.total_fuel_expenses > 0 && (
+                  <dl className='flex-container py-2.5 px-3 text-sm'>
+                    <dt className='text-gray-500 font-semibold'>
+                      Гориво
+                    </dt>
+
+                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
+                      {formatCurrency(expenses.total_fuel_expenses, 2)}
+                    </dd>
+                  </dl>
+                )}
+
+                {expenses.total_ad_expenses > 0 && (
+                  <dl className='flex-container py-2.5 px-3 text-sm border-t border-slate-200'>
+                    <dt className='text-gray-500 font-semibold'>
+                      Реклами
+                    </dt>
+
+                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
+                      {formatCurrency(expenses.total_ad_expenses, 2)}
+                    </dd>
+                  </dl>
+                )}
+
+                {expenses.total_additional_expenses > 0 && (
+                  <dl className='flex-container py-2.5 px-3 text-sm border-t border-slate-200'>
+                    <dt className='text-gray-500 font-semibold'>
+                      Допълнителни
+                    </dt>
+
+                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
+                      {formatCurrency(
+                        expenses.total_additional_expenses,
+                        2
+                      )}
+                    </dd>
+                  </dl>
+                )}
+
+                {((expenses.total_fuel_expenses > 0 &&
+                  expenses.total_additional_expenses > 0) ||
+                  (expenses.total_fuel_expenses > 0 &&
+                    expenses.total_ad_expenses > 0)) && (
+                  <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t border-slate-200'>
+                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
+                      {formatCurrency(
+                        expenses.total_fuel_expenses +
+                          expenses.total_additional_expenses +
+                          expenses.total_ad_expenses,
+                        2
+                      )}
+                    </dd>
+                  </dl>
+                )}
+              </div>
+            </Tab>
+          )}
+        </Tabs>
+      </Modal>
     </Layout>
   );
 };

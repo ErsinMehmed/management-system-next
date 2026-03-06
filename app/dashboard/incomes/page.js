@@ -1,14 +1,13 @@
 "use client";
-import React, { useEffect, useState, useMemo } from "react";
-import { MdAttachMoney } from "react-icons/md";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
-import Input from "@/components/html/Input";
 import Table from "@/components/table/Table";
 import Pagination from "@/components/table/Pagination";
 import IncomeForm from "@/components/forms/Income";
-import { productTitle } from "@/utils";
+import { useDisclosure } from "@heroui/react";
+import { FiPlus } from "react-icons/fi";
 import { commonStore, incomeStore, userStore } from "@/stores/useStore";
 
 const DashboardIncomes = () => {
@@ -34,6 +33,7 @@ const DashboardIncomes = () => {
   } = incomeStore;
   const { distributors, loadDistributors } = userStore;
   const { errorFields, successMessage, errorMessage } = commonStore;
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
     loadAllIncomes();
@@ -75,21 +75,14 @@ const DashboardIncomes = () => {
     return response;
   };
 
-  const modal = (
-    <Modal
-      isButton={true}
-      errorFields={errorFields}
-      saveBtnAction={handleCreateIncome}
-      isRecordCreated={isIncomeCreated}
-      openBtnText='Добави'
-      title='Дoбави допълнителен приход'>
-      <IncomeForm
-        data={incomeData}
-        errorFields={errorFields}
-        distributors={distributors}
-        handleFieldChange={handleFieldChange}
-      />
-    </Modal>
+  const addButton = (
+    <button
+      type="button"
+      className="text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90"
+      onClick={onOpen}>
+      <span className="hidden sm:block">Добави</span>
+      <FiPlus className="w-5 h-5 sm:hidden" />
+    </button>
   );
 
   return (
@@ -107,7 +100,7 @@ const DashboardIncomes = () => {
           totalPages={allIncomes.pagination?.total_pages}
           isLoading={isLoading}
           setPerPage={setPerPage}
-          searchBarButton={modal}
+          searchBarButton={addButton}
           searchBarPlaceholder='дистрибутор'>
           <Pagination
             isLoading={isLoading}
@@ -123,6 +116,20 @@ const DashboardIncomes = () => {
           />
         </Table>
       </div>
+
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        title='Дoбави допълнителен приход'
+        isLoading={isIncomeCreated}
+        onSave={handleCreateIncome}>
+        <IncomeForm
+          data={incomeData}
+          errorFields={errorFields}
+          distributors={distributors}
+          handleFieldChange={handleFieldChange}
+        />
+      </Modal>
     </Layout>
   );
 };

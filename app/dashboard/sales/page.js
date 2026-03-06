@@ -8,6 +8,8 @@ import Input from "@/components/html/Input";
 import Table from "@/components/table/Table";
 import Pagination from "@/components/table/Pagination";
 import SellForm from "@/components/forms/Sell";
+import { useDisclosure } from "@heroui/react";
+import { FiPlus } from "react-icons/fi";
 import { productTitle } from "@/utils";
 import { commonStore, sellStore, productStore } from "@/stores/useStore";
 
@@ -45,6 +47,8 @@ const DashboardSales = () => {
   } = sellStore;
   const { products } = productStore;
   const { errorFields, successMessage, errorMessage } = commonStore;
+  const { isOpen: isAddOpen, onOpen: onAddOpen, onOpenChange: onAddOpenChange } = useDisclosure();
+  const { isOpen: isValuesOpen, onOpen: onValuesOpen, onOpenChange: onValuesOpenChange } = useDisclosure();
 
   useEffect(() => {
     loadSales();
@@ -123,40 +127,87 @@ const DashboardSales = () => {
     setSellData({ ...updatedData, [name]: value });
   };
 
-  const modal = (
-    <Modal
-      isButton={true}
-      errorFields={errorFields}
-      saveBtnAction={createSell}
-      isRecordCreated={isSellCreated}
-      openBtnText='Добави'
-      title='Дoбави продажба'>
-      <SellForm
-        data={sellData}
-        errorFields={errorFields}
-        updatedProducts={updatedProducts}
-        handleFieldChange={handleFieldChange}
-      />
-    </Modal>
+  const addButton = (
+    <button
+      type="button"
+      className="text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90"
+      onClick={onAddOpen}>
+      <span className="hidden sm:block">Добави</span>
+      <FiPlus className="w-5 h-5 sm:hidden" />
+    </button>
   );
 
   return (
     <Layout title='Продажби'>
+      <button
+        onClick={onValuesOpen}
+        className='text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
+        <span className='hidden sm:block'>Стойности</span>
+        <MdAttachMoney className='w-5 h-5 sm:hidden' />
+      </button>
+
+      <div className='min-h-screen 2xl:px-10'>
+        <Table
+          title='Продажби'
+          data={filteredSales}
+          columns={["продукт", "количество", "цена", "гориво", "дата"]}
+          delete={handleDeleteSell}
+          perPage={perPage}
+          orderColumn={orderColumn}
+          setOrderColumn={setOrderColumn}
+          filterSearchOnClick={searchSales}
+          clearFilterData={clearFilterData}
+          filterData={filterData}
+          showFilter={showFilter}
+          setShowFilter={setShowFilter}
+          setFilterData={setFilterData}
+          totalPages={sales.pagination?.total_pages}
+          isLoading={isLoading}
+          setPerPage={setPerPage}
+          searchBarButton={addButton}
+          searchBarPlaceholder='име на продукт'
+          searchBarValue={searchText}
+          setSearchBarText={setSearchText}
+          filterSection={true}>
+          <Pagination
+            isLoading={isLoading}
+            currentPage={sales.pagination?.current_page}
+            totalPages={sales.pagination?.total_pages}
+            totalItems={sales.pagination?.total_results}
+            perPage={sales.pagination?.per_page}
+            handlePrevPage={handlePageChange}
+            handleNextPage={() => handlePageChange("next")}
+            handlePageClick={(pageNumber) => {
+              handlePageClick(pageNumber);
+            }}
+          />
+        </Table>
+      </div>
+
       <Modal
+        isOpen={isAddOpen}
+        onOpenChange={onAddOpenChange}
+        title='Дoбави продажба'
+        isLoading={isSellCreated}
+        onSave={createSell}>
+        <SellForm
+          data={sellData}
+          errorFields={errorFields}
+          updatedProducts={updatedProducts}
+          handleFieldChange={handleFieldChange}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={isValuesOpen}
+        onOpenChange={onValuesOpenChange}
         title='Редактирай стойности'
-        saveBtnAction={() => {
+        onSave={() => {
           return updateValues("65a551bbacc139606ddbb3ec", {
             diesel_price: dieselPrice,
             fuel_consumption: fuelConsumption,
           });
-        }}
-        openButton={
-          <button className='text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
-            <span className='hidden sm:block'>Стойности</span>
-
-            <MdAttachMoney className='w-5 h-5 sm:hidden' />
-          </button>
-        }>
+        }}>
         <div className='border-b pb-6'>
           <div className='text-slate-700 font-semibold mb-2'>Константи</div>
 
@@ -179,44 +230,6 @@ const DashboardSales = () => {
           </div>
         </div>
       </Modal>
-
-      <div className='min-h-screen 2xl:px-10'>
-        <Table
-          title='Продажби'
-          data={filteredSales}
-          columns={["продукт", "количество", "цена", "гориво", "дата"]}
-          delete={handleDeleteSell}
-          perPage={perPage}
-          orderColumn={orderColumn}
-          setOrderColumn={setOrderColumn}
-          filterSearchOnClick={searchSales}
-          clearFilterData={clearFilterData}
-          filterData={filterData}
-          showFilter={showFilter}
-          setShowFilter={setShowFilter}
-          setFilterData={setFilterData}
-          totalPages={sales.pagination?.total_pages}
-          isLoading={isLoading}
-          setPerPage={setPerPage}
-          searchBarButton={modal}
-          searchBarPlaceholder='име на продукт'
-          searchBarValue={searchText}
-          setSearchBarText={setSearchText}
-          filterSection={true}>
-          <Pagination
-            isLoading={isLoading}
-            currentPage={sales.pagination?.current_page}
-            totalPages={sales.pagination?.total_pages}
-            totalItems={sales.pagination?.total_results}
-            perPage={sales.pagination?.per_page}
-            handlePrevPage={handlePageChange}
-            handleNextPage={() => handlePageChange("next")}
-            handlePageClick={(pageNumber) => {
-              handlePageClick(pageNumber);
-            }}
-          />
-        </Table>
-      </div>
     </Layout>
   );
 };

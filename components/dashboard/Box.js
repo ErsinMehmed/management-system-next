@@ -1,13 +1,13 @@
 "use client";
-import Modal from "@/components/Modal";
 import moment from "moment";
 import { formatCurrency } from "@/utils";
 
 const Box = (props) => {
-  const boxContent = (
+  return (
     <div
+      onClick={props.onClick}
       className={`w-full relative bg-white rounded-md shadow-md border border-slate-200 ${
-        props.modal && "cursor-pointer"
+        props.onClick && "cursor-pointer"
       } `}>
       <div className='p-5'>
         <div className='flex gap-3'>
@@ -45,18 +45,6 @@ const Box = (props) => {
         )}
       </div>
     </div>
-  );
-
-  return props.modal ? (
-    <Modal
-      openButton={boxContent}
-      isButton={false}
-      showFooter={true}
-      title={props.modalTitle}>
-      {props.modalContent}
-    </Modal>
-  ) : (
-    boxContent
   );
 };
 

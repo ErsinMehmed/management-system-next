@@ -2,8 +2,6 @@
 import Image from "next/image";
 import { HiMenuAlt1 } from "react-icons/hi";
 import { FaXmark } from "react-icons/fa6";
-import Modal from "@/components/Modal";
-import Chat from "@/components/Chat";
 import Dropdown from "./AccountDropdown";
 
 const Navbar = (props) => {

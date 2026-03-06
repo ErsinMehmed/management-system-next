@@ -1,10 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { MdDelete } from "react-icons/md";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
   useDisclosure,
   Tooltip,
   Popover,
@@ -18,6 +14,7 @@ import { IoMdArrowDropup } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { productTitle, formatCurrency } from "@/utils";
 import { perPageResult } from "@/data";
+import ConfirmModal from "@/components/ConfirmModal";
 import SearchBar from "./SearchBar";
 import Filter from "./Filter";
 import Select from "@/components/html/Select";
@@ -112,44 +109,13 @@ const Table = (props) => {
 
   return (
     <div className='sm:container sm:mx-auto sm:px-8 2xl:px-0'>
-      <Modal
-        placement='center'
+      <ConfirmModal
         isOpen={isOpen}
-        onOpenChange={onOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className='flex flex-col gap-1 text-2xl mt-3'>
-                Изтрий {props.title === "Заявки" ? "заявката" : "продажбата"}
-              </ModalHeader>
-
-              <ModalBody>
-                <div>
-                  Сигурни ли сте, че искате да изтриете{" "}
-                  {props.title === "Заявки" ? "заявката" : "продажбата"} ?
-                </div>
-
-                <div className='flex flex-row mt-3 mb-4 space-x-3 justify-evenly'>
-                  <button
-                    onClick={() => {
-                      onClose();
-                      handleDelete(rowId);
-                    }}
-                    className='w-full py-2.5 text-sm font-semibold text-center text-white transition-all bg-red-600 border border-red-600 rounded-lg hover:bg-red-500 active:scale-95'>
-                    Изтрий
-                  </button>
-
-                  <button
-                    onClick={onClose}
-                    className='w-full py-2.5 text-sm font-semibold text-center text-gray-700 transition-all bg-white border border-gray-200 rounded-lg hover:bg-gray-100 active:scale-95'>
-                    Откажи
-                  </button>
-                </div>
-              </ModalBody>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+        onOpenChange={onOpenChange}
+        title={`Изтрий ${props.title === "Заявки" ? "заявката" : "продажбата"}`}
+        message={`Сигурни ли сте, че искате да изтриете ${props.title === "Заявки" ? "заявката" : "продажбата"} ?`}
+        onConfirm={() => handleDelete(rowId)}
+      />
 
       <SearchBar
         isLoading={props.isLoading}
