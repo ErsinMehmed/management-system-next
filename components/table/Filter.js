@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { HiMiniXMark, HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { GrPowerReset } from "react-icons/gr";
-import { objectHasValues } from "@/utils";
+import { objectIsEmpty } from "@/utils";
 import { usePathname } from "next/navigation";
 import FilterForm from "@/components/table/FilterForm";
 
@@ -46,9 +46,9 @@ function Filter(props) {
               <button
                 type='button'
                 onClick={props.clearFilterData}
-                disabled={objectHasValues(props.data)}
+                disabled={objectIsEmpty(props.data)}
                 className={`w-1/2 sm:w-auto  ${
-                  objectHasValues(props.data)
+                  objectIsEmpty(props.data)
                     ? "opacity-60"
                     : "hover:text-[#0071f5] active:scale-95 hover:border-blue-100"
                 } text-slate-700 border border-gray-300  focus:outline-none font-semibold rounded-full px-4 2xl:px-6 h-11 mt-7 text-center transition-all center-element`}>
@@ -58,10 +58,10 @@ function Filter(props) {
 
               <button
                 type='button'
-                disabled={objectHasValues(props.data)}
+                disabled={objectIsEmpty(props.data)}
                 onClick={props.searchOnClick}
                 className={`w-1/2 sm:w-auto ${
-                  objectHasValues(props.data)
+                  objectIsEmpty(props.data)
                     ? "bg-opacity-60"
                     : "hover:bg-blue-600 active:scale-95"
                 } text-white bg-[#0071f5] focus:outline-none font-semibold rounded-full px-6 2xl:px-8 h-11 mt-7 text-center transition-all center-element`}>

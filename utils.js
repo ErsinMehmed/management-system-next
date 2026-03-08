@@ -98,7 +98,7 @@ function validatePassword(field, value, errors) {
   }
 }
 
-export function objectHasValues(obj) {
+export function objectIsEmpty(obj) {
   for (const key in obj) {
     if (
       obj.hasOwnProperty(key) &&
