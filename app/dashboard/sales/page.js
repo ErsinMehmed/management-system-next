@@ -106,9 +106,11 @@ const DashboardSales = () => {
       case "diesel_price":
         updatedData.fuel_price =
           (sellData.mileage / 100) * sellData.fuel_consumption * Number(value);
+        break;
       case "fuel_consumption":
         updatedData.fuel_price =
           (sellData.mileage / 100) * Number(value) * sellData.diesel_price;
+        break;
       case "mileage":
         updatedData.fuel_price =
           (Number(value) / 100) *
