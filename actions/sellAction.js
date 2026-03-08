@@ -80,21 +80,18 @@ class Sell {
           break;
       }
 
-      if (
-        this.cache.has("period") &&
-        this.cache.has("stats") &&
-        this.cache.get("period") === period
-      ) {
-        return this.cache.get("stats");
+      const statsCacheKey = `stats:${period}`;
+
+      if (this.cache.has(statsCacheKey)) {
+        return this.cache.get(statsCacheKey);
       }
 
       const response = await fetch(`/api/sales/statistics?period=${period}`);
-      const stats = response.json();
+      const stats = await response.json();
 
-      this.cache.set("period", period);
-      this.cache.set("stats", stats);
+      this.cache.set(statsCacheKey, stats);
 
-      return await stats;
+      return stats;
     } catch (error) {
       throw error;
     }
@@ -123,23 +120,19 @@ class Sell {
           break;
       }
 
-      if (
-        this.cache.has("period-line") &&
-        this.cache.has("stats-line") &&
-        this.cache.get("period-line") === period
-      ) {
-        return this.cache.get("stats-line");
+      const lineCacheKey = `line:${period}`;
+      if (this.cache.has(lineCacheKey)) {
+        return this.cache.get(lineCacheKey);
       }
 
       const response = await fetch(
         `/api/sales/statistics-line-chart?period=${period}`
       );
-      const stats = response.json();
+      const stats = await response.json();
 
-      this.cache.set("period-line", period);
-      this.cache.set("stats-line", stats);
+      this.cache.set(lineCacheKey, stats);
 
-      return await stats;
+      return stats;
     } catch (error) {
       throw error;
     }
