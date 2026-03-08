@@ -3,10 +3,11 @@ import connectMongoDB from "@/libs/mongodb";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 
-export async function PUT(request, {
-  const { error } = await requireSuperAdmin();
-  if (error) return error;
- params }) {
+export async function PUT(request, { params }) {
+  const { error: authError } = await requireSuperAdmin();
+
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const data = await request.json();
