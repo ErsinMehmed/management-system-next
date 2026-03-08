@@ -155,9 +155,9 @@ class Sell {
     }
   };
 
-  updateValue = async (id, data) => {
+  updateValue = async (data) => {
     try {
-      const response = await fetch(`/api/values/${id}`, {
+      const response = await fetch("/api/values", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

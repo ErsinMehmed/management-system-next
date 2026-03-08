@@ -26,3 +26,19 @@ export async function GET() {
 
   return NextResponse.json(values);
 }
+
+export async function PUT(request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  const data = await request.json();
+
+  await connectMongoDB();
+
+  await Value.findOneAndUpdate({}, data, { upsert: true });
+
+  return NextResponse.json(
+    { message: "Стойностите са обновени", status: true },
+    { status: 200 }
+  );
+}

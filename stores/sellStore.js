@@ -288,7 +288,7 @@ class Sell {
     }
   };
 
-  updateValues = async (id, data) => {
+  updateValues = async (data) => {
     commonStore.resetMessages();
 
     const valueRules = getValueRules();
@@ -300,7 +300,7 @@ class Sell {
       return false;
     }
 
-    const response = await sellAction.updateValue(id, data);
+    const response = await sellAction.updateValue(data);
 
     if (response.status) {
       commonStore.setSuccessMessage(response.message);

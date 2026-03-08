@@ -141,7 +141,7 @@ const DashboardSales = () => {
     <Layout title='Продажби'>
       <button
         onClick={onValuesOpen}
-        className='text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
+        className='text-white absolute -top-[3.3rem] sm:-top-[3.1rem] right-7 sm:right-18 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
         <span className='hidden sm:block'>Стойности</span>
         <MdAttachMoney className='w-5 h-5 sm:hidden' />
       </button>
@@ -203,12 +203,12 @@ const DashboardSales = () => {
         onOpenChange={onValuesOpenChange}
         title='Редактирай стойности'
         onSave={() => {
-          return updateValues("65a551bbacc139606ddbb3ec", {
+          return updateValues({
             diesel_price: dieselPrice,
             fuel_consumption: fuelConsumption,
           });
         }}>
-        <div className='border-b pb-6'>
+        <div className='border-b border-slate-200 pb-6'>
           <div className='text-slate-700 font-semibold mb-2'>Константи</div>
 
           <div className='space-y-3.5'>

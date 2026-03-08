@@ -49,7 +49,7 @@ const DashboardLayout = (props) => {
               {props.title}
             </div>
 
-            <div className='p-4 sm:p-5'>{props.children}</div>
+            <div className='relative p-4 sm:p-5'>{props.children}</div>
           </div>
         </div>
       </div>
