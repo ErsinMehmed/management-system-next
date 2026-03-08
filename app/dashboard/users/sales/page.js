@@ -20,7 +20,8 @@ const UserSales = () => {
     start: parseDate(moment().subtract(7, "days").format("YYYY-MM-DD")),
     end: parseDate(moment().format("YYYY-MM-DD")),
   });
-  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const { data: session } = useSession();
+  const isUserAdmin = session?.user?.role === "Admin" || session?.user?.role === "Super Admin";
 
   const transformDateRange = (range) => {
     const formatDate = (dateObj) => {
@@ -46,15 +47,6 @@ const UserSales = () => {
     loadAdditionalExpenses(period);
     loadUsers();
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUserRole = localStorage.getItem("userRole");
-      setIsUserAdmin(
-        storedUserRole === "Admin" || storedUserRole === "Super Admin"
-      );
-    }
-  }, [setIsUserAdmin]);
 
   const handleDateChange = (newValue) => {
     const period = transformDateRange(newValue);

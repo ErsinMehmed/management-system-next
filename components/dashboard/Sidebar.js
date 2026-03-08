@@ -1,26 +1,16 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { dashboardLinks } from "@/data";
 
 const SideBar = (props) => {
   const pathname = usePathname();
-  const [filteredLinks, setFilteredLinks] = useState(null);
-
-  useEffect(() => {
-    let storedUserRole;
-
-    if (typeof window !== "undefined") {
-      storedUserRole = localStorage.getItem("userRole");
-    }
-
-    const filteredLink = dashboardLinks.filter((item) =>
-      item.role.includes(storedUserRole)
-    );
-
-    setFilteredLinks(filteredLink);
-  }, []);
+  const { data: session } = useSession();
+  const filteredLinks = dashboardLinks.filter((item) =>
+    item.role.includes(session?.user?.role)
+  );
 
   return (
     <aside

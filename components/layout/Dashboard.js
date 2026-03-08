@@ -14,11 +14,6 @@ const DashboardLayout = (props) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (session?.user?.id && session?.user?.role) {
-      localStorage.setItem("userId", session.user.id);
-      localStorage.setItem("userRole", session.user.role);
-    }
-
     loadProductsIfNotLoaded();
   }, []);
 

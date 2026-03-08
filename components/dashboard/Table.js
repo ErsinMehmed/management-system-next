@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Spinner } from "@heroui/react";
 import { formatCurrency } from "@/utils";
@@ -7,14 +8,8 @@ import { productStore } from "@/stores/useStore";
 
 const Table = (props) => {
   const { isLoading } = productStore;
-  const [isUserAdmin, setIsUserAdmin] = useState(false);
-
-  useEffect(() => {
-    const storedUserRole = localStorage.getItem("userRole");
-    setIsUserAdmin(
-      storedUserRole === "Admin" || storedUserRole === "Super Admin"
-    );
-  }, []);
+  const { data: session } = useSession();
+  const isUserAdmin = session?.user?.role === "Admin" || session?.user?.role === "Super Admin";
 
   const renderCellValue = (key, value) => {
     switch (key) {

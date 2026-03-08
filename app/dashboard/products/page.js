@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
@@ -23,14 +24,8 @@ const DashboardProducts = () => {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
   const { isOpen: isVisibilityOpen, onOpen: onVisibilityOpen, onOpenChange: onVisibilityOpenChange } = useDisclosure();
-  const [isUserAdmin, setIsUserAdmin] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUserRole = localStorage.getItem("userRole");
-      setIsUserAdmin(storedUserRole === "Super Admin");
-    }
-  }, [setIsUserAdmin]);
+  const { data: session } = useSession();
+  const isUserAdmin = session?.user?.role === "Super Admin";
 
   const handleFieldChange = (name, value, index) => {
     let updatedData = { ...productData };

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import { observer } from "mobx-react-lite";
 import {
   sellStore,
@@ -24,7 +25,8 @@ import LineChart from "@/components/charts/LineChart";
 // import UploadTest from "@/components/UploadTest";
 
 const Dashboard = () => {
-  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const { data: session } = useSession();
+  const isUserAdmin = session?.user?.role === "Admin" || session?.user?.role === "Super Admin";
   const { sellStats, loadSaleStats, loadLineChartSaleStats } = sellStore;
   const { expenses, loadExpenses } = expenseStore;
   const { incomes, additionalIncomes, loadIncomes, loadAdditionalIncomes } =
@@ -46,15 +48,6 @@ const Dashboard = () => {
 
     Promise.all(promises);
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUserRole = localStorage.getItem("userRole");
-      setIsUserAdmin(
-        storedUserRole === "Admin" || storedUserRole === "Super Admin"
-      );
-    }
-  }, [setIsUserAdmin]);
 
   const handleFieldChange = useCallback(
     (name, value) => {
