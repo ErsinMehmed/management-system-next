@@ -1,4 +1,5 @@
 import connectMongoDB from "@/libs/mongodb";
+import { checkRateLimit, resetRateLimit } from "@/helpers/rateLimiter";
 import User from "@/models/user";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -12,6 +13,14 @@ export const authOptions = {
 
       async authorize(credentials) {
         const { email, password } = credentials;
+
+        const { blocked, minutesLeft } = checkRateLimit(email);
+
+        if (blocked) {
+          throw new Error(
+            `Твърде много неуспешни опита. Опитайте отново след ${minutesLeft} минути.`
+          );
+        }
 
         try {
           await connectMongoDB();
@@ -31,8 +40,11 @@ export const authOptions = {
             return null;
           }
 
+          resetRateLimit(email);
+
           return user;
         } catch (error) {
+          if (error.message.includes("Опитайте")) throw error;
           console.log("Error: ", error);
         }
       },
