@@ -1,4 +1,5 @@
 "use client";
+import { memo } from "react";
 import moment from "moment";
 import Image from "next/image";
 import InstagramImg from "@/public/images/instagram-logo.png";
@@ -38,4 +39,4 @@ const Box = (props) => {
   );
 };
 
-export default Box;
+export default memo(Box);

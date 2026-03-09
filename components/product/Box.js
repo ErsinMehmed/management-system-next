@@ -1,4 +1,5 @@
 "use client";
+import { memo } from "react";
 import Image from "next/image";
 import { productTitle, formatCurrency } from "@/utils";
 
@@ -42,4 +43,4 @@ const Box = (props) => {
   );
 };
 
-export default Box;
+export default memo(Box);

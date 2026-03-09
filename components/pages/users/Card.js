@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -271,4 +271,4 @@ const UserCard = () => {
   });
 };
 
-export default observer(UserCard);
+export default memo(observer(UserCard));
