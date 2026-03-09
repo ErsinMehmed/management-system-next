@@ -16,125 +16,96 @@ import { dropdownPeriods } from "@/data";
 import dynamic from "next/dynamic";
 import { formatCurrency } from "@/utils";
 
-const Pie = (props) => {
-  const ReactApexChart = dynamic(() => import("react-apexcharts"), {
-    ssr: false,
-  });
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
+const PIE_COLORS_BG = [
+  "red", "sky", "blue", "indigo", "amber", "yellow",
+  "lime", "emerald", "purple", "rose", "orange", "fuchsia", "violet",
+];
+
+const PIE_COLORS_HEX = [
+  "#f87171", "#38bdf8", "#60a5fa", "#818cf8", "#fbbf24", "#facc15",
+  "#a3e635", "#34d399", "#c084fc", "#fb7185", "#fb923c", "#e879f9", "#a78bfa",
+];
+
+const Pie = (props) => {
   const { incomes } = incomeStore;
   const { dashboardBoxPeriod } = commonStore;
   const { pieChartPeriod, setPieChartPeriod } = sellStore;
 
-  let modifiedPieChartPeriod = "";
+  const [showSection, setShowSection] = useState(false);
 
-  if (pieChartPeriod.data_ instanceof Set && pieChartPeriod.data_.size > 0) {
-    modifiedPieChartPeriod = pieChartPeriod.data_.values().next().value;
-  }
+  const modifiedPieChartPeriod = useMemo(() => {
+    if (pieChartPeriod.data_ instanceof Set && pieChartPeriod.data_.size > 0) {
+      return pieChartPeriod.data_.values().next().value;
+    }
+    return "";
+  }, [pieChartPeriod]);
 
-  const pieChartBoxColors = [
-    "red",
-    "sky",
-    "blue",
-    "indigo",
-    "amber",
-    "yellow",
-    "lime",
-    "emerald",
-    "purple",
-    "rose",
-    "orange",
-    "fuchsia",
-    "violet",
-  ];
+  const { seriesData, labels, totalSalesCount, totalBottleCount, totalCartonCount } =
+    useMemo(() => {
+      if (!props.status) {
+        return {
+          seriesData: [],
+          labels: [],
+          totalSalesCount: null,
+          totalBottleCount: null,
+          totalCartonCount: null,
+        };
+      }
 
-  const seriesData = [];
-  const labels = [];
-  let totalSalesCount = null;
-  let totalBottleCount = null;
-  let totalCartonCount = null;
+      const seriesData = [];
+      const labels = [];
 
-  if (props.status) {
-    props.data.forEach((item) => {
-      seriesData.push(item.total_quantity);
-      labels.push(item.name + " " + item.weight + "гр.");
-    });
+      props.data.forEach((item) => {
+        seriesData.push(item.total_quantity);
+        labels.push(item.name + " " + item.weight + "гр.");
+      });
 
-    totalSalesCount = props.data.reduce(
-      (accumulator, stat) => accumulator + stat.sales_count,
-      0
-    );
+      const totalSalesCount = props.data.reduce(
+        (acc, stat) => acc + stat.sales_count,
+        0
+      );
+      const totalBottleCount = props.data.reduce(
+        (acc, stat) => acc + stat.total_quantity,
+        0
+      );
+      const totalCartonCount = props.data.reduce((acc, stat) => {
+        acc += stat.total_quantity / stat.units_per_box;
+        return acc;
+      }, 0);
 
-    totalBottleCount = props.data.reduce(
-      (accumulator, stat) => accumulator + stat.total_quantity,
-      0
-    );
+      return { seriesData, labels, totalSalesCount, totalBottleCount, totalCartonCount };
+    }, [props.data, props.status]);
 
-    totalCartonCount = props.data.reduce((accumulator, stat) => {
-      accumulator += stat.total_quantity / stat.units_per_box;
-
-      return accumulator;
-    }, 0);
-  }
-
-  const chartOptions = {
-    series: seriesData,
-    colors: [
-      "#f87171",
-      "#38bdf8",
-      "#60a5fa",
-      "#818cf8",
-      "#fbbf24",
-      "#facc15",
-      "#a3e635",
-      "#34d399",
-      "#c084fc",
-      "#fb7185",
-      "#fb923c",
-      "#e879f9",
-      "#a78bfa",
-    ],
-    chart: {
-      height: 420,
-      width: "100%",
-      type: "pie",
-    },
-    stroke: {
-      colors: ["white"],
-      lineCap: "round",
-    },
-    plotOptions: {
-      pie: {
-        labels: {
-          show: true,
-        },
-        size: "100%",
-        dataLabels: {
-          offset: -25,
+  const chartOptions = useMemo(
+    () => ({
+      series: seriesData,
+      colors: PIE_COLORS_HEX,
+      chart: { height: 420, width: "100%", type: "pie" },
+      stroke: { colors: ["white"], lineCap: "round" },
+      plotOptions: {
+        pie: {
+          labels: { show: true },
+          size: "100%",
+          dataLabels: { offset: -25 },
         },
       },
-    },
-    labels: labels,
-    dataLabels: {
-      enabled: true,
-      style: {
-        fontFamily: "Inter, sans-serif",
+      labels,
+      dataLabels: {
+        enabled: true,
+        style: { fontFamily: "Inter, sans-serif" },
       },
-    },
-    legend: {
-      position: "bottom",
-      fontFamily: "Inter, sans-serif",
-    },
-    yaxis: {
-      labels: {
-        formatter: function (value) {
-          return value + " бр.";
-        },
+      legend: { position: "bottom", fontFamily: "Inter, sans-serif" },
+      yaxis: {
+        labels: { formatter: (value) => value + " бр." },
       },
-    },
-  };
+    }),
+    [seriesData, labels]
+  );
 
-  const chartComponent = useMemo(() => {
-    return (
+  const chartComponent = useMemo(
+    () => (
       <ReactApexChart
         options={chartOptions}
         series={chartOptions.series}
@@ -142,10 +113,9 @@ const Pie = (props) => {
         height={"100%"}
         width={"100%"}
       />
-    );
-  }, [props.data]);
-
-  const [showSection, setShowSection] = useState(false);
+    ),
+    [chartOptions]
+  );
 
   const handleShowSection = () => {
     setShowSection(!showSection);
@@ -175,14 +145,14 @@ const Pie = (props) => {
                     {props.data.map((stat, index) => (
                       <dl
                         key={index}
-                        className={`bg-${pieChartBoxColors[index]}-50 rounded-lg center-element flex-col h-[78px]`}>
+                        className={`bg-${PIE_COLORS_BG[index]}-50 rounded-lg center-element flex-col h-[78px]`}>
                         <dt
-                          className={`size-[38px] rounded-full bg-${pieChartBoxColors[index]}-100 text-${pieChartBoxColors[index]}-600 text-sm font-semibold center-element mb-1`}>
+                          className={`size-[38px] rounded-full bg-${PIE_COLORS_BG[index]}-100 text-${PIE_COLORS_BG[index]}-600 text-sm font-semibold center-element mb-1`}>
                           {stat.total_quantity}
                         </dt>
 
                         <dd
-                          className={`text-${pieChartBoxColors[index]}-600 text-sm font-semibold`}>
+                          className={`text-${PIE_COLORS_BG[index]}-600 text-sm font-semibold`}>
                           {stat.name + " " + stat.weight + "гр."}
                         </dd>
                       </dl>
