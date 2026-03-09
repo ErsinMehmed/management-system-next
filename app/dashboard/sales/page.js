@@ -143,7 +143,7 @@ const DashboardSales = () => {
     <Layout title='Продажби'>
       <button
         onClick={onValuesOpen}
-        className='text-white absolute -top-[3.3rem] sm:-top-[3.1rem] right-7 sm:right-18 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
+        className='text-white absolute -top-[3.3rem] sm:-top-[3.1rem] right-7 sm:right-18 2xl:right-96 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
         <span className='hidden sm:block'>Стойности</span>
         <MdAttachMoney className='w-5 h-5 sm:hidden' />
       </button>
