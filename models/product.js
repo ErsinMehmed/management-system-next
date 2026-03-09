@@ -14,7 +14,7 @@ const productSchema = new Schema(
     model: String,
     count: Number,
     puffs: Number,
-    availability: Number,
+    availability: { type: Number, default: 0, min: 0 },
     units_per_box: Number,
     price: Number,
     hidden: Boolean,

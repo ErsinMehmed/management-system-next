@@ -4,10 +4,10 @@ import User from "./user.js";
 
 const sellSchema = new Schema(
   {
-    quantity: Number,
-    price: Number,
+    quantity: { type: Number, required: true, min: 1 },
+    price: { type: Number, required: true, min: 0 },
     message: String,
-    date: Date,
+    date: { type: Date, required: true, default: Date.now },
     mileage: Number,
     additional_costs: Number,
     fuel_consumption: Number,
@@ -21,6 +21,10 @@ const sellSchema = new Schema(
     timestamps: true,
   }
 );
+
+sellSchema.index({ date: -1 });
+sellSchema.index({ creator: 1, date: -1 });
+sellSchema.index({ product: 1 });
 
 const Sell = mongoose.models.Sell || mongoose.model("Sell", sellSchema);
 

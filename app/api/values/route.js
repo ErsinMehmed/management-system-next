@@ -22,9 +22,9 @@ export async function GET() {
 
   await connectMongoDB();
 
-  const values = await Value.find();
+  const values = await Value.findById("global");
 
-  return NextResponse.json(values);
+  return NextResponse.json(values ? [values] : []);
 }
 
 export async function PUT(request) {
@@ -35,7 +35,7 @@ export async function PUT(request) {
 
   await connectMongoDB();
 
-  await Value.findOneAndUpdate({}, data, { upsert: true });
+  await Value.findOneAndUpdate({ _id: "global" }, data, { upsert: true });
 
   return NextResponse.json(
     { message: "Стойностите са обновени", status: true },
