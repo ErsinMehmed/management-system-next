@@ -19,7 +19,7 @@ import TabSection from "@/components/dashboard/TabSection";
 import DashboardDateFilters from "@/components/dashboard/DashboardDateFilters";
 import Table from "@/components/dashboard/Table";
 import Box from "@/components/dashboard/Box";
-
+import Layout from "@/components/layout/Dashboard";
 import { formatCurrency } from "@/utils";
 import LineChart from "@/components/charts/LineChart";
 // import UploadTest from "@/components/UploadTest";
@@ -35,6 +35,12 @@ const Dashboard = () => {
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
   const { categories, loadCategoriesIfNotLoaded } = categoryStore;
   const [selectedCategory, setSelectedCategory] = useState("");
+
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
   const { isOpen: isIncomesOpen, onOpen: onIncomesOpen, onOpenChange: onIncomesOpenChange } = useDisclosure();
   const { isOpen: isExpensesOpen, onOpen: onExpensesOpen, onOpenChange: onExpensesOpenChange } = useDisclosure();
 
