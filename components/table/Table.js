@@ -192,7 +192,15 @@ const Table = (props) => {
                 </thead>
 
                 <tbody className='bg-white w-full'>
-                  {props.data?.map((row, rowIndex) => (
+                  {!props.data?.length ? (
+                    <tr>
+                      <td
+                        colSpan={props.columns.length + 1}
+                        className='px-4 py-12 text-center text-gray-400 text-sm'>
+                        Няма намерени резултати
+                      </td>
+                    </tr>
+                  ) : props.data?.map((row, rowIndex) => (
                     <tr
                       key={rowIndex}
                       className='odd:bg-gray-50'>
