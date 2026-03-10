@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    МODE: "prod",
+    MODE: "prod",
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   },
   images: {
