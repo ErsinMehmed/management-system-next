@@ -14,3 +14,16 @@ export async function POST(request) {
     { status: 201 }
   );
 }
+
+export async function GET() {
+  try {
+    await connectMongoDB();
+    const categories = await Category.find({}).select("name").sort({ name: 1 });
+    return NextResponse.json(categories, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Грешка при зареждане на категории", status: false },
+      { status: 500 }
+    );
+  }
+}

@@ -8,18 +8,18 @@ import {
   incomeStore,
   commonStore,
   productStore,
+  categoryStore,
 } from "@/stores/useStore";
 import { MdAttachMoney } from "react-icons/md";
 import { TbMoneybag } from "react-icons/tb";
 import { Tabs, Tab, useDisclosure } from "@heroui/react";
-import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
 import PieChart from "@/components/charts/PieChart";
 import TabSection from "@/components/dashboard/TabSection";
 import DashboardDateFilters from "@/components/dashboard/DashboardDateFilters";
 import Table from "@/components/dashboard/Table";
 import Box from "@/components/dashboard/Box";
-import { categories } from "@/data";
+
 import { formatCurrency } from "@/utils";
 import LineChart from "@/components/charts/LineChart";
 // import UploadTest from "@/components/UploadTest";
@@ -33,14 +33,15 @@ const Dashboard = () => {
     incomeStore;
   const { products } = productStore;
   const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
-  const [selectedCategory, setSelectedCategory] = useState("Бутилки");
+  const { categories, loadCategoriesIfNotLoaded } = categoryStore;
+  const [selectedCategory, setSelectedCategory] = useState("");
   const { isOpen: isIncomesOpen, onOpen: onIncomesOpen, onOpenChange: onIncomesOpenChange } = useDisclosure();
   const { isOpen: isExpensesOpen, onOpen: onExpensesOpen, onOpenChange: onExpensesOpenChange } = useDisclosure();
 
   useEffect(() => {
     const { dateFrom, dateTo } = dashboardBoxPeriod;
 
-    const promises = [loadSaleStats(), loadLineChartSaleStats()];
+    const promises = [loadSaleStats(), loadLineChartSaleStats(), loadCategoriesIfNotLoaded()];
 
     if (!dateFrom && !dateTo) {
       promises.push(loadAdditionalIncomes(), loadExpenses(), loadIncomes());

@@ -7,6 +7,7 @@ import expense from "./expenseStore";
 import income from "./incomeStore";
 import ad from "./adStore";
 import user from "./userStore";
+import category from "./categoryStore";
 
 const commonStore = common;
 const authStore = auth;
@@ -17,6 +18,7 @@ const expenseStore = expense;
 const incomeStore = income;
 const adStore = ad;
 const userStore = user;
+const categoryStore = category;
 
 export {
   commonStore,
@@ -28,4 +30,5 @@ export {
   incomeStore,
   adStore,
   userStore,
+  categoryStore,
 };

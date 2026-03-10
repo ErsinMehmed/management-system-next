@@ -36,8 +36,6 @@ const dropdownPeriods = [
   "Всички резултати",
 ];
 
-const categories = ["Бутилки", "Вейпове", "Балони"];
-
 const dashboardLinks = [
   {
     link: "/dashboard",
@@ -84,6 +82,5 @@ export {
   dropdownPeriods,
   perPageResult,
   dashboardLinks,
-  categories,
   salesTableHeaders,
 };
