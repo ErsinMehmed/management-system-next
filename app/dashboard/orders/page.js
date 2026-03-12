@@ -3,6 +3,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import connectMongoDB from "@/libs/mongodb";
 import Order from "@/models/order";
+
+export const dynamic = "force-dynamic";
 import OrdersClient from "@/components/dashboard/OrdersClient";
 
 const PER_PAGE = 10;
