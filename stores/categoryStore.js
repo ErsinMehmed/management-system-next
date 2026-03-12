@@ -27,6 +27,11 @@ class CategoryStore {
       await this.loadCategories();
     }
   };
+
+  hydrate = (categories) => {
+    this.categories = categories;
+    this.isLoading = false;
+  };
 }
 
 const categoryStore = new CategoryStore();

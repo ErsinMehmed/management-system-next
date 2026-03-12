@@ -1,345 +1,201 @@
-"use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useSession } from "next-auth/react";
-import { observer } from "mobx-react-lite";
-import {
-  sellStore,
-  expenseStore,
-  incomeStore,
-  commonStore,
-  productStore,
-  categoryStore,
-} from "@/stores/useStore";
-import { MdAttachMoney } from "react-icons/md";
-import { TbMoneybag } from "react-icons/tb";
-import { Tabs, Tab, useDisclosure } from "@heroui/react";
-import Modal from "@/components/Modal";
-import PieChart from "@/components/charts/PieChart";
-import TabSection from "@/components/dashboard/TabSection";
-import DashboardDateFilters from "@/components/dashboard/DashboardDateFilters";
-import Table from "@/components/dashboard/Table";
-import Box from "@/components/dashboard/Box";
-import Layout from "@/components/layout/Dashboard";
-import { formatCurrency } from "@/utils";
-import LineChart from "@/components/charts/LineChart";
-// import UploadTest from "@/components/UploadTest";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
+import connectMongoDB from "@/libs/mongodb";
+import Sell from "@/models/sell";
+import Order from "@/models/order";
+import Ad from "@/models/ad";
+import Product from "@/models/product";
+import Category from "@/models/category";
+import Income from "@/models/income";
+import mongoose from "mongoose";
+import DashboardClient from "@/components/dashboard/DashboardClient";
 
-const Dashboard = () => {
-  const { data: session } = useSession();
-  const isUserAdmin = session?.user?.role === "Admin" || session?.user?.role === "Super Admin";
-  const { sellStats, loadSaleStats, loadLineChartSaleStats } = sellStore;
-  const { expenses, loadExpenses } = expenseStore;
-  const { incomes, additionalIncomes, loadIncomes, loadAdditionalIncomes } =
-    incomeStore;
-  const { products } = productStore;
-  const { dashboardBoxPeriod, setDashboardBoxPeriod } = commonStore;
-  const { categories, loadCategoriesIfNotLoaded } = categoryStore;
-  const [selectedCategory, setSelectedCategory] = useState("");
+async function fetchExpenses() {
+  const [adResult, fuelResult, orderResult, byProductResult] = await Promise.all([
+    Ad.aggregate([
+      { $group: { _id: null, total_ad_price: { $sum: "$amount" } } },
+    ]),
+    Sell.aggregate([
+      { $group: { _id: null, total_fuel_price: { $sum: "$fuel_price" }, additional_costs: { $sum: "$additional_costs" } } },
+    ]),
+    Order.aggregate([
+      { $group: { _id: null, total_amount: { $sum: "$total_amount" } } },
+    ]),
+    Order.aggregate([
+      { $group: { _id: "$product", quantity: { $sum: "$quantity" }, total_expenses: { $sum: "$total_amount" } } },
+      { $lookup: { from: "products", localField: "_id", foreignField: "_id", as: "product" } },
+      { $unwind: "$product" },
+      { $lookup: { from: "categories", localField: "product.category", foreignField: "_id", as: "category" } },
+      { $unwind: "$category" },
+      { $project: { _id: "$product._id", name: "$product.name", weight: "$product.weight", flavor: "$product.flavor", puffs: "$product.puffs", count: "$product.count", category: "$category.name", quantity: 1, total_expenses: 1 } },
+      { $sort: { quantity: 1 } },
+    ]),
+  ]);
 
-  useEffect(() => {
-    if (categories.length > 0 && !selectedCategory) {
-      setSelectedCategory(categories[0]);
-    }
-  }, [categories, selectedCategory]);
-  const { isOpen: isIncomesOpen, onOpen: onIncomesOpen, onOpenChange: onIncomesOpenChange } = useDisclosure();
-  const { isOpen: isExpensesOpen, onOpen: onExpensesOpen, onOpenChange: onExpensesOpenChange } = useDisclosure();
+  return {
+    total_ad_expenses: adResult[0]?.total_ad_price ?? 0,
+    total_order_expenses: orderResult[0]?.total_amount ?? 0,
+    total_fuel_expenses: fuelResult[0]?.total_fuel_price ?? 0,
+    total_additional_expenses: fuelResult[0]?.additional_costs ?? 0,
+    expenses_by_products: byProductResult,
+    status: true,
+  };
+}
 
-  useEffect(() => {
-    const { dateFrom, dateTo } = dashboardBoxPeriod;
+async function fetchLineChartStats() {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 7);
 
-    const promises = [loadSaleStats(), loadLineChartSaleStats(), loadCategoriesIfNotLoaded()];
+  const sales = await Sell.aggregate([
+    { $match: { date: { $gte: startDate } } },
+    { $group: { _id: { product: "$product", period: { $dateToString: { format: "%Y-%m-%d", date: "$date" } } }, total_quantity: { $sum: "$quantity" } } },
+    { $lookup: { from: "products", localField: "_id.product", foreignField: "_id", as: "product" } },
+    { $unwind: "$product" },
+    { $lookup: { from: "categories", localField: "product.category", foreignField: "_id", as: "category" } },
+    { $unwind: "$category" },
+    { $match: { "category.name": "Бутилки" } },
+    { $project: { _id: 0, name: "$product.name", period: "$_id.period", total_quantity: 1 } },
+    { $sort: { period: 1 } },
+  ]);
 
-    if (!dateFrom && !dateTo) {
-      promises.push(loadAdditionalIncomes(), loadExpenses(), loadIncomes());
-    }
+  if (sales.length === 0) {
+    return { message: "Няма намерени данни за посоченият период", status: false };
+  }
 
-    Promise.all(promises);
-  }, []);
+  const periods = [];
+  const dataMap = {};
 
-  const handleFieldChange = useCallback(
-    (name, value) => {
-      if (name === "period") {
-        setDashboardBoxPeriod({
-          ...dashboardBoxPeriod,
-          [name]: value,
-          dateFrom: "",
-          dateTo: "",
-        });
-      } else {
-        setDashboardBoxPeriod({ ...dashboardBoxPeriod, [name]: value });
-      }
-    },
-    [dashboardBoxPeriod, setDashboardBoxPeriod]
-  );
+  sales.forEach(({ name, period, total_quantity }) => {
+    if (!periods.includes(period)) periods.push(period);
+    if (!dataMap[name]) dataMap[name] = { name, data: [] };
+    const idx = periods.indexOf(period);
+    dataMap[name].data[idx] = (dataMap[name].data[idx] || 0) + total_quantity;
+  });
 
-  const filteredBottles = useMemo(
-    () =>
-      products.filter(
-        (product) =>
-          product.category.name === "Бутилки" && product.availability > 0
-      ),
-    [products]
-  );
+  const data = Object.values(dataMap).map((item) => ({
+    ...item,
+    data: periods.map((p, i) => item.data[i] || 0),
+  }));
 
-  const filteredBottleAvailabilities = filteredBottles?.map(
-    ({ name, weight, image_url, availability, price, units_per_box }) => {
-      const baseData = {
-        name: `${name} ${weight}гр.`,
-        image_url: image_url,
-        carton: (availability / units_per_box).toFixed(1),
-        availability,
+  return { periods, data, status: true };
+}
+
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) redirect("/");
+
+  await connectMongoDB();
+
+  const isAdmin = ["Admin", "Super Admin"].includes(session.user.role);
+  const userObjectId = new mongoose.Types.ObjectId(session.user.id);
+
+  const [
+    sellStatsResult,
+    incomesResult,
+    additionalIncomesResult,
+    expensesResult,
+    categories,
+    products,
+    lineChartResult,
+  ] = await Promise.all([
+    // Pie chart статистики (всички времена)
+    Sell.aggregate([
+      {
+        $group: {
+          _id: "$product",
+          sales_count: { $sum: 1 },
+          total_quantity: { $sum: "$quantity" },
+        },
+      },
+      { $lookup: { from: "products", localField: "_id", foreignField: "_id", as: "product" } },
+      { $unwind: "$product" },
+      { $lookup: { from: "categories", localField: "product.category", foreignField: "_id", as: "category" } },
+      { $unwind: "$category" },
+      {
+        $project: {
+          _id: "$product._id",
+          name: "$product.name",
+          weight: "$product.weight",
+          flavor: "$product.flavor",
+          count: "$product.count",
+          units_per_box: "$product.units_per_box",
+          category: "$category.name",
+          total_quantity: 1,
+          sales_count: 1,
+        },
+      },
+      { $match: { category: "Бутилки" } },
+      { $sort: { total_quantity: 1 } },
+    ]),
+
+    // Приходи (само за текущия потребител)
+    (async () => {
+      const [totalArr, byProductArr] = await Promise.all([
+        Sell.aggregate([
+          { $match: { creator: userObjectId } },
+          { $group: { _id: null, incomes: { $sum: "$price" } } },
+        ]),
+        Sell.aggregate([
+          { $match: { creator: userObjectId } },
+          { $group: { _id: "$product", quantity: { $sum: "$quantity" }, total_incomes: { $sum: "$price" } } },
+          { $lookup: { from: "products", localField: "_id", foreignField: "_id", as: "product" } },
+          { $unwind: "$product" },
+          { $lookup: { from: "categories", localField: "product.category", foreignField: "_id", as: "category" } },
+          { $unwind: "$category" },
+          { $project: { _id: "$product._id", name: "$product.name", weight: "$product.weight", puffs: "$product.puffs", flavor: "$product.flavor", count: "$product.count", category: "$category.name", quantity: 1, total_incomes: 1 } },
+          { $sort: { quantity: 1 } },
+        ]),
+      ]);
+      return {
+        incomes: totalArr[0]?.incomes ?? 0,
+        incomes_by_products: byProductArr,
+        status: true,
       };
+    })(),
 
-      if (isUserAdmin) {
-        return {
-          ...baseData,
-          price: price * availability,
-        };
-      }
+    // Допълнителни приходи
+    Income.aggregate([
+      { $group: { _id: null, incomes: { $sum: "$amount" } } },
+    ]).then((r) => ({ incomes: r[0]?.incomes ?? 0 })),
 
-      return baseData;
-    }
+    // Разходи (само за администратори)
+    isAdmin
+      ? fetchExpenses()
+      : Promise.resolve({
+          total_ad_expenses: 0,
+          total_order_expenses: 0,
+          total_fuel_expenses: 0,
+          total_additional_expenses: 0,
+          expenses_by_products: [],
+          status: true,
+        }),
+
+    // Категории
+    Category.find({}).lean(),
+
+    // Продукти с категория (за таблицата с наличности)
+    Product.find({}).populate("category").lean(),
+
+    // Line chart (последните 7 дни по подразбиране)
+    fetchLineChartStats(),
+  ]);
+
+  const initialData = JSON.parse(
+    JSON.stringify({
+      sellStats: {
+        sales: sellStatsResult,
+        status: sellStatsResult.length > 0,
+      },
+      incomes: incomesResult,
+      additionalIncomes: additionalIncomesResult,
+      expenses: expensesResult,
+      categories: categories.map((c) => c.name),
+      products,
+      lineChartStats: lineChartResult,
+    })
   );
 
-  const filteredVapes = useMemo(
-    () =>
-      products.filter(
-        (product) =>
-          product.category.name === "Вейпове" && product.availability > 0
-      ),
-    [products]
-  );
-
-  const filteredVapeAvailabilities = useMemo(
-    () =>
-      filteredVapes.map(
-        ({ name, puffs, image_url, availability, price, units_per_box }) => {
-          const baseData = {
-            name: `${name} ${puffs}k`,
-            image_url,
-            carton: (availability / units_per_box).toFixed(1),
-            availability,
-          };
-
-          if (isUserAdmin) {
-            return {
-              ...baseData,
-              price: price * availability,
-            };
-          }
-
-          return baseData;
-        }
-      ),
-    [filteredVapes, isUserAdmin]
-  );
-
-  const allExpenses = (
-    expenses.total_order_expenses +
-    expenses.total_fuel_expenses +
-    expenses.total_additional_expenses +
-    expenses.total_ad_expenses
-  ).toFixed(2);
-
-  const profit = (incomes?.incomes + additionalIncomes?.incomes).toFixed(2);
-
-  const columns = isUserAdmin
-    ? ["продукт", "кашони", "бутилки", "стойност"]
-    : ["продукт", "кашони", "бутилки"];
-
-  return (
-    <Layout title='Администраторско табло'>
-      <DashboardDateFilters
-        dashboardBoxPeriod={dashboardBoxPeriod}
-        handleFieldChange={handleFieldChange}
-      />
-
-      <div
-        className={`grid grid-cols-1 ${
-          isUserAdmin ? "lg:grid-cols-3" : ""
-        }  gap-5 mb-5`}>
-        <Box
-          title='Приходи'
-          period={dashboardBoxPeriod}
-          value={profit}
-          icon={<MdAttachMoney className='w-6 h-6' />}
-          onClick={onIncomesOpen}
-        />
-
-        {isUserAdmin && (
-          <Box
-            title='Разходи'
-            period={dashboardBoxPeriod}
-            value={allExpenses}
-            icon={<MdAttachMoney className='w-6 h-6' />}
-            onClick={onExpensesOpen}
-          />
-        )}
-
-        {isUserAdmin && (
-          <Box
-            title='Печалба'
-            period={dashboardBoxPeriod}
-            value={(profit - allExpenses).toFixed(2)}
-            icon={<TbMoneybag className='w-6 h-6' />}
-            modal={false}
-          />
-        )}
-      </div>
-
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-y-5 lg:gap-5 mb-5'>
-        <PieChart
-          data={sellStats.sales}
-          status={sellStats.status}
-          message={sellStats.message}
-        />
-
-        <div className='col-span-2 h-full'>
-          <Table
-            title='Наличност на бутилки'
-            data={{
-              bottles: filteredBottleAvailabilities,
-              vapes: filteredVapeAvailabilities,
-            }}
-            columns={columns}
-          />
-        </div>
-      </div>
-
-      {isUserAdmin && <LineChart />}
-
-      {/* <UploadTest /> */}
-
-      <Modal
-        isOpen={isIncomesOpen}
-        onOpenChange={onIncomesOpenChange}
-        title='Приходи по категории'
-        showFooter={false}>
-        <Tabs
-          aria-label='Options'
-          selectedKey={selectedCategory}
-          onSelectionChange={setSelectedCategory}>
-          {categories.map((category) => (
-            <Tab
-              key={category}
-              title={category}>
-              <TabSection
-                data={incomes}
-                kind='incomes'
-                category={category}
-                totalKey='total_incomes'
-              />
-            </Tab>
-          ))}
-
-          {additionalIncomes?.incomes > 0 && (
-            <Tab title='Други'>
-              <div className='bg-gray-50 rounded-lg'>
-                <dl className='flex-container py-2.5 px-3 text-sm'>
-                  <dt className='text-gray-500 font-semibold'>
-                    Допълнителни приходи
-                  </dt>
-
-                  <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                    {formatCurrency(additionalIncomes?.incomes, 2)}
-                  </dd>
-                </dl>
-              </div>
-            </Tab>
-          )}
-        </Tabs>
-      </Modal>
-
-      <Modal
-        isOpen={isExpensesOpen}
-        onOpenChange={onExpensesOpenChange}
-        title='Разходи по категории'
-        showFooter={false}>
-        <Tabs
-          aria-label='Options'
-          selectedKey={selectedCategory}
-          onSelectionChange={setSelectedCategory}>
-          {categories.map((category) => (
-            <Tab
-              key={category}
-              title={category}>
-              <TabSection
-                data={expenses}
-                kind='expenses'
-                category={category}
-                totalKey='total_expenses'
-              />
-            </Tab>
-          ))}
-
-          {(expenses.total_fuel_expenses > 0 ||
-            expenses.total_additional_expenses > 0 ||
-            expenses.total_ad_expenses > 0) && (
-            <Tab
-              key='Други'
-              title='Други'>
-              <div className='bg-gray-50 rounded-lg'>
-                {expenses.total_fuel_expenses > 0 && (
-                  <dl className='flex-container py-2.5 px-3 text-sm'>
-                    <dt className='text-gray-500 font-semibold'>
-                      Гориво
-                    </dt>
-
-                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                      {formatCurrency(expenses.total_fuel_expenses, 2)}
-                    </dd>
-                  </dl>
-                )}
-
-                {expenses.total_ad_expenses > 0 && (
-                  <dl className='flex-container py-2.5 px-3 text-sm border-t border-slate-200'>
-                    <dt className='text-gray-500 font-semibold'>
-                      Реклами
-                    </dt>
-
-                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                      {formatCurrency(expenses.total_ad_expenses, 2)}
-                    </dd>
-                  </dl>
-                )}
-
-                {expenses.total_additional_expenses > 0 && (
-                  <dl className='flex-container py-2.5 px-3 text-sm border-t border-slate-200'>
-                    <dt className='text-gray-500 font-semibold'>
-                      Допълнителни
-                    </dt>
-
-                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium'>
-                      {formatCurrency(
-                        expenses.total_additional_expenses,
-                        2
-                      )}
-                    </dd>
-                  </dl>
-                )}
-
-                {((expenses.total_fuel_expenses > 0 &&
-                  expenses.total_additional_expenses > 0) ||
-                  (expenses.total_fuel_expenses > 0 &&
-                    expenses.total_ad_expenses > 0)) && (
-                  <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t border-slate-200'>
-                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
-                      {formatCurrency(
-                        expenses.total_fuel_expenses +
-                          expenses.total_additional_expenses +
-                          expenses.total_ad_expenses,
-                        2
-                      )}
-                    </dd>
-                  </dl>
-                )}
-              </div>
-            </Tab>
-          )}
-        </Tabs>
-      </Modal>
-    </Layout>
-  );
-};
-
-export default observer(Dashboard);
+  return <DashboardClient initialData={initialData} />;
+}

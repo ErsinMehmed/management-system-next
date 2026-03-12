@@ -15,6 +15,10 @@ class Expense {
     this.expenses = data;
   };
 
+  hydrate = (expenses) => {
+    this.expenses = expenses;
+  };
+
   loadExpenses = async (period) => {
     this.setExpenses(await expenseAction.getExpenses(period));
   };

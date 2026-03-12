@@ -70,7 +70,7 @@ export async function POST(request) {
     await Sell.create(data);
 
     return NextResponse.json(
-      { message: "Прождабата е добавена успешно", status: true },
+      { message: "Продажбата е добавена успешно", status: true },
       { status: 201 }
     );
   } catch (error) {

@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(ls -la \"C:\\\\Users\\\\ersin.hyusein\\\\OneDrive - myPOS Limited, branch Bulgaria, BFC\\\\Desktop\\\\management-system-next\" | grep -v \"^d.*\\\\.$\")"
     ]
   }
 }

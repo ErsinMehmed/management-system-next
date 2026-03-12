@@ -88,6 +88,11 @@ class Income {
     this.additionalIncomes = data;
   };
 
+  hydrate = (incomes, additionalIncomes) => {
+    if (incomes) this.incomes = incomes;
+    if (additionalIncomes) this.additionalIncomes = additionalIncomes;
+  };
+
   setIsLoading = (data) => {
     this.isLoading = data;
   };

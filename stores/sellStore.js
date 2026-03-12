@@ -127,6 +127,17 @@ class Sell {
     this.loadSaleStats(data);
   };
 
+  hydrate = (stats, lineChartStats) => {
+    if (stats) {
+      this.sellStats = stats;
+      this.isLoading = false;
+    }
+    if (lineChartStats) {
+      this.lineChartSaleStats = lineChartStats;
+      this.isLoadingLineChartStats = false;
+    }
+  };
+
   loadSaleStats = async (period) => {
     try {
       const stats = await sellAction.getStats(

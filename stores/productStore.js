@@ -37,6 +37,11 @@ class Product {
     }
   };
 
+  hydrate = (products) => {
+    this.products = products;
+    this.isLoading = false;
+  };
+
   updateProduct = async (id, data) => {
     commonStore.resetMessages();
     this.isProductUpdated = true;
