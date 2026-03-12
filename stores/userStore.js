@@ -43,6 +43,10 @@ class User {
       this.distributors = response.distributors;
     }
   };
+
+  hydrateDistributors = (distributors) => {
+    if (distributors) this.distributors = distributors;
+  };
 }
 
 export default new User();

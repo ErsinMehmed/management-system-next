@@ -45,6 +45,13 @@ class Order {
     this.orders = data;
   };
 
+  hydrateOrders = (orders) => {
+    if (orders) {
+      this.orders = orders;
+      this.isLoading = false;
+    }
+  };
+
   setOrderData = (data) => {
     this.orderData = data;
   };

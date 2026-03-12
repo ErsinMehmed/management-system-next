@@ -93,6 +93,13 @@ class Income {
     if (additionalIncomes) this.additionalIncomes = additionalIncomes;
   };
 
+  hydrateAllIncomes = (allIncomes) => {
+    if (allIncomes) {
+      this.allIncomes = allIncomes;
+      this.isLoading = false;
+    }
+  };
+
   setIsLoading = (data) => {
     this.isLoading = data;
   };
