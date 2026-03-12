@@ -127,6 +127,23 @@ class Sell {
     this.loadSaleStats(data);
   };
 
+  hydrateSales = (sales, values) => {
+    if (sales) {
+      this.sales = sales;
+      this.isLoading = false;
+    }
+
+    if (values) {
+      this.fuelConsumption = values.fuel_consumption;
+      this.dieselPrice = values.diesel_price;
+      this.sellData = {
+        ...this.sellData,
+        diesel_price: values.diesel_price,
+        fuel_consumption: values.fuel_consumption,
+      };
+    }
+  };
+
   hydrate = (stats, lineChartStats) => {
     if (stats) {
       this.sellStats = stats;
