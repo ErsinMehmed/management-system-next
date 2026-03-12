@@ -2,6 +2,8 @@ import connectMongoDB from "@/libs/mongodb";
 import Product from "@/models/product";
 import ProductsHydrator from "@/components/layout/ProductsHydrator";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({ children }) {
   await connectMongoDB();
 
