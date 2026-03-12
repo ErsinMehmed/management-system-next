@@ -3,7 +3,6 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
-import Product from "@/models/product";
 import Value from "@/models/value";
 import SalesClient from "@/components/dashboard/SalesClient";
 
@@ -26,10 +25,9 @@ export default async function SalesPage() {
     .populate({ path: "product", select: "name weight flavor count category puffs units_per_box", populate: { path: "category", select: "name" } })
     .populate({ path: "creator", select: "name" });
 
-  const [totalItems, items, products, values] = await Promise.all([
+  const [totalItems, items, values] = await Promise.all([
     Sell.countDocuments(isSuperAdmin ? {} : { creator: session.user.id }),
     salesQuery.skip(0).limit(PER_PAGE).lean(),
-    Product.find({}).populate("category").lean(),
     isAdmin ? Value.findOne({}).lean() : Promise.resolve(null),
   ]);
 
@@ -45,7 +43,6 @@ export default async function SalesPage() {
         },
       },
       values,
-      products,
     })
   );
 

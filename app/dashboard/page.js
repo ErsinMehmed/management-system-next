@@ -5,7 +5,6 @@ import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
 import Order from "@/models/order";
 import Ad from "@/models/ad";
-import Product from "@/models/product";
 import Category from "@/models/category";
 import Income from "@/models/income";
 import mongoose from "mongoose";
@@ -97,7 +96,6 @@ export default async function DashboardPage() {
     additionalIncomesResult,
     expensesResult,
     categories,
-    products,
     lineChartResult,
   ] = await Promise.all([
     // Pie chart статистики (всички времена)
@@ -175,9 +173,6 @@ export default async function DashboardPage() {
     // Категории
     Category.find({}).lean(),
 
-    // Продукти с категория (за таблицата с наличности)
-    Product.find({}).populate("category").lean(),
-
     // Line chart (последните 7 дни по подразбиране)
     fetchLineChartStats(),
   ]);
@@ -192,7 +187,6 @@ export default async function DashboardPage() {
       additionalIncomes: additionalIncomesResult,
       expenses: expensesResult,
       categories: categories.map((c) => c.name),
-      products,
       lineChartStats: lineChartResult,
     })
   );

@@ -50,7 +50,6 @@ const DashboardClient = ({ initialData }) => {
       incomeStore.hydrate(initialData.incomes, initialData.additionalIncomes);
       expenseStore.hydrate(initialData.expenses);
       categoryStore.hydrate(initialData.categories);
-      productStore.hydrate(initialData.products);
       return;
     }
 

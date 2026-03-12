@@ -53,7 +53,6 @@ const SalesClient = ({ initialData }) => {
   useEffect(() => {
     if (initialData) {
       sellStore.hydrateSales(initialData.sales, initialData.values);
-      productStore.hydrate(initialData.products);
       return;
     }
     loadSales();
