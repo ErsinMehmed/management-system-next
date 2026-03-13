@@ -8,7 +8,7 @@ import Pagination from "@/components/table/Pagination";
 import ClientOrderForm from "@/components/forms/ClientOrder";
 import { useDisclosure } from "@heroui/react";
 import Link from "next/link";
-import { FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiRefreshCw } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
 
@@ -29,6 +29,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { errorFields } = commonStore;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [deletingId, setDeletingId] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -72,16 +73,28 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
   return (
     <Layout title="Клиентски поръчки">
-      {isAdmin && (
-        <button
-          onClick={onOpen}
-          className="text-white absolute -top-[3.3rem] sm:-top-[3.1rem] right-7 sm:right-18 2xl:right-96 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 py-1.5 text-center transition-all active:scale-90">
-          <span className="hidden sm:block">Добави</span>
-          <FiPlus className="w-5 h-5 sm:hidden" />
-        </button>
-      )}
-
       <div className="min-h-screen 2xl:px-10">
+        <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
+          <button
+            onClick={async () => {
+              setIsRefreshing(true);
+              await clientOrderStore.loadOrders();
+              setIsRefreshing(false);
+            }}
+            className="flex items-center justify-center gap-2 w-full sm:w-auto text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-3 sm:py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
+            <FiRefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <span>Презареди</span>
+          </button>
+
+          {isAdmin && (
+            <button
+              onClick={onOpen}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-3 sm:py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
+              <FiPlus className="w-4 h-4" />
+              <span>Добави</span>
+            </button>
+          )}
+        </div>
         {isLoading ? (
           <div className="p-8 text-center text-slate-400">Зареждане...</div>
         ) : orders?.items?.length === 0 ? (
