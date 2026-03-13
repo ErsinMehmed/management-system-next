@@ -1,4 +1,4 @@
-import admin from "@/libs/firebase-admin";
+import getAdmin from "@/libs/firebase-admin";
 import User from "@/models/user";
 
 export async function notifyUser(userId, { title, body, data = {} }) {
@@ -11,7 +11,7 @@ export async function notifyUser(userId, { title, body, data = {} }) {
     tokens: user.fcmTokens,
   };
 
-  const response = await admin.messaging().sendEachForMulticast(message);
+  const response = await getAdmin().messaging().sendEachForMulticast(message);
 
   const invalidTokens = [];
   response.responses.forEach((res, idx) => {
@@ -51,7 +51,7 @@ export async function notifyAllEmployees({ title, body, data = {} }) {
     tokens: allTokens,
   };
 
-  const response = await admin.messaging().sendEachForMulticast(message);
+  const response = await getAdmin().messaging().sendEachForMulticast(message);
 
   // Почистваме невалидни токени от DB
   const invalidTokens = [];
