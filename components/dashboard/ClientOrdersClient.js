@@ -81,102 +81,84 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
       )}
 
       <div className="min-h-screen 2xl:px-10">
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-100 font-semibold text-slate-700">
-            Поръчки
+        {isLoading ? (
+          <div className="p-8 text-center text-slate-400">Зареждане...</div>
+        ) : orders?.items?.length === 0 ? (
+          <div className="p-8 text-center text-slate-400">Няма поръчки</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {orders?.items?.map((order) => (
+              <div key={order._id} className="bg-white rounded-xl shadow-sm p-4 flex flex-col gap-3">
+
+                {/* Горен ред — телефон + статус + изтрий */}
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <div className="font-semibold text-slate-800 text-base">{order.phone}</div>
+                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${order.isNewClient ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                      {order.isNewClient ? "Нов клиент" : "Съществуващ"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {isAdmin ? (
+                      <select
+                        value={order.status}
+                        onChange={(e) => clientOrderStore.updateStatus(order._id, e.target.value)}
+                        className={`text-xs font-semibold px-2 py-1.5 rounded-lg border-0 cursor-pointer ${STATUS_STYLES[order.status]}`}>
+                        {STATUSES.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className={`text-xs font-semibold px-2 py-1.5 rounded-lg ${STATUS_STYLES[order.status]}`}>
+                        {order.status}
+                      </span>
+                    )}
+
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleDelete(order._id)}
+                        disabled={deletingId === order._id}
+                        className="text-red-400 hover:text-red-600 transition-colors p-1">
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Продукт + бройка + цена */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600 font-medium">{order.product?.name ?? "—"}</span>
+                  <div className="flex items-center gap-3 text-slate-500">
+                    <span>{order.quantity} бр.</span>
+                    <span className="font-semibold text-slate-700">{formatCurrency(order.price, 2)}</span>
+                  </div>
+                </div>
+
+                {/* Адрес / Бележка / Продавач */}
+                {(order.address || order.note || order.assignedTo?.name) && (
+                  <div className="flex flex-col gap-1 text-xs text-slate-400 border-t border-gray-100 pt-2">
+                    {order.address && <span>📍 {order.address}</span>}
+                    {order.note && <span>📝 {order.note}</span>}
+                    {order.assignedTo?.name && <span>👤 {order.assignedTo.name}</span>}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
+        )}
 
-          {isLoading ? (
-            <div className="p-8 text-center text-slate-400">Зареждане...</div>
-          ) : orders?.items?.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">Няма поръчки</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
-                  <tr>
-                    <th className="px-4 py-3">Клиент</th>
-                    <th className="px-4 py-3">Продукт</th>
-                    <th className="px-4 py-3">Бр.</th>
-                    <th className="px-4 py-3">Цена</th>
-                    <th className="px-4 py-3">Адрес</th>
-                    <th className="px-4 py-3">Бележка</th>
-                    <th className="px-4 py-3">Статус</th>
-                    <th className="px-4 py-3">Продавач</th>
-                    {isAdmin && <th className="px-4 py-3"></th>}
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-gray-100">
-                  {orders?.items?.map((order) => (
-                    <tr key={order._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-slate-700">{order.phone}</div>
-                        <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${order.isNewClient ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                          {order.isNewClient ? "Нов" : "Съществуващ"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">
-                        {order.product?.name ?? "-"}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">{order.quantity}</td>
-                      <td className="px-4 py-3 font-medium text-slate-700">
-                        {formatCurrency(order.price, 2)}
-                      </td>
-                      <td className="px-4 py-3 text-slate-500 max-w-[150px] truncate">
-                        {order.address || "-"}
-                      </td>
-                      <td className="px-4 py-3 text-slate-500 max-w-[150px] truncate">
-                        {order.note || "-"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {isAdmin ? (
-                          <select
-                            value={order.status}
-                            onChange={(e) => clientOrderStore.updateStatus(order._id, e.target.value)}
-                            className={`text-xs font-semibold px-2 py-1 rounded-lg border-0 cursor-pointer ${STATUS_STYLES[order.status]}`}>
-                            {STATUSES.map((s) => (
-                              <option key={s} value={s}>{s}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${STATUS_STYLES[order.status]}`}>
-                            {order.status}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-slate-500">
-                        {order.assignedTo?.name ?? <span className="text-gray-300">—</span>}
-                      </td>
-                      {isAdmin && (
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => handleDelete(order._id)}
-                            disabled={deletingId === order._id}
-                            className="text-red-400 hover:text-red-600 transition-colors">
-                            <FiTrash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <div className="p-4 border-t border-gray-100">
-            <Pagination
-              isLoading={isLoading}
-              currentPage={orders.pagination?.current_page}
-              totalPages={orders.pagination?.total_pages}
-              totalItems={orders.pagination?.total_results}
-              perPage={orders.pagination?.per_page}
-              handlePrevPage={handlePageChange}
-              handleNextPage={() => handlePageChange("next")}
-              handlePageClick={handlePageClick}
-            />
-          </div>
+        <div className="mt-4">
+          <Pagination
+            isLoading={isLoading}
+            currentPage={orders.pagination?.current_page}
+            totalPages={orders.pagination?.total_pages}
+            totalItems={orders.pagination?.total_results}
+            perPage={orders.pagination?.per_page}
+            handlePrevPage={handlePageChange}
+            handleNextPage={() => handlePageChange("next")}
+            handlePageClick={handlePageClick}
+          />
         </div>
       </div>
 
