@@ -52,6 +52,6 @@ export const config = {
     "/dashboard/users",
     "/dashboard/users/sales",
     "/dashboard/incomes",
-    "/api/((?!auth).*)",
+    "/api/((?!auth|register).*)",
   ],
 };

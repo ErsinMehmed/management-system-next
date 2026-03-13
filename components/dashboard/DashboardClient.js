@@ -47,17 +47,17 @@ const DashboardClient = ({ initialData }) => {
     if (initialData) {
       // Хидратираме MobX stores с данните от SSR — без API calls
       sellStore.hydrate(initialData.sellStats, initialData.lineChartStats);
-      incomeStore.hydrate(initialData.incomes, initialData.additionalIncomes);
-      expenseStore.hydrate(initialData.expenses);
+      incomeStore.hydrate(initialData.incomes, isUserAdmin ? initialData.additionalIncomes : null);
+      if (isUserAdmin) expenseStore.hydrate(initialData.expenses);
       categoryStore.hydrate(initialData.categories);
       return;
     }
 
     // Fallback: зареждаме от API ако няма SSR данни
     const { dateFrom, dateTo } = dashboardBoxPeriod;
-    const promises = [loadSaleStats(), loadLineChartSaleStats(), loadCategoriesIfNotLoaded()];
-    if (!dateFrom && !dateTo) {
-      promises.push(loadAdditionalIncomes(), loadExpenses(), loadIncomes());
+    const promises = [loadSaleStats(), loadLineChartSaleStats(), loadCategoriesIfNotLoaded(), loadIncomes()];
+    if (isUserAdmin && !dateFrom && !dateTo) {
+      promises.push(loadAdditionalIncomes(), loadExpenses());
     }
     Promise.all(promises);
   }, []);
@@ -147,7 +147,7 @@ const DashboardClient = ({ initialData }) => {
     expenses.total_ad_expenses
   ).toFixed(2);
 
-  const profit = (incomes?.incomes + additionalIncomes?.incomes).toFixed(2);
+  const profit = (incomes?.incomes ?? 0).toFixed(2);
 
   const columns = isUserAdmin
     ? ["продукт", "кашони", "бутилки", "стойност"]
@@ -164,13 +164,15 @@ const DashboardClient = ({ initialData }) => {
         className={`grid grid-cols-1 ${
           isUserAdmin ? "lg:grid-cols-3" : ""
         }  gap-5 mb-5`}>
-        <Box
-          title='Приходи'
-          period={dashboardBoxPeriod}
-          value={profit}
-          icon={<MdAttachMoney className='w-6 h-6' />}
-          onClick={onIncomesOpen}
-        />
+        {isUserAdmin && (
+          <Box
+            title='Приходи'
+            period={dashboardBoxPeriod}
+            value={profit}
+            icon={<MdAttachMoney className='w-6 h-6' />}
+            onClick={onIncomesOpen}
+          />
+        )}
 
         {isUserAdmin && (
           <Box
@@ -193,14 +195,16 @@ const DashboardClient = ({ initialData }) => {
         )}
       </div>
 
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-y-5 lg:gap-5 mb-5'>
-        <PieChart
-          data={sellStats.sales}
-          status={sellStats.status}
-          message={sellStats.message}
-        />
+      <div className={`grid grid-cols-1 ${isUserAdmin ? "lg:grid-cols-3" : ""} gap-y-5 lg:gap-5 mb-5`}>
+        {isUserAdmin && (
+          <PieChart
+            data={sellStats.sales}
+            status={sellStats.status}
+            message={sellStats.message}
+          />
+        )}
 
-        <div className='col-span-2 h-full'>
+        <div className={isUserAdmin ? "col-span-2 h-full" : "h-full"}>
           <Table
             title='Наличност на бутилки'
             data={{
@@ -236,7 +240,7 @@ const DashboardClient = ({ initialData }) => {
             </Tab>
           ))}
 
-          {additionalIncomes?.incomes > 0 && (
+          {isUserAdmin && additionalIncomes?.incomes > 0 && (
             <Tab title='Други'>
               <div className='bg-gray-50 rounded-lg'>
                 <dl className='flex-container py-2.5 px-3 text-sm'>

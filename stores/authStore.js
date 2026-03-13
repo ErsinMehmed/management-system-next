@@ -93,7 +93,7 @@ class Auth {
   };
 
   handleDefaultError = (errorFields) => {
-    commonStore.setErrorFields(errorFields);
+    commonStore.setErrorFields(errorFields ?? {});
   };
 
   resetUserData = () => {

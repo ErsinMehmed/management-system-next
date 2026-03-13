@@ -59,7 +59,7 @@ const dashboardLinks = [
   {
     link: "/dashboard/sales",
     text: "Продажби",
-    role: ["Super Admin", "Admin", "Seller"],
+    role: ["Super Admin", "Admin"],
     icon: <BsCart2 className='w-5 h-5' />,
   },
   {

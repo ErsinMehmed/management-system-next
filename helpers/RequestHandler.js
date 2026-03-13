@@ -68,7 +68,7 @@ export default class RequestHandler {
       queryBuilder.where("quantity").lte(parseInt(maxQuantity));
     }
 
-    if (getUserRecords && userId && userRole !== "Super Admin") {
+    if (getUserRecords && userId && !["Super Admin", "Admin"].includes(userRole)) {
       queryBuilder = queryBuilder.where("creator").equals(userId);
     }
 
