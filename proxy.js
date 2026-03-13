@@ -28,7 +28,8 @@ export default withAuth(
       role !== "Admin" &&
       (path === "/dashboard/orders" ||
         path === "/dashboard/products" ||
-        path === "/dashboard/incomes")
+        path === "/dashboard/incomes" ||
+          path === "/dashboard/sales")
     ) {
       return new NextResponse("Нямате достъп!");
     }
