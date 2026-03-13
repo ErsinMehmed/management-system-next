@@ -43,11 +43,25 @@ export default function PushNotificationInit() {
         });
 
         if (token) {
-          await fetch("/api/notifications/token", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token }),
-          });
+          const savedToken = localStorage.getItem("fcm_token");
+
+          if (savedToken && savedToken !== token) {
+            // Токенът се е сменил — изтриваме стария
+            await fetch("/api/notifications/token", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token: savedToken }),
+            });
+          }
+
+          if (savedToken !== token) {
+            await fetch("/api/notifications/token", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token }),
+            });
+            localStorage.setItem("fcm_token", token);
+          }
         }
 
         // Показва notification докато приложението е отворено (foreground)

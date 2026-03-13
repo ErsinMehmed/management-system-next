@@ -28,5 +28,5 @@ self.addEventListener("push", (event) => {
 // Отваря приложението при клик върху notification
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  event.waitUntil(clients.openWindow("/dashboard/orders"));
+  event.waitUntil(clients.openWindow("/dashboard/client-orders"));
 });
