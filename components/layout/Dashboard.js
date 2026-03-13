@@ -7,6 +7,7 @@ import MobileMenu from "@/components/dashboard/MobileMenu";
 import Alert from "@/components/Alert";
 import { productStore } from "@/stores/useStore";
 import { I18nProvider } from "@react-aria/i18n";
+import PushNotificationInit from "@/components/PushNotificationInit";
 
 const DashboardLayout = (props) => {
   const { data: session } = useSession();
@@ -23,6 +24,7 @@ const DashboardLayout = (props) => {
 
   return (
     <I18nProvider locale='bg-BG'>
+      <PushNotificationInit />
       <Alert />
 
       <div className='flex items-center w-full bg-[#f5f5f7]'>

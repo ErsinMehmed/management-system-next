@@ -8,6 +8,7 @@ import income from "./incomeStore";
 import ad from "./adStore";
 import user from "./userStore";
 import category from "./categoryStore";
+import clientOrder from "./clientOrderStore";
 
 const commonStore = common;
 const authStore = auth;
@@ -19,6 +20,7 @@ const incomeStore = income;
 const adStore = ad;
 const userStore = user;
 const categoryStore = category;
+const clientOrderStore = clientOrder;
 
 export {
   commonStore,
@@ -31,4 +33,5 @@ export {
   adStore,
   userStore,
   categoryStore,
+  clientOrderStore,
 };

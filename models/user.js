@@ -25,6 +25,7 @@ const userSchema = new Schema(
     percent: Number,
     target: Number,
     role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
+    fcmTokens: { type: [String], default: [] },
   },
   {
     timestamps: true,

@@ -17,6 +17,8 @@
       "bcryptjs": "^2.4.3",
       "chalk": "^5.4.0",
       "dotenv": "^16.4.7",
+      "firebase": "^12.10.0",
+      "firebase-admin": "^13.7.0",
       "framer-motion": "^11.15.0",
       "lodash": "^4.17.21",
       "mobx-react-lite": "^4.1.0",

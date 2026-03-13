@@ -5,6 +5,7 @@ import {
   BsHouse,
   BsPeople,
   BsCashCoin,
+  BsPersonLinesFill,
 } from "react-icons/bs";
 
 const perPageResult = [
@@ -66,6 +67,12 @@ const dashboardLinks = [
     text: "Приходи",
     role: ["Super Admin", "Admin"],
     icon: <BsCashCoin className='w-5 h-5' />,
+  },
+  {
+    link: "/dashboard/client-orders",
+    text: "Клиентски поръчки",
+    role: ["Super Admin", "Admin", "Seller"],
+    icon: <BsPersonLinesFill className='w-5 h-5' />,
   },
   // {
   //   link: "/dashboard/users/sales",
