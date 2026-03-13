@@ -7,6 +7,7 @@ import Modal from "@/components/Modal";
 import Pagination from "@/components/table/Pagination";
 import ClientOrderForm from "@/components/forms/ClientOrder";
 import { useDisclosure } from "@heroui/react";
+import Link from "next/link";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
@@ -88,59 +89,59 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {orders?.items?.map((order) => (
-              <div key={order._id} className="bg-white rounded-xl shadow-sm p-4 flex flex-col gap-3">
+              <div key={order._id} className="bg-white rounded-xl shadow-sm flex flex-col relative">
 
-                {/* Горен ред — телефон + статус + изтрий */}
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <div className="font-semibold text-slate-800 text-base">{order.phone}</div>
-                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${order.isNewClient ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                      {order.isNewClient ? "Нов клиент" : "Съществуващ"}
+                {/* Цялата кутия е линк */}
+                <Link href={`/dashboard/client-orders/${order._id}`} className="p-4 flex flex-col gap-3 flex-1">
+                  {/* Телефон + badge */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-semibold text-slate-800 text-base">{order.phone}</span>
+                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded w-fit ${order.isNewClient ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                        {order.isNewClient ? "Нов клиент" : "Съществуващ"}
+                      </span>
+                    </div>
+                    <span className={`text-xs font-semibold px-2 py-1.5 rounded-lg shrink-0 ${STATUS_STYLES[order.status]}`}>
+                      {order.status}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    {isAdmin ? (
-                      <select
-                        value={order.status}
-                        onChange={(e) => clientOrderStore.updateStatus(order._id, e.target.value)}
-                        className={`text-xs font-semibold px-2 py-1.5 rounded-lg border-0 cursor-pointer ${STATUS_STYLES[order.status]}`}>
-                        {STATUSES.map((s) => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className={`text-xs font-semibold px-2 py-1.5 rounded-lg ${STATUS_STYLES[order.status]}`}>
-                        {order.status}
-                      </span>
-                    )}
-
-                    {isAdmin && (
-                      <button
-                        onClick={() => handleDelete(order._id)}
-                        disabled={deletingId === order._id}
-                        className="text-red-400 hover:text-red-600 transition-colors p-1">
-                        <FiTrash2 className="w-4 h-4" />
-                      </button>
-                    )}
+                  {/* Продукт + бройки + цена */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600 font-medium">{order.product?.name ?? "—"}</span>
+                    <div className="flex items-center gap-3 text-slate-500">
+                      <span>{order.quantity} бр.</span>
+                      <span className="font-semibold text-slate-700">{formatCurrency(order.price, 2)}</span>
+                    </div>
                   </div>
-                </div>
 
-                {/* Продукт + бройка + цена */}
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 font-medium">{order.product?.name ?? "—"}</span>
-                  <div className="flex items-center gap-3 text-slate-500">
-                    <span>{order.quantity} бр.</span>
-                    <span className="font-semibold text-slate-700">{formatCurrency(order.price, 2)}</span>
-                  </div>
-                </div>
+                  {/* Адрес / Бележка / Продавач */}
+                  {(order.address || order.note || order.assignedTo?.name) && (
+                    <div className="flex flex-col gap-1 text-xs text-slate-400 border-t border-gray-100 pt-2">
+                      {order.address && <span>📍 {order.address}</span>}
+                      {order.note && <span>📝 {order.note}</span>}
+                      {order.assignedTo?.name && <span>👤 {order.assignedTo.name}</span>}
+                    </div>
+                  )}
+                </Link>
 
-                {/* Адрес / Бележка / Продавач */}
-                {(order.address || order.note || order.assignedTo?.name) && (
-                  <div className="flex flex-col gap-1 text-xs text-slate-400 border-t border-gray-100 pt-2">
-                    {order.address && <span>📍 {order.address}</span>}
-                    {order.note && <span>📝 {order.note}</span>}
-                    {order.assignedTo?.name && <span>👤 {order.assignedTo.name}</span>}
+                {/* Статус + изтрий (само за admin) */}
+                {isAdmin && (
+                  <div className="flex items-center justify-between px-4 pb-3 gap-2">
+                    <select
+                      value={order.status}
+                      onChange={(e) => clientOrderStore.updateStatus(order._id, e.target.value)}
+                      className={`text-xs font-semibold px-2 py-1.5 rounded-lg border-0 cursor-pointer ${STATUS_STYLES[order.status]}`}>
+                      {STATUSES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => handleDelete(order._id)}
+                      disabled={deletingId === order._id}
+                      className="text-red-400 hover:text-red-600 transition-colors p-1">
+                      <FiTrash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -165,7 +166,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        title="Добави клиентска поръчка"
+        title="Добави поръчка"
         isLoading={isCreating}
         onSave={handleCreate}>
         <ClientOrderForm

@@ -21,6 +21,7 @@ self.addEventListener("push", (event) => {
       badge: "/icon.png",
       tag: "order-notification",
       renotify: true,
+      data: data.data ?? {},
     })
   );
 });
@@ -28,5 +29,6 @@ self.addEventListener("push", (event) => {
 // Отваря приложението при клик върху notification
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  event.waitUntil(clients.openWindow("/dashboard/client-orders"));
+  const url = event.notification.data?.url ?? "/dashboard/client-orders";
+  event.waitUntil(clients.openWindow(url));
 });

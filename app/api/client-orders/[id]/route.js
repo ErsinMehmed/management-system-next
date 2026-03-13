@@ -2,10 +2,12 @@ import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function PUT(request, { params }) {
-  const { error } = await requireAdmin();
-  if (error) return error;
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const { id } = await params;
   const { status } = await request.json();

@@ -66,11 +66,12 @@ export async function POST(request) {
     { path: "assignedTo", select: "name" },
   ]);
 
-  // Push notification — само към асайнатия продавач, или към всички ако няма
+  // Push notification — само към асайнатия доставчик, или към всички ако няма
   const clientType = data.isNewClient ? "🆕 Нов клиент" : "Съществуващ клиент";
   const notifPayload = {
-    title: "📦 Нова клиентска поръчка",
+    title: "📦 Нова поръчка",
     body: `${clientType} · ${data.phone}\n${order.product?.name} × ${data.quantity} бр. — ${data.price} лв.`,
+    data: { url: `/dashboard/client-orders/${order._id}` },
   };
   if (data.assignedTo) {
     notifyUser(data.assignedTo, notifPayload).catch(console.error);

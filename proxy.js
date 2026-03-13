@@ -53,6 +53,7 @@ export const config = {
     "/dashboard/users",
     "/dashboard/users/sales",
     "/dashboard/incomes",
+    "/dashboard/client-orders/:path*",
     "/api/((?!auth|register).*)",
   ],
 };
