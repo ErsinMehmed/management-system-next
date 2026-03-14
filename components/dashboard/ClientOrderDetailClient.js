@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Dashboard";
 import { FiArrowLeft, FiPhone, FiCopy, FiCheck } from "react-icons/fi";
+import { FaViber, FaWhatsapp } from "react-icons/fa";
 import { Tooltip, Button } from "@heroui/react";
 import { formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
@@ -100,9 +101,22 @@ const ClientOrderDetailClient = ({ order }) => {
             <Row label="Продукт" value={productName} />
             <Row label="Количество" value={`${order.quantity} бр.`} />
             <Row label="Цена" value={formatCurrency(order.price, 2)} />
+            {order.contactMethod && (
+              <Row
+                label="Връзка"
+                value={
+                  <span className="flex items-center gap-1.5 justify-end">
+                    {order.contactMethod === "Viber"
+                      ? <FaViber className="w-4 h-4 text-[#7360F2]" />
+                      : <FaWhatsapp className="w-4 h-4 text-[#25D366]" />}
+                    {order.contactMethod}
+                  </span>
+                }
+              />
+            )}
             {order.address && <Row label="Адрес" value={order.address} />}
             {order.note && <Row label="Бележка" value={order.note} />}
-            {order.assignedTo?.name && <Row label="Продавач" value={order.assignedTo.name} />}
+            {order.assignedTo?.name && <Row label="Доставчик" value={order.assignedTo.name} />}
             <Row
               label="Дата"
               value={new Date(order.createdAt).toLocaleDateString("bg-BG", {

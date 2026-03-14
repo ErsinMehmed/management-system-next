@@ -1,6 +1,13 @@
 import Input from "@/components/html/Input";
 import Select from "@/components/html/Select";
 import Textarea from "@/components/html/Textarea";
+import { Select as HeroSelect, SelectItem } from "@heroui/react";
+import { FaViber, FaWhatsapp } from "react-icons/fa";
+
+const CONTACT_METHODS = [
+  { value: "Viber", icon: <FaViber className="w-4 h-4 text-[#7360F2]" /> },
+  { value: "WhatsApp", icon: <FaWhatsapp className="w-4 h-4 text-[#25D366]" /> },
+];
 
 const ClientOrderForm = ({ data, errorFields, products, sellers = [], handleFieldChange }) => {
   return (
@@ -50,6 +57,19 @@ const ClientOrderForm = ({ data, errorFields, products, sellers = [], handleFiel
         value={data.note || ""}
         onChange={(value) => handleFieldChange("note", value)}
       />
+
+      <HeroSelect
+        label="Начин за връзка (по избор)"
+        size="sm"
+        classNames={{ trigger: "w-full" }}
+        defaultSelectedKeys={data.contactMethod ? [data.contactMethod] : []}
+        onChange={(e) => handleFieldChange("contactMethod", e.target.value)}>
+        {CONTACT_METHODS.map((m) => (
+          <SelectItem key={m.value} value={m.value} startContent={m.icon}>
+            {m.value}
+          </SelectItem>
+        ))}
+      </HeroSelect>
 
       {sellers.length > 0 && (
         <Select

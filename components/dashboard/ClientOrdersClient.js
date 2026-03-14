@@ -128,7 +128,6 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                     </div>
                   </div>
 
-                  {/* Адрес / Бележка / Продавач */}
                   {(order.address || order.note || order.assignedTo?.name) && (
                     <div className="flex flex-col gap-1 text-xs text-slate-400 border-t border-gray-100 pt-2">
                       {order.address && <span>📍 {order.address}</span>}

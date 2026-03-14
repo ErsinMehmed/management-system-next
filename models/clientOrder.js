@@ -15,6 +15,7 @@ const clientOrderSchema = new Schema(
       default: "нова",
     },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    contactMethod: { type: String, default: "" },
   },
   { timestamps: true }
 );

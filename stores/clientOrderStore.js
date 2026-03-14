@@ -9,6 +9,7 @@ const initialOrderData = {
   address: "",
   note: "",
   assignedTo: "",
+  contactMethod: "",
 };
 
 const STATUS_COLORS = {
