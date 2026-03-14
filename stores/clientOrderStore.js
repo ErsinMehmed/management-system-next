@@ -25,6 +25,8 @@ class ClientOrderStore {
   isCreating = false;
   currentPage = 1;
   perPage = "10";
+  summary = { items: [], grandTotal: 0 };
+  isSummaryLoading = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -107,6 +109,17 @@ class ClientOrderStore {
     if (data.status) {
       commonStore.setSuccessMessage(data.message);
       this.loadOrders();
+    }
+  };
+
+  loadSummary = async () => {
+    this.isSummaryLoading = true;
+    try {
+      const res = await fetch("/api/client-orders/summary");
+      const data = await res.json();
+      this.summary = data;
+    } finally {
+      this.isSummaryLoading = false;
     }
   };
 
