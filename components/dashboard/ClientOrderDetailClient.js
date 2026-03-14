@@ -39,6 +39,12 @@ const ClientOrderDetailClient = ({ order }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const phoneHref = order.contactMethod === "WhatsApp"
+    ? `https://wa.me/${order.phone.replace(/\D/g, "")}`
+    : order.contactMethod === "Viber"
+    ? `viber://chat?number=${order.phone.replace(/\D/g, "")}`
+    : `tel:${order.phone}`;
+
   const productName = order.product
     ? [order.product.name, order.product.flavor, order.product.weight && `${order.product.weight}г`, order.product.puffs && `${order.product.puffs}k`]
         .filter(Boolean).join(" ")
@@ -61,7 +67,8 @@ const ClientOrderDetailClient = ({ order }) => {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <a
-                  href={`tel:${order.phone}`}
+                  href={phoneHref}
+                  onClick={() => navigator.clipboard.writeText(order.phone)}
                   className="flex items-center gap-2 text-xl font-bold text-[#0071f5] hover:text-blue-700 transition-colors">
                   <FiPhone className="w-5 h-5" />
                   {order.phone}
