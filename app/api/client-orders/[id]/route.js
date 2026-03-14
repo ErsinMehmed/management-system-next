@@ -20,7 +20,12 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
   }
 
-  const update = { status, rejectionReason: status === "отказана" ? (rejectionReason ?? "") : "" };
+  const finalStatuses = ["доставена", "отказана"];
+  const update = {
+    status,
+    rejectionReason: status === "отказана" ? (rejectionReason ?? "") : "",
+    statusChangedAt: finalStatuses.includes(status) ? new Date() : null,
+  };
   await ClientOrder.findByIdAndUpdate(id, update);
 
   return NextResponse.json({ message: "Статусът е обновен", status: true });

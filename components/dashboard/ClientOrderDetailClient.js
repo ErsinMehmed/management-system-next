@@ -34,6 +34,7 @@ const ClientOrderDetailClient = ({ order }) => {
   const router = useRouter();
   const [currentStatus, setCurrentStatus] = useState(order.status);
   const [currentRejectionReason, setCurrentRejectionReason] = useState(order.rejectionReason || "");
+  const [statusChangedAt, setStatusChangedAt] = useState(order.statusChangedAt || null);
   const [viewed, setViewed] = useState(order.viewedBySeller || false);
   const [copied, setCopied] = useState(false);
 
@@ -115,6 +116,7 @@ const ClientOrderDetailClient = ({ order }) => {
                   await clientOrderStore.updateStatus(order._id, val);
                   setCurrentStatus(val);
                   setCurrentRejectionReason("");
+                  setStatusChangedAt(["доставена", "отказана"].includes(val) ? new Date() : null);
                 }
               }}
               baseClass="w-36"
@@ -143,6 +145,15 @@ const ClientOrderDetailClient = ({ order }) => {
             {order.address && <Row label="Адрес" value={order.address} />}
             {order.note && <Row label="Бележка" value={order.note} />}
             {currentRejectionReason && <Row label="Причина за отказ" value={currentRejectionReason} />}
+            {statusChangedAt && (
+              <Row
+                label={currentStatus === "доставена" ? "Час на доставка" : "Час на отказа"}
+                value={new Date(statusChangedAt).toLocaleDateString("bg-BG", {
+                  day: "2-digit", month: "2-digit", year: "numeric",
+                  hour: "2-digit", minute: "2-digit",
+                })}
+              />
+            )}
             {order.assignedTo?.name && <Row label="Доставчик" value={order.assignedTo.name} />}
             {isSuperAdmin && order.assignedTo && (
               <Row
@@ -174,6 +185,7 @@ const ClientOrderDetailClient = ({ order }) => {
           await clientOrderStore.updateStatus(order._id, "отказана", pendingReason);
           setCurrentStatus("отказана");
           setCurrentRejectionReason(pendingReason);
+          setStatusChangedAt(new Date());
           return true;
         }}>
         <textarea

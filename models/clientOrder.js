@@ -18,6 +18,7 @@ const clientOrderSchema = new Schema(
     contactMethod: { type: String, default: "" },
     rejectionReason: { type: String, default: "" },
     viewedBySeller: { type: Boolean, default: false },
+    statusChangedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
