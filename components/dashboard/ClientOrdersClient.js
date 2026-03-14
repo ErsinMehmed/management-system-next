@@ -11,12 +11,12 @@ import Link from "next/link";
 import { FiPlus, FiTrash2, FiRefreshCw } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
+import Select from "@/components/html/Select";
 
-const STATUSES = ["нова", "изпратена", "доставена", "отказана"];
+const STATUSES = ["нова", "доставена", "отказана"];
 
 const STATUS_STYLES = {
   нова: "bg-blue-100 text-blue-700",
-  изпратена: "bg-yellow-100 text-yellow-700",
   доставена: "bg-green-100 text-green-700",
   отказана: "bg-red-100 text-red-700",
 };
@@ -141,14 +141,13 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                 {/* Статус + изтрий (само за admin) */}
                 {isAdmin && (
                   <div className="flex items-center justify-between px-4 pb-3 gap-2">
-                    <select
+                    <Select
+                      controlled
                       value={order.status}
-                      onChange={(e) => clientOrderStore.updateStatus(order._id, e.target.value)}
-                      className={`text-xs font-semibold px-2 py-1.5 rounded-lg border-0 cursor-pointer ${STATUS_STYLES[order.status]}`}>
-                      {STATUSES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                      items={STATUSES.map((s) => ({ _id: s, value: s, name: s }))}
+                      onChange={(val) => clientOrderStore.updateStatus(order._id, val)}
+                      classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${STATUS_STYLES[order.status]}`}
+                    />
                     <button
                       onClick={() => handleDelete(order._id)}
                       disabled={deletingId === order._id}

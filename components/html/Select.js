@@ -5,6 +5,10 @@ const SelectComponent = (props) => {
     props.onChange(event.target.value);
   };
 
+  const selectedProps = props.controlled
+    ? { selectedKeys: props.value ? [props.value] : [] }
+    : { defaultSelectedKeys: props.value ? [props.value] : [] };
+
   return (
     <Select
       label={props.label}
@@ -13,7 +17,7 @@ const SelectComponent = (props) => {
       }}
       size={"sm"}
       onChange={handleChange}
-      defaultSelectedKeys={props.value ? [props.value] : []}
+      {...selectedProps}
       isInvalid={props.errorMessage ? true : false}
       errorMessage={props.errorMessage}>
       {props.items?.map((item) => (

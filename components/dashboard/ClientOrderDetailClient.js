@@ -7,12 +7,12 @@ import Layout from "@/components/layout/Dashboard";
 import { FiArrowLeft, FiPhone } from "react-icons/fi";
 import { formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
+import Select from "@/components/html/Select";
 
-const STATUSES = ["нова", "изпратена", "доставена", "отказана"];
+const STATUSES = ["нова", "доставена", "отказана"];
 
 const STATUS_STYLES = {
   нова: "bg-blue-100 text-blue-700",
-  изпратена: "bg-yellow-100 text-yellow-700",
   доставена: "bg-green-100 text-green-700",
   отказана: "bg-red-100 text-red-700",
 };
@@ -61,18 +61,16 @@ const ClientOrderDetailClient = ({ order }) => {
               </span>
             </div>
 
-            <select
+            <Select
+              controlled
               value={currentStatus}
-              onChange={async (e) => {
-                const newStatus = e.target.value;
-                await clientOrderStore.updateStatus(order._id, newStatus);
-                setCurrentStatus(newStatus);
+              items={STATUSES.map((s) => ({ _id: s, value: s, name: s }))}
+              onChange={async (val) => {
+                await clientOrderStore.updateStatus(order._id, val);
+                setCurrentStatus(val);
               }}
-              className={`text-xs font-semibold px-2 py-1.5 rounded-lg border-0 cursor-pointer ${STATUS_STYLES[currentStatus]}`}>
-              {STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+              classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${STATUS_STYLES[currentStatus]}`}
+            />
           </div>
 
           {/* Детайли */}
