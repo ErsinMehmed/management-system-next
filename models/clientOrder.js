@@ -11,11 +11,13 @@ const clientOrderSchema = new Schema(
     note: { type: String, default: "" },
     status: {
       type: String,
-      enum: ["нова", "изпратена", "доставена", "отказана"],
+      enum: ["нова", "доставена", "отказана"],
       default: "нова",
     },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User", default: null },
     contactMethod: { type: String, default: "" },
+    rejectionReason: { type: String, default: "" },
+    viewedBySeller: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/helpers/requireRole";
+import { requireAdmin, requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import { NextResponse } from "next/server";
@@ -10,13 +10,42 @@ export async function PUT(request, { params }) {
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const { id } = await params;
-  const { status } = await request.json();
+  const { status, rejectionReason } = await request.json();
 
   await connectMongoDB();
 
-  await ClientOrder.findByIdAndUpdate(id, { status });
+  const existing = await ClientOrder.findById(id).select("status").lean();
+  const lockedStatuses = ["отказана", "доставена"];
+  if (lockedStatuses.includes(existing?.status) && session.user.role !== "Super Admin") {
+    return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
+  }
+
+  const update = { status, rejectionReason: status === "отказана" ? (rejectionReason ?? "") : "" };
+  await ClientOrder.findByIdAndUpdate(id, update);
 
   return NextResponse.json({ message: "Статусът е обновен", status: true });
+}
+
+export async function PATCH(request, { params }) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
+
+  const { id } = await params;
+
+  await connectMongoDB();
+
+  const order = await ClientOrder.findById(id).select("assignedTo viewedBySeller").lean();
+  if (!order) return NextResponse.json({ message: "Не е намерена." }, { status: 404 });
+
+  if (order.viewedBySeller) return NextResponse.json({ status: true });
+
+  if (String(order.assignedTo) !== String(session.user.id)) {
+    return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
+  }
+
+  await ClientOrder.findByIdAndUpdate(id, { viewedBySeller: true });
+
+  return NextResponse.json({ status: true });
 }
 
 export async function DELETE(request, { params }) {

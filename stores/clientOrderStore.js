@@ -14,7 +14,6 @@ const initialOrderData = {
 
 const STATUS_COLORS = {
   нова: "bg-blue-100 text-blue-700",
-  изпратена: "bg-yellow-100 text-yellow-700",
   доставена: "bg-green-100 text-green-700",
   отказана: "bg-red-100 text-red-700",
 };
@@ -97,11 +96,11 @@ class ClientOrderStore {
     }
   };
 
-  updateStatus = async (id, status) => {
+  updateStatus = async (id, status, rejectionReason = "") => {
     const res = await fetch(`/api/client-orders/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, rejectionReason }),
     });
     const data = await res.json();
 
@@ -109,6 +108,10 @@ class ClientOrderStore {
       commonStore.setSuccessMessage(data.message);
       this.loadOrders();
     }
+  };
+
+  markAsViewed = async (id) => {
+    await fetch(`/api/client-orders/${id}`, { method: "PATCH" });
   };
 
   deleteOrder = async (id) => {
