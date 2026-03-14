@@ -128,19 +128,9 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                             {order.isNewClient ? "Нов клиент" : "Съществуващ"}
                           </span>
                         </div>
-                        <div className="flex flex-col items-end gap-0.5 shrink-0">
-                          <span className={`text-xs font-semibold px-2 py-1.5 rounded-lg ${STATUS_STYLES[order.status]}`}>
-                            {order.status}
-                          </span>
-                          {order.statusChangedAt && ["доставена", "отказана"].includes(order.status) && (
-                            <span className="text-[10px] text-slate-400">
-                              {new Date(order.statusChangedAt).toLocaleDateString("bg-BG", {
-                                day: "2-digit", month: "2-digit",
-                                hour: "2-digit", minute: "2-digit",
-                              })}
-                            </span>
-                          )}
-                        </div>
+                        <span className={`text-xs font-semibold px-2 py-1.5 rounded-lg shrink-0 ${STATUS_STYLES[order.status]}`}>
+                          {order.status}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">
