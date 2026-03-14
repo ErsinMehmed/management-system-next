@@ -245,12 +245,19 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                         .slice()
                         .sort((a, b) => b.totalRevenue - a.totalRevenue)
                         .map((item, i) => (
-                          <div key={i} className="grid grid-cols-3 px-4 py-3 border-b border-gray-50 last:border-0 items-center hover:bg-slate-50 transition-colors">
+                          <div key={i} className="grid grid-cols-3 px-4 py-3 border-b border-gray-50 items-center hover:bg-slate-50 transition-colors">
                             <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
                             <span className="text-sm text-slate-500 text-center">{item.totalQuantity} бр.</span>
                             <span className="text-sm font-semibold text-slate-700 text-right">{formatCurrency(item.totalRevenue, 2)}</span>
                           </div>
                         ))}
+
+                      {/* Общо за доставчика */}
+                      <div className="grid grid-cols-3 px-4 py-3 bg-slate-50 border-t border-gray-200 items-center">
+                        <span className="text-sm font-bold text-slate-700">Общо</span>
+                        <span />
+                        <span className="text-sm font-bold text-[#0071f5] text-right">{formatCurrency(seller.sellerTotal, 2)}</span>
+                      </div>
                     </div>
                   ))}
 

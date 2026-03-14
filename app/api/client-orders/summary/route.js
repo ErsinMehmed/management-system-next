@@ -14,16 +14,21 @@ const productLookup = [
       as: "product",
     },
   },
-  { $unwind: "$product" },
+  { $unwind: { path: "$product", preserveNullAndEmptyArrays: true } },
   {
     $lookup: {
       from: "categories",
       localField: "product.category",
       foreignField: "_id",
-      as: "product.category",
+      as: "categoryArr",
     },
   },
-  { $unwind: { path: "$product.category", preserveNullAndEmpty: true } },
+  {
+    $addFields: {
+      "product.category": { $arrayElemAt: ["$categoryArr", 0] },
+    },
+  },
+  { $unset: "categoryArr" },
 ];
 
 export async function GET() {
@@ -32,7 +37,6 @@ export async function GET() {
 
   await connectMongoDB();
 
-  const isSuperAdmin = session.user.role === "Super Admin";
   const isSeller = session.user.role === "Seller";
 
   // Seller — само неговите доставени поръчки, групирани по продукт
@@ -49,7 +53,7 @@ export async function GET() {
     return NextResponse.json({ bySeller: false, items, grandTotal });
   }
 
-  // Super Admin — всички доставени, групирани по доставчик → продукт
+  // Admin / Super Admin — всички доставени, групирани по доставчик → продукт
   const sellers = await ClientOrder.aggregate([
     { $match: { status: "доставена" } },
     {
@@ -69,7 +73,7 @@ export async function GET() {
         as: "seller",
       },
     },
-    { $unwind: { path: "$seller", preserveNullAndEmpty: true } },
+    { $unwind: { path: "$seller", preserveNullAndEmptyArrays: true } },
     {
       $group: {
         _id: "$_id.seller",
