@@ -1,5 +1,6 @@
 "use client";
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Dashboard";
@@ -27,6 +28,7 @@ const ClientOrderDetailClient = ({ order }) => {
   const { data: session } = useSession();
   const isAdmin = ["Admin", "Super Admin"].includes(session?.user?.role);
   const router = useRouter();
+  const [currentStatus, setCurrentStatus] = useState(order.status);
 
   const productName = order.product
     ? [order.product.name, order.product.flavor, order.product.weight && `${order.product.weight}г`, order.product.puffs && `${order.product.puffs}k`]
@@ -60,9 +62,13 @@ const ClientOrderDetailClient = ({ order }) => {
             </div>
 
             <select
-              defaultValue={order.status}
-              onChange={(e) => clientOrderStore.updateStatus(order._id, e.target.value)}
-              className={`text-xs font-semibold px-2 py-1.5 rounded-lg border-0 cursor-pointer ${STATUS_STYLES[order.status]}`}>
+              value={currentStatus}
+              onChange={async (e) => {
+                const newStatus = e.target.value;
+                await clientOrderStore.updateStatus(order._id, newStatus);
+                setCurrentStatus(newStatus);
+              }}
+              className={`text-xs font-semibold px-2 py-1.5 rounded-lg border-0 cursor-pointer ${STATUS_STYLES[currentStatus]}`}>
               {STATUSES.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}

@@ -11,17 +11,17 @@ self.addEventListener("message", (event) => {
 
 // Показва notification когато приложението е на заден план
 self.addEventListener("push", (event) => {
-  const data = event.data?.json() ?? {};
-  const notification = data.notification ?? {};
+  const payload = event.data?.json() ?? {};
+  const { title = "Нова поръчка", body = "", ...rest } = payload.data ?? {};
 
   event.waitUntil(
-    self.registration.showNotification(notification.title ?? "Нова поръчка", {
-      body: notification.body ?? "",
+    self.registration.showNotification(title, {
+      body,
       icon: "/icon.png",
       badge: "/icon.png",
       tag: "order-notification",
       renotify: true,
-      data: data.data ?? {},
+      data: rest,
     })
   );
 });

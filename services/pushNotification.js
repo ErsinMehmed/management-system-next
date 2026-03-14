@@ -6,8 +6,7 @@ export async function notifyUser(userId, { title, body, data = {} }) {
   if (!user || user.fcmTokens.length === 0) return;
 
   const message = {
-    notification: { title, body },
-    data,
+    data: { title, body, ...data },
     tokens: user.fcmTokens,
   };
 
@@ -46,8 +45,7 @@ export async function notifyAllEmployees({ title, body, data = {} }) {
   if (allTokens.length === 0) return;
 
   const message = {
-    notification: { title, body },
-    data,
+    data: { title, body, ...data },
     tokens: allTokens,
   };
 
