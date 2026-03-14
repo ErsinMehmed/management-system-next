@@ -49,12 +49,19 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const { error } = await requireAdmin();
-  if (error) return error;
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
+
+  const isAdmin = ["Admin", "Super Admin"].includes(session.user.role);
+  const isSeller = session.user.role === "Seller";
+  if (!isAdmin && !isSeller) return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
 
   await connectMongoDB();
 
   const data = await request.json();
+
+  // Seller винаги се асайнва на себе си
+  if (isSeller) data.assignedTo = session.user.id;
 
   // Определяме дали клиентът е нов по телефон
   const existingOrder = await ClientOrder.findOne({ phone: data.phone });

@@ -101,7 +101,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                 <span>Презареди</span>
               </button>
 
-              {isAdmin && (
+              {(isAdmin || session?.user?.role === "Seller") && (
                 <button
                   onClick={onOpen}
                   className="flex items-center justify-center gap-2 w-full sm:w-auto text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-3 sm:py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
