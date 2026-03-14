@@ -1,14 +1,15 @@
 "use client";
 import { observer } from "mobx-react-lite";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Dashboard";
-import { FiArrowLeft, FiPhone, FiCopy, FiCheck, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiArrowLeft, FiPhone, FiCopy, FiCheck, FiEye, FiEyeOff, FiEdit2 } from "react-icons/fi";
 import { FaViber, FaWhatsapp } from "react-icons/fa";
 import { Tooltip, Button, useDisclosure } from "@heroui/react";
 import { formatCurrency } from "@/utils";
-import { clientOrderStore } from "@/stores/useStore";
+import { clientOrderStore, productStore } from "@/stores/useStore";
+import { productTitle } from "@/utils";
 import Select from "@/components/html/Select";
 import Modal from "@/components/Modal";
 
@@ -44,7 +45,21 @@ const ClientOrderDetailClient = ({ order }) => {
     }
   }, [session]);
   const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
+  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
   const [pendingReason, setPendingReason] = useState("");
+  const [editProduct, setEditProduct] = useState(order.product?._id ?? "");
+  const [editQuantity, setEditQuantity] = useState(order.quantity ?? 1);
+  const [editPrice, setEditPrice] = useState(order.price ?? "");
+  const [currentProductName, setCurrentProductName] = useState(null);
+  const [currentQuantity, setCurrentQuantity] = useState(order.quantity);
+  const [currentPrice, setCurrentPrice] = useState(order.price);
+
+  const canEdit = currentStatus === "нова" || isSuperAdmin;
+
+  const availableProducts = useMemo(
+    () => productStore.products.filter((p) => !p.hidden).map((p) => ({ ...p, name: productTitle(p) })),
+    [productStore.products]
+  );
 
   const handleCopy = () => {
     navigator.clipboard.writeText(order.phone);
@@ -58,10 +73,11 @@ const ClientOrderDetailClient = ({ order }) => {
     ? `viber://chat?number=${order.phone.replace(/\D/g, "")}`
     : `tel:${order.phone}`;
 
-  const productName = order.product
-    ? [order.product.name, order.product.flavor, order.product.weight && `${order.product.weight}г`, order.product.puffs && `${order.product.puffs}k`]
-        .filter(Boolean).join(" ")
-    : "—";
+  const productName = currentProductName
+    ?? (order.product
+      ? [order.product.name, order.product.flavor, order.product.weight && `${order.product.weight}г`, order.product.puffs && `${order.product.puffs}k`]
+          .filter(Boolean).join(" ")
+      : "—");
 
   return (
     <Layout title="Детайли на заявката">
@@ -126,9 +142,45 @@ const ClientOrderDetailClient = ({ order }) => {
 
           {/* Детайли */}
           <div className="px-5 py-1">
-            <Row label="Продукт" value={productName} />
-            <Row label="Количество" value={`${order.quantity} бр.`} />
-            <Row label="Цена" value={formatCurrency(order.price, 2)} />
+            <Row
+              label="Продукт"
+              value={
+                <span className="flex items-center gap-2 justify-end">
+                  {productName}
+                  {canEdit && (
+                    <button onClick={onEditOpen} className="text-slate-400 hover:text-[#0071f5] transition-colors">
+                      <FiEdit2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </span>
+              }
+            />
+            <Row
+              label="Количество"
+              value={
+                <span className="flex items-center gap-2 justify-end">
+                  {currentQuantity} бр.
+                  {canEdit && (
+                    <button onClick={onEditOpen} className="text-slate-400 hover:text-[#0071f5] transition-colors">
+                      <FiEdit2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </span>
+              }
+            />
+            <Row
+              label="Цена"
+              value={
+                <span className="flex items-center gap-2 justify-end">
+                  {formatCurrency(currentPrice, 2)}
+                  {canEdit && (
+                    <button onClick={onEditOpen} className="text-slate-400 hover:text-[#0071f5] transition-colors">
+                      <FiEdit2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </span>
+              }
+            />
             {order.contactMethod && (
               <Row
                 label="Връзка"
@@ -176,6 +228,64 @@ const ClientOrderDetailClient = ({ order }) => {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={isEditOpen}
+        onOpenChange={onEditOpenChange}
+        title="Редактирай поръчка"
+        primaryBtnText="Запази"
+        onSave={async () => {
+          const success = await clientOrderStore.updateProductPrice(order._id, editProduct, Number(editQuantity), Number(editPrice));
+          if (success) {
+            const selected = availableProducts.find((p) => p._id === editProduct);
+            if (selected) setCurrentProductName(selected.name);
+            setCurrentQuantity(Number(editQuantity));
+            setCurrentPrice(Number(editPrice));
+          }
+          return success;
+        }}>
+        <div className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-slate-500">Продукт</label>
+            <Select
+              controlled
+              value={editProduct}
+              items={availableProducts.map((p) => ({ _id: p._id, value: p._id, name: p.name }))}
+              onChange={(val) => {
+                const selected = availableProducts.find((p) => p._id === val);
+                const autoPrice = selected?.sell_prices?.[Number(editQuantity) - 1] ?? editPrice;
+                setEditProduct(val);
+                setEditPrice(autoPrice);
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-slate-500">Бройка</label>
+            <input
+              type="number"
+              min={1}
+              value={editQuantity}
+              onChange={(e) => {
+                const qty = Number(e.target.value);
+                setEditQuantity(e.target.value);
+                const selected = availableProducts.find((p) => p._id === editProduct);
+                const autoPrice = selected?.sell_prices?.[qty - 1];
+                if (autoPrice !== undefined) setEditPrice(autoPrice);
+              }}
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-slate-500">Цена</label>
+            <input
+              type="number"
+              value={editPrice}
+              onChange={(e) => setEditPrice(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+      </Modal>
+
       <Modal
         isOpen={isRejectionOpen}
         onOpenChange={onRejectionOpenChange}

@@ -10,11 +10,27 @@ export async function PUT(request, { params }) {
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const { id } = await params;
-  const { status, rejectionReason } = await request.json();
+  const body = await request.json();
 
   await connectMongoDB();
 
   const existing = await ClientOrder.findById(id).select("status").lean();
+
+  // Редактиране на продукт и цена
+  if (body.product !== undefined || body.price !== undefined) {
+    if (existing?.status !== "нова" && session.user.role !== "Super Admin") {
+      return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
+    }
+    const update = {};
+    if (body.product !== undefined) update.product = body.product;
+    if (body.price !== undefined) update.price = body.price;
+    if (body.quantity !== undefined) update.quantity = body.quantity;
+    await ClientOrder.findByIdAndUpdate(id, update);
+    return NextResponse.json({ message: "Поръчката е обновена", status: true });
+  }
+
+  // Смяна на статус
+  const { status, rejectionReason } = body;
   const lockedStatuses = ["отказана", "доставена"];
   if (lockedStatuses.includes(existing?.status) && session.user.role !== "Super Admin") {
     return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });

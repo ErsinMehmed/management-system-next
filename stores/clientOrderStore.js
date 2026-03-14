@@ -123,6 +123,17 @@ class ClientOrderStore {
     }
   };
 
+  updateProductPrice = async (id, product, quantity, price) => {
+    const res = await fetch(`/api/client-orders/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product, quantity, price }),
+    });
+    const data = await res.json();
+    if (data.status) commonStore.setSuccessMessage(data.message);
+    return data.status;
+  };
+
   markAsViewed = async (id) => {
     await fetch(`/api/client-orders/${id}`, { method: "PATCH" });
   };
