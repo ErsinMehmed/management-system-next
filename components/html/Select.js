@@ -13,6 +13,7 @@ const SelectComponent = (props) => {
     <Select
       label={props.label}
       classNames={{
+        base: props.baseClass ?? "w-full",
         trigger: props.classes ?? "w-full",
       }}
       size={"sm"}

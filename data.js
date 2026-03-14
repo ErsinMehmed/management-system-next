@@ -5,7 +5,7 @@ import {
   BsHouse,
   BsPeople,
   BsCashCoin,
-  BsPersonLinesFill,
+  BsClipboard,
 } from "react-icons/bs";
 
 const perPageResult = [
@@ -70,9 +70,9 @@ const dashboardLinks = [
   },
   {
     link: "/dashboard/client-orders",
-    text: "Клиентски поръчки",
+    text: "Заявки",
     role: ["Super Admin", "Admin", "Seller"],
-    icon: <BsPersonLinesFill className='w-5 h-5' />,
+    icon: <BsClipboard className='w-5 h-5' />,
   },
   // {
   //   link: "/dashboard/users/sales",

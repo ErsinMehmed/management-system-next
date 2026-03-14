@@ -72,7 +72,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   };
 
   return (
-    <Layout title="Клиентски поръчки">
+    <Layout title="Заявки">
       <div className="min-h-screen 2xl:px-10">
         <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
           <button
@@ -146,6 +146,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                       value={order.status}
                       items={STATUSES.map((s) => ({ _id: s, value: s, name: s }))}
                       onChange={(val) => clientOrderStore.updateStatus(order._id, val)}
+                      baseClass="w-36"
                       classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${STATUS_STYLES[order.status]}`}
                     />
                     <button

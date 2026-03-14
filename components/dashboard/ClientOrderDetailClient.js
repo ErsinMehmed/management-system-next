@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Dashboard";
-import { FiArrowLeft, FiPhone } from "react-icons/fi";
+import { FiArrowLeft, FiPhone, FiCopy, FiCheck } from "react-icons/fi";
+import { Tooltip, Button } from "@heroui/react";
 import { formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
 import Select from "@/components/html/Select";
@@ -29,6 +30,13 @@ const ClientOrderDetailClient = ({ order }) => {
   const isAdmin = ["Admin", "Super Admin"].includes(session?.user?.role);
   const router = useRouter();
   const [currentStatus, setCurrentStatus] = useState(order.status);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(order.phone);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const productName = order.product
     ? [order.product.name, order.product.flavor, order.product.weight && `${order.product.weight}г`, order.product.puffs && `${order.product.puffs}k`]
@@ -36,31 +44,44 @@ const ClientOrderDetailClient = ({ order }) => {
     : "—";
 
   return (
-    <Layout title="Детайли на поръчка">
+    <Layout title="Детайли на заявката">
       <div className="max-w-lg mx-auto 2xl:px-10">
         {/* Бек бутон */}
         <button
           onClick={() => router.push("/dashboard/client-orders")}
           className="flex items-center gap-2 mb-4 text-[#0071f5] font-semibold text-sm hover:text-blue-700 transition-colors">
           <FiArrowLeft className="w-4 h-4" />
-          Назад към поръчките
+          Назад към заявките
         </button>
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
 
           {/* Хедър */}
-          <div className="p-5 border-b border-gray-100 flex items-start justify-between gap-3">
-            <div>
-              <a
-                href={`tel:${order.phone}`}
-                className="flex items-center gap-2 text-xl font-bold text-[#0071f5] hover:text-blue-700 transition-colors">
-                <FiPhone className="w-5 h-5" />
-                {order.phone}
-              </a>
-              <span className={`mt-1 inline-block text-xs font-semibold px-2 py-0.5 rounded ${order.isNewClient ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+          <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <a
+                  href={`tel:${order.phone}`}
+                  className="flex items-center gap-2 text-xl font-bold text-[#0071f5] hover:text-blue-700 transition-colors">
+                  <FiPhone className="w-5 h-5" />
+                  {order.phone}
+                </a>
+                <Tooltip
+                  content="Копирано"
+                  color="default"
+                  isOpen={copied}>
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="flat"
+                    onPress={handleCopy}>
+                    {copied ? <FiCheck className="w-4 h-4 text-green-500" /> : <FiCopy className="w-4 h-4" />}
+                  </Button>
+                </Tooltip>
+              </div>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded w-fit ${order.isNewClient ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
                 {order.isNewClient ? "Нов клиент" : "Съществуващ клиент"}
               </span>
             </div>
-
             <Select
               controlled
               value={currentStatus}
@@ -69,6 +90,7 @@ const ClientOrderDetailClient = ({ order }) => {
                 await clientOrderStore.updateStatus(order._id, val);
                 setCurrentStatus(val);
               }}
+              baseClass="w-36"
               classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${STATUS_STYLES[currentStatus]}`}
             />
           </div>
