@@ -123,11 +123,11 @@ class ClientOrderStore {
     }
   };
 
-  updateProductPrice = async (id, product, quantity, price) => {
+  updateProductPrice = async (id, product, quantity, price, payout) => {
     const res = await fetch(`/api/client-orders/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ product, quantity, price }),
+      body: JSON.stringify({ product, quantity, price, payout }),
     });
     const data = await res.json();
     if (data.status) commonStore.setSuccessMessage(data.message);

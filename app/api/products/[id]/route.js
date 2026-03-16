@@ -44,7 +44,7 @@ export async function GET(request, { params }) {
     await connectMongoDB();
 
     const product = await Product.findById(id).select(
-      "price availability sell_prices"
+      "price availability sell_prices seller_prices"
     );
 
     if (!product) {

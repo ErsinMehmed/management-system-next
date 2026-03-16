@@ -224,10 +224,11 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                       </div>
 
                       {/* Колони */}
-                      <div className="grid grid-cols-3 px-4 py-2 border-b border-gray-100 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                      <div className={`grid px-4 py-2 border-b border-gray-100 text-xs font-semibold text-slate-400 uppercase tracking-wide ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
                         <span>Продукт</span>
                         <span className="text-center">Бройки</span>
                         <span className="text-right">Оборот</span>
+                        {isSuperAdmin && <span className="text-right">За изплащане</span>}
                       </div>
 
                       {/* Редове */}
@@ -235,26 +236,33 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                         .slice()
                         .sort((a, b) => b.totalRevenue - a.totalRevenue)
                         .map((item, i) => (
-                          <div key={i} className="grid grid-cols-3 px-4 py-3 border-b border-gray-50 items-center hover:bg-slate-50 transition-colors">
+                          <div key={i} className={`grid px-4 py-3 border-b border-gray-50 items-center hover:bg-slate-50 transition-colors ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
                             <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
                             <span className="text-sm text-slate-500 text-center">{item.totalQuantity} бр.</span>
                             <span className="text-sm font-semibold text-slate-700 text-right">{formatCurrency(item.totalRevenue, 2)}</span>
+                            {isSuperAdmin && <span className="text-sm font-semibold text-orange-500 text-right">{formatCurrency(item.totalPayout, 2)}</span>}
                           </div>
                         ))}
 
                       {/* Общо за доставчика */}
-                      <div className="grid grid-cols-3 px-4 py-3 bg-slate-50 border-t border-gray-200 items-center">
+                      <div className={`grid px-4 py-3 bg-slate-50 border-t border-gray-200 items-center ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
                         <span className="text-sm font-bold text-slate-700">Общо</span>
                         <span />
                         <span className="text-sm font-bold text-[#0071f5] text-right">{formatCurrency(seller.sellerTotal, 2)}</span>
+                        {isSuperAdmin && <span className="text-sm font-bold text-orange-500 text-right">{formatCurrency(seller.sellerPayout, 2)}</span>}
                       </div>
                     </div>
                   ))}
 
-                  {/* Общ оборот */}
+                  {/* Общ оборот + хонорар */}
                   <div className="bg-white rounded-xl shadow-sm px-4 py-3 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-800">Общ оборот</span>
-                    <span className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</span>
+                    <span className="text-sm font-bold text-slate-800">Общо</span>
+                    <div className="flex items-center gap-4">
+                      {isSuperAdmin && summary.grandPayout > 0 && (
+                        <span className="text-sm font-bold text-orange-500">{formatCurrency(summary.grandPayout, 2)} за изплащане</span>
+                      )}
+                      <span className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</span>
+                    </div>
                   </div>
                 </div>
               )

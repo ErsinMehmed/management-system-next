@@ -5,27 +5,28 @@ import ClientOrder from "@/models/clientOrder";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
-const productLookup = [
+const productAndCategoryLookup = [
   {
     $lookup: {
       from: "products",
-      localField: "productId",
+      localField: "product",
       foreignField: "_id",
-      as: "product",
+      as: "productDoc",
     },
   },
-  { $unwind: { path: "$product", preserveNullAndEmptyArrays: true } },
+  { $unwind: { path: "$productDoc", preserveNullAndEmptyArrays: true } },
   {
     $lookup: {
       from: "categories",
-      localField: "product.category",
+      localField: "productDoc.category",
       foreignField: "_id",
       as: "categoryArr",
     },
   },
   {
     $addFields: {
-      "product.category": { $arrayElemAt: ["$categoryArr", 0] },
+      "productDoc.category": { $arrayElemAt: ["$categoryArr", 0] },
+      orderPayout: { $ifNull: ["$payout", 0] },
     },
   },
   { $unset: "categoryArr" },
@@ -39,13 +40,19 @@ export async function GET() {
 
   const isSeller = session.user.role === "Seller";
 
-  // Seller — само неговите доставени поръчки, групирани по продукт
+  // Seller — само неговите доставени поръчки, групирани по продукт (без хонорар)
   if (isSeller) {
     const items = await ClientOrder.aggregate([
       { $match: { status: "доставена", assignedTo: new mongoose.Types.ObjectId(session.user.id) } },
-      { $group: { _id: "$product", totalQuantity: { $sum: "$quantity" }, totalRevenue: { $sum: "$price" } } },
-      { $addFields: { productId: "$_id" } },
-      ...productLookup,
+      ...productAndCategoryLookup,
+      {
+        $group: {
+          _id: "$product",
+          totalQuantity: { $sum: "$quantity" },
+          totalRevenue: { $sum: "$price" },
+          product: { $first: "$productDoc" },
+        },
+      },
       { $sort: { totalRevenue: -1 } },
     ]);
 
@@ -56,15 +63,16 @@ export async function GET() {
   // Admin / Super Admin — всички доставени, групирани по доставчик → продукт
   const sellers = await ClientOrder.aggregate([
     { $match: { status: "доставена" } },
+    ...productAndCategoryLookup,
     {
       $group: {
         _id: { seller: "$assignedTo", product: "$product" },
         totalQuantity: { $sum: "$quantity" },
         totalRevenue: { $sum: "$price" },
+        totalPayout: { $sum: "$orderPayout" },
+        product: { $first: "$productDoc" },
       },
     },
-    { $addFields: { productId: "$_id.product" } },
-    ...productLookup,
     {
       $lookup: {
         from: "users",
@@ -83,14 +91,17 @@ export async function GET() {
             product: "$product",
             totalQuantity: "$totalQuantity",
             totalRevenue: "$totalRevenue",
+            totalPayout: "$totalPayout",
           },
         },
         sellerTotal: { $sum: "$totalRevenue" },
+        sellerPayout: { $sum: "$totalPayout" },
       },
     },
     { $sort: { sellerTotal: -1 } },
   ]);
 
   const grandTotal = sellers.reduce((sum, s) => sum + s.sellerTotal, 0);
-  return NextResponse.json({ bySeller: true, sellers, grandTotal });
+  const grandPayout = sellers.reduce((sum, s) => sum + s.sellerPayout, 0);
+  return NextResponse.json({ bySeller: true, sellers, grandTotal, grandPayout });
 }

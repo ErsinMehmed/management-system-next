@@ -51,12 +51,11 @@ const ProductForm = (props) => {
               className='flex items-center'>
               {props.data.sell_prices.length > 1 && (
                 <Button
-                  onPress={() => props.removeData(index)}
+                  onPress={() => props.removeData(index, "sell_prices")}
                   isIconOnly
                   radius='full'
                   className='mr-2.5'
                   color='danger'>
-                  {" "}
                   <FaTrash />
                 </Button>
               )}
@@ -84,7 +83,46 @@ const ProductForm = (props) => {
 
           <div className='center-element mt-4 w-full'>
             <Button
-              onPress={props.addData}
+              onPress={() => props.addData("sell_prices")}
+              color='default'
+              radius='full'>
+              <HiOutlinePlus />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className='pt-1 space-y-2 border-t border-slate-200'>
+        <div className='text-slate-700 font-semibold'>За изплащане на доставчик</div>
+        <p className='text-xs text-slate-400'>Сума която получава доставчикът за тази поръчка според броя бройки.</p>
+
+        <div className='space-y-3.5'>
+          {(props.data.seller_prices || []).map((price, index) => (
+            <div key={index} className='flex items-center'>
+              {props.data.seller_prices.length > 1 && (
+                <Button
+                  onPress={() => props.removeData(index, "seller_prices")}
+                  isIconOnly
+                  radius='full'
+                  className='mr-2.5'
+                  color='danger'>
+                  <FaTrash />
+                </Button>
+              )}
+              <Input
+                type='text'
+                label={`За изплащане за ${index + 1}бр.`}
+                value={price || ""}
+                onChange={(value) =>
+                  props.handleFieldChange("seller_prices", value, index)
+                }
+              />
+            </div>
+          ))}
+
+          <div className='center-element mt-4 w-full'>
+            <Button
+              onPress={() => props.addData("seller_prices")}
               color='default'
               radius='full'>
               <HiOutlinePlus />

@@ -30,7 +30,8 @@ const ProductsClient = () => {
   const handleFieldChange = (name, value, index) => {
     let updatedData = { ...productData };
 
-    if (name === "sell_prices") {
+    if (name === "sell_prices" || name === "seller_prices") {
+      updatedData[name] = [...(updatedData[name] || [])];
       updatedData[name][index] = value;
     } else {
       updatedData = { ...updatedData, [name]: value };
@@ -45,17 +46,16 @@ const ProductsClient = () => {
     setProductData(data);
   };
 
-  const removeData = (index) => {
+  const removeData = (index, field = "sell_prices") => {
     const updatedData = { ...productData };
-    updatedData.sell_prices.splice(index, 1);
-
+    updatedData[field] = [...(updatedData[field] || [])];
+    updatedData[field].splice(index, 1);
     setProductData(updatedData);
   };
 
-  const addData = () => {
+  const addData = (field = "sell_prices") => {
     const updatedData = { ...productData };
-    updatedData.sell_prices.push("");
-
+    updatedData[field] = [...(updatedData[field] || []), ""];
     setProductData(updatedData);
   };
 

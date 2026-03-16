@@ -1,6 +1,7 @@
 import { requireAdmin, requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
+import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -14,10 +15,10 @@ export async function PUT(request, { params }) {
 
   await connectMongoDB();
 
-  const existing = await ClientOrder.findById(id).select("status").lean();
+  const existing = await ClientOrder.findById(id).select("status product quantity").lean();
 
-  // Редактиране на продукт и цена
-  if (body.product !== undefined || body.price !== undefined) {
+  // Редактиране на продукт, цена, бройка и хонорар
+  if (body.product !== undefined || body.price !== undefined || body.payout !== undefined) {
     if (existing?.status !== "нова" && session.user.role !== "Super Admin") {
       return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
     }
@@ -25,6 +26,18 @@ export async function PUT(request, { params }) {
     if (body.product !== undefined) update.product = body.product;
     if (body.price !== undefined) update.price = body.price;
     if (body.quantity !== undefined) update.quantity = body.quantity;
+
+    // Хонорар: ако е подаден ръчно (само Super Admin), използва се той
+    // иначе се авто-изчислява при смяна на продукт или бройка
+    if (body.payout !== undefined && session.user.role === "Super Admin") {
+      update.payout = body.payout;
+    } else if (body.product !== undefined || body.quantity !== undefined) {
+      const productId = body.product ?? existing?.product;
+      const qty = body.quantity ?? existing?.quantity;
+      const prod = await Product.findById(productId).select("seller_prices").lean();
+      update.payout = prod?.seller_prices?.[qty - 1] ?? 0;
+    }
+
     await ClientOrder.findByIdAndUpdate(id, update);
     return NextResponse.json({ message: "Поръчката е обновена", status: true });
   }

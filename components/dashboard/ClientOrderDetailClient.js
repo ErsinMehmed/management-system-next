@@ -45,9 +45,11 @@ const ClientOrderDetailClient = ({ order }) => {
   const [editProduct, setEditProduct] = useState(order.product?._id ?? "");
   const [editQuantity, setEditQuantity] = useState(order.quantity ?? 1);
   const [editPrice, setEditPrice] = useState(order.price ?? "");
+  const [editPayout, setEditPayout] = useState(order.payout ?? 0);
   const [currentProductName, setCurrentProductName] = useState(null);
   const [currentQuantity, setCurrentQuantity] = useState(order.quantity);
   const [currentPrice, setCurrentPrice] = useState(order.price);
+  const [currentPayout, setCurrentPayout] = useState(order.payout ?? 0);
 
   const canEdit = currentStatus === "нова" || isSuperAdmin;
   const statusCfg = STATUS_CONFIG[currentStatus] ?? STATUS_CONFIG["нова"];
@@ -175,7 +177,7 @@ const ClientOrderDetailClient = ({ order }) => {
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <div className="bg-white rounded-lg px-3 py-2 flex flex-col items-center shadow-sm border border-white/80 min-w-[72px]">
                   <span className="text-xs text-slate-400 font-medium">Бройки</span>
                   <span className="text-lg font-bold text-slate-800">{currentQuantity}</span>
@@ -184,6 +186,12 @@ const ClientOrderDetailClient = ({ order }) => {
                   <span className="text-xs text-slate-400 font-medium">Цена</span>
                   <span className="text-lg font-bold text-[#0071f5]">{formatCurrency(currentPrice, 2)}</span>
                 </div>
+                {isSuperAdmin && (
+                  <div className="bg-white rounded-lg px-3 py-2 flex flex-col items-center shadow-sm border border-orange-100 min-w-[96px]">
+                    <span className="text-xs text-orange-400 font-medium">За изплащане</span>
+                    <span className="text-lg font-bold text-orange-500">{formatCurrency(currentPayout, 2)}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -266,12 +274,16 @@ const ClientOrderDetailClient = ({ order }) => {
         title="Редактирай поръчка"
         primaryBtnText="Запази"
         onSave={async () => {
-          const success = await clientOrderStore.updateProductPrice(order._id, editProduct, Number(editQuantity), Number(editPrice));
+          const success = await clientOrderStore.updateProductPrice(
+            order._id, editProduct, Number(editQuantity), Number(editPrice),
+            isSuperAdmin ? Number(editPayout) : undefined
+          );
           if (success) {
             const selected = availableProducts.find((p) => p._id === editProduct);
             if (selected) setCurrentProductName(selected.name);
             setCurrentQuantity(Number(editQuantity));
             setCurrentPrice(Number(editPrice));
+            if (isSuperAdmin) setCurrentPayout(Number(editPayout));
           }
           return success;
         }}>
@@ -284,9 +296,12 @@ const ClientOrderDetailClient = ({ order }) => {
               items={availableProducts.map((p) => ({ _id: p._id, value: p._id, name: p.name }))}
               onChange={(val) => {
                 const selected = availableProducts.find((p) => p._id === val);
-                const autoPrice = selected?.sell_prices?.[Number(editQuantity) - 1] ?? editPrice;
+                const qty = Number(editQuantity);
+                const autoPrice = selected?.sell_prices?.[qty - 1] ?? editPrice;
+                const autoPayout = selected?.seller_prices?.[qty - 1] ?? editPayout;
                 setEditProduct(val);
                 setEditPrice(autoPrice);
+                if (isSuperAdmin) setEditPayout(autoPayout);
               }}
             />
           </div>
@@ -301,7 +316,9 @@ const ClientOrderDetailClient = ({ order }) => {
                 setEditQuantity(e.target.value);
                 const selected = availableProducts.find((p) => p._id === editProduct);
                 const autoPrice = selected?.sell_prices?.[qty - 1];
+                const autoPayout = selected?.seller_prices?.[qty - 1];
                 if (autoPrice !== undefined) setEditPrice(autoPrice);
+                if (isSuperAdmin && autoPayout !== undefined) setEditPayout(autoPayout);
               }}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -315,6 +332,17 @@ const ClientOrderDetailClient = ({ order }) => {
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          {isSuperAdmin && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-orange-500">За изплащане</label>
+              <input
+                type="number"
+                value={editPayout}
+                onChange={(e) => setEditPayout(e.target.value)}
+                className="w-full rounded-xl border border-orange-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+            </div>
+          )}
         </div>
       </Modal>
 

@@ -67,6 +67,10 @@ export async function POST(request) {
   const existingOrder = await ClientOrder.findOne({ phone: data.phone });
   data.isNewClient = !existingOrder;
 
+  // Авто-изчисляване на хонорара
+  const product = await Product.findById(data.product).select("seller_prices").lean();
+  data.payout = product?.seller_prices?.[data.quantity - 1] ?? 0;
+
   const order = await ClientOrder.create(data);
   await order.populate([
     { path: "product", select: "name weight flavor puffs count" },
