@@ -28,17 +28,6 @@ const STATUS_ACCENT = {
   отказана: "bg-red-500",
 };
 
-const STATUS_ICON_BG = {
-  нова: "bg-blue-100",
-  доставена: "bg-green-100",
-  отказана: "bg-red-100",
-};
-
-const STATUS_ICON_COLOR = {
-  нова: "text-blue-500",
-  доставена: "text-green-600",
-  отказана: "text-red-500",
-};
 
 const STATUS_ICON = {
   нова: FiPhone,
@@ -209,8 +198,8 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                       {/* Ред 1: телефон + статус */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${STATUS_ICON_BG[order.status] ?? "bg-slate-100"}`}>
-                            {(() => { const Icon = STATUS_ICON[order.status] ?? FiPhone; return <Icon className={`w-3.5 h-3.5 ${STATUS_ICON_COLOR[order.status] ?? "text-slate-400"}`} />; })()}
+                          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-slate-100">
+                            {(() => { const Icon = STATUS_ICON[order.status] ?? FiPhone; return <Icon className="w-3.5 h-3.5 text-slate-400" />; })()}
                           </div>
                           <div>
                             <p className="font-bold text-slate-800 text-base leading-tight">{order.phone}</p>

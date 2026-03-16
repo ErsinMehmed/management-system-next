@@ -16,9 +16,9 @@ import Modal from "@/components/Modal";
 const STATUSES = ["нова", "доставена", "отказана"];
 
 const STATUS_CONFIG = {
-  нова:     { bg: "bg-blue-50",   border: "border-blue-200",  badge: "bg-blue-100 text-blue-700",   accent: "bg-blue-500" },
-  доставена:{ bg: "bg-green-50",  border: "border-green-200", badge: "bg-green-100 text-green-700", accent: "bg-green-500" },
-  отказана: { bg: "bg-red-50",    border: "border-red-200",   badge: "bg-red-100 text-red-700",     accent: "bg-red-500" },
+  нова:     { badge: "bg-blue-100 text-blue-700",   accent: "bg-blue-500" },
+  доставена:{ badge: "bg-green-100 text-green-700", accent: "bg-green-500" },
+  отказана: { badge: "bg-red-100 text-red-700",     accent: "bg-red-500" },
 };
 
 const ClientOrderDetailClient = ({ order }) => {
@@ -167,7 +167,7 @@ const ClientOrderDetailClient = ({ order }) => {
             </div>
 
             {/* Продукт + метрики */}
-            <div className={`mx-4 mb-4 rounded-xl p-4 ${statusCfg.bg} border ${statusCfg.border}`}>
+            <div className="mx-4 mb-4 rounded-xl p-4 bg-slate-50 border border-slate-100">
               <div className="flex items-start justify-between gap-2 mb-3">
                 <p className="text-base font-bold text-slate-800 leading-snug">{productName}</p>
                 {canEdit && (
