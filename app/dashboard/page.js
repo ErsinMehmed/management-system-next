@@ -87,6 +87,8 @@ export default async function DashboardPage() {
 
   if (!session) redirect("/");
 
+  if (session.user.role === "Seller") redirect("/dashboard/client-orders");
+
   await connectMongoDB();
 
   const isAdmin = ["Admin", "Super Admin"].includes(session.user.role);
@@ -100,7 +102,7 @@ export default async function DashboardPage() {
     categories,
     lineChartResult,
   ] = await Promise.all([
-    // Pie chart статистики (всички времена)
+    // Pie chart статистики
     Sell.aggregate([
       {
         $group: {

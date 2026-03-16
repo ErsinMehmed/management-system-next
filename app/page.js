@@ -17,7 +17,7 @@ const Login = () => {
 
   useEffect(() => {
     if (session) {
-      router.push("/dashboard");
+      router.push(session.user.role === "Seller" ? "/dashboard/client-orders" : "/dashboard");
     }
   }, [session]);
 

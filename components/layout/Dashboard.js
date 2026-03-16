@@ -13,6 +13,7 @@ const DashboardLayout = (props) => {
   const { data: session } = useSession();
   const { loadProductsIfNotLoaded } = productStore;
   const [isVisible, setIsVisible] = useState(false);
+  const isSeller = session?.user?.role === "Seller";
 
   useEffect(() => {
     loadProductsIfNotLoaded();
@@ -28,17 +29,17 @@ const DashboardLayout = (props) => {
       <Alert />
 
       <div className='flex items-center w-full bg-[#f5f5f7]'>
-        <SideBar show={isVisible} />
-
-        <MobileMenu show={isVisible} />
+        {!isSeller && <SideBar show={isVisible} />}
+        {!isSeller && <MobileMenu show={isVisible} />}
 
         <div
           className={`${
-            isVisible ? "sm:ml-16" : "sm:ml-52 2xl:ml-72"
+            !isSeller && (isVisible ? "sm:ml-16" : "sm:ml-52 2xl:ml-72")
           } transition-all duration-500 w-full min-h-screen`}>
           <Navbar
             onMenuClick={toggleMenu}
             show={isVisible}
+            hideSidebarToggle={isSeller}
           />
 
           <div className='mt-16'>
