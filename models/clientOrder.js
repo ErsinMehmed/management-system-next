@@ -18,6 +18,7 @@ const clientOrderSchema = new Schema(
     contactMethod: { type: String, default: "" },
     payout: { type: Number, default: 0 },
     isPaid: { type: Boolean, default: false },
+    paidAt: { type: Date, default: null },
     rejectionReason: { type: String, default: "" },
     viewedBySeller: { type: Boolean, default: false },
     statusChangedAt: { type: Date, default: null },

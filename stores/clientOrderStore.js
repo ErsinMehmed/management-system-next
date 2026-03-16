@@ -27,6 +27,8 @@ class ClientOrderStore {
   perPage = "10";
   summary = { items: [], grandTotal: 0 };
   isSummaryLoading = false;
+  history = { sellers: [], isSeller: false, grandTotal: 0, grandPayout: 0 };
+  isHistoryLoading = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -139,6 +141,17 @@ class ClientOrderStore {
 
   markAsViewed = async (id) => {
     await fetch(`/api/client-orders/${id}`, { method: "PATCH" });
+  };
+
+  loadHistory = async () => {
+    this.isHistoryLoading = true;
+    try {
+      const res = await fetch("/api/client-orders/history");
+      const data = await res.json();
+      this.history = data;
+    } finally {
+      this.isHistoryLoading = false;
+    }
   };
 
   markSellerAsPaid = async (sellerId) => {

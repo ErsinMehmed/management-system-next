@@ -13,13 +13,15 @@ export async function POST(request) {
 
   await connectMongoDB();
 
+  const paidAt = new Date();
+
   const result = await ClientOrder.updateMany(
     {
       assignedTo: new mongoose.Types.ObjectId(sellerId),
       status: "доставена",
       isPaid: { $ne: true },
     },
-    { $set: { isPaid: true } }
+    { $set: { isPaid: true, paidAt } }
   );
 
   return NextResponse.json({ status: true, updated: result.modifiedCount });
