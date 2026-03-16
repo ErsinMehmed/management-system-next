@@ -9,7 +9,7 @@ import ClientOrderForm from "@/components/forms/ClientOrder";
 import { useDisclosure, Tabs, Tab, Button, DatePicker } from "@heroui/react";
 import { parseAbsoluteToLocal, getLocalTimeZone, now } from "@internationalized/date";
 import Link from "next/link";
-import { FiPlus, FiTrash2, FiRefreshCw, FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiRefreshCw, FiEye, FiEyeOff, FiCheckCircle, FiFilter, FiTrendingUp, FiDollarSign, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiXCircle, FiTruck } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
 import Select from "@/components/html/Select";
@@ -20,6 +20,30 @@ const STATUS_STYLES = {
   нова: "bg-blue-100 text-blue-700",
   доставена: "bg-green-100 text-green-700",
   отказана: "bg-red-100 text-red-700",
+};
+
+const STATUS_ACCENT = {
+  нова: "bg-blue-500",
+  доставена: "bg-green-500",
+  отказана: "bg-red-500",
+};
+
+const STATUS_ICON_BG = {
+  нова: "bg-blue-100",
+  доставена: "bg-green-100",
+  отказана: "bg-red-100",
+};
+
+const STATUS_ICON_COLOR = {
+  нова: "text-blue-500",
+  доставена: "text-green-600",
+  отказана: "text-red-500",
+};
+
+const STATUS_ICON = {
+  нова: FiPhone,
+  доставена: FiTruck,
+  отказана: FiXCircle,
 };
 
 const ClientOrdersClient = ({ initialData, sellers = [] }) => {
@@ -160,44 +184,80 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             </div>
 
             {isLoading ? (
-              <div className="p-8 text-center text-slate-400">Зареждане...</div>
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
+                <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
+              </div>
             ) : orders?.items?.length === 0 ? (
-              <div className="p-8 text-center text-slate-400">Няма поръчки</div>
+              <div className="flex flex-col items-center justify-center py-16 gap-2">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-1">
+                  <FiPackage className="w-6 h-6 text-slate-300" />
+                </div>
+                <p className="text-sm font-semibold text-slate-400">Няма поръчки</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {orders?.items?.map((order) => (
-                  <div key={order._id} className="bg-white rounded-xl shadow-sm flex flex-col relative">
+                  <div key={order._id} className="bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
 
-                    <Link href={`/dashboard/client-orders/${order._id}`} className="p-4 flex flex-col gap-3 flex-1">
+                    {/* Цветна лента */}
+                    <div className={`h-1 w-full ${STATUS_ACCENT[order.status] ?? "bg-slate-300"}`} />
+
+                    <Link href={`/dashboard/client-orders/${order._id}`} className="px-4 pt-3.5 pb-3 flex flex-col gap-3 flex-1">
+
+                      {/* Ред 1: телефон + статус */}
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-semibold text-slate-800 text-base">{order.phone}</span>
-                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded w-fit ${order.isNewClient ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                            {order.isNewClient ? "Нов клиент" : "Съществуващ"}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${STATUS_ICON_BG[order.status] ?? "bg-slate-100"}`}>
+                            {(() => { const Icon = STATUS_ICON[order.status] ?? FiPhone; return <Icon className={`w-3.5 h-3.5 ${STATUS_ICON_COLOR[order.status] ?? "text-slate-400"}`} />; })()}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-800 text-base leading-tight">{order.phone}</p>
+                            <span className={`text-xs font-semibold ${order.isNewClient ? "text-green-600" : "text-slate-400"}`}>
+                              {order.isNewClient ? "✦ Нов клиент" : "Съществуващ"}
+                            </span>
+                          </div>
                         </div>
-                        <span className={`text-xs font-semibold px-2 py-1.5 rounded-lg shrink-0 ${STATUS_STYLES[order.status]}`}>
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-lg shrink-0 ${STATUS_STYLES[order.status]}`}>
                           {order.status}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-600 font-medium">{order.product?.name ?? "—"}</span>
-                        <div className="flex items-center gap-3 text-slate-500">
-                          <span>{order.quantity} бр.</span>
-                          <span className="font-semibold text-slate-700">{formatCurrency(order.price, 2)}</span>
+                      {/* Ред 2: продукт + метрики */}
+                      <div className="bg-slate-50 rounded-xl px-3 py-2.5 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FiPackage className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span className="text-sm font-semibold text-slate-700 truncate">{order.product?.name ?? "—"}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <span className="text-sm text-slate-400 tabular-nums">{order.quantity} бр.</span>
+                          <span className="text-sm font-bold text-[#0071f5] tabular-nums">{formatCurrency(order.price, 2)}</span>
                         </div>
                       </div>
 
+                      {/* Ред 3: мета инфо */}
                       {(order.address || order.note || order.assignedTo?.name) && (
-                        <div className="flex flex-col gap-1 text-xs text-slate-400 border-t border-gray-100 pt-2">
-                          {order.address && <span>📍 {order.address}</span>}
-                          {order.note && <span>📝 {order.note}</span>}
+                        <div className="flex flex-col gap-1.5 border-t border-gray-50 pt-2.5">
+                          {order.address && (
+                            <div className="flex items-center gap-1.5 text-sm text-slate-400">
+                              <FiMapPin className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">{order.address}</span>
+                            </div>
+                          )}
+                          {order.note && (
+                            <div className="flex items-center gap-1.5 text-sm text-slate-400">
+                              <FiFileText className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">{order.note}</span>
+                            </div>
+                          )}
                           {order.assignedTo?.name && (
-                            <div className="flex items-center justify-between">
-                              <span>👤 {order.assignedTo.name}</span>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-1.5 text-sm text-slate-400">
+                                <FiUser className="w-3.5 h-3.5 shrink-0" />
+                                <span>{order.assignedTo.name}</span>
+                              </div>
                               {isSuperAdmin && (
-                                <span className={`flex items-center gap-1 font-semibold ${order.viewedBySeller ? "text-green-500" : "text-gray-400"}`}>
+                                <span className={`flex items-center gap-1 text-xs font-semibold ${order.viewedBySeller ? "text-green-500" : "text-gray-300"}`}>
                                   {order.viewedBySeller ? <FiEye className="w-3.5 h-3.5" /> : <FiEyeOff className="w-3.5 h-3.5" />}
                                   {order.viewedBySeller ? "Видяна" : "Не е видяна"}
                                 </span>
@@ -209,7 +269,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                     </Link>
 
                     {isAdmin && (
-                      <div className="flex items-center justify-between px-4 pb-3 gap-2">
+                      <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-50 gap-2">
                         <Select
                           controlled
                           value={order.status}
@@ -258,8 +318,16 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
           {/* ТАБ 2: Обобщение */}
           <Tab key="summary" title="Обобщение">
-            {/* Филтри */}
-            <div className="flex flex-col gap-3 mb-4">
+
+            {/* ФИЛТЪР ПАНЕЛ */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-lg bg-[#0071f5]/10 flex items-center justify-center">
+                  <FiFilter className="w-3.5 h-3.5 text-[#0071f5]" />
+                </div>
+                <span className="text-sm font-bold text-slate-700">Период</span>
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 {[
                   { key: "24h",       label: "24 часа" },
@@ -274,20 +342,20 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                     key={key}
                     size="sm"
                     radius="full"
-                    variant={summaryPreset === key ? "solid" : "bordered"}
+                    variant={summaryPreset === key ? "solid" : "flat"}
                     color={summaryPreset === key ? "primary" : "default"}
                     onPress={() => {
                       setSummaryPreset(key);
                       if (key !== "custom") applyFilter(key);
                     }}
-                    className="font-semibold">
+                    className={`font-semibold text-xs ${summaryPreset !== key ? "text-slate-500" : ""}`}>
                     {label}
                   </Button>
                 ))}
               </div>
 
               {summaryPreset === "custom" && (
-                <div className="flex flex-wrap items-end gap-3">
+                <div className="flex flex-wrap items-end gap-3 mt-4 pt-4 border-t border-gray-100">
                   <DatePicker
                     label="От"
                     granularity="minute"
@@ -326,37 +394,87 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             </div>
 
             {isSummaryLoading ? (
-              <div className="p-8 text-center text-slate-400">Зареждане...</div>
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
+                <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
+              </div>
             ) : summary?.bySeller ? (
-              /* Super Admin — разбито по доставчици */
               !summary?.sellers?.length ? (
-                <div className="p-8 text-center text-slate-400">Няма доставени поръчки</div>
+                <div className="flex flex-col items-center justify-center py-16 gap-2">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-1">
+                    <FiTrendingUp className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <p className="text-sm font-semibold text-slate-400">Няма доставени поръчки</p>
+                  <p className="text-xs text-slate-300">за избрания период</p>
+                </div>
               ) : (
                 <div className="flex flex-col gap-4">
-                  {summary.sellers.map((seller) => (
-                    <div key={seller._id ?? "unassigned"} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                      {/* Хедър на доставчик */}
-                      <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-gray-200">
-                        <span className="text-sm font-bold text-slate-800">👤 {seller.sellerName}</span>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-semibold text-[#0071f5]">{formatCurrency(seller.sellerTotal, 2)}</span>
-                          {isSuperAdmin && seller._id && seller.sellerUnpaidCount > 0 && (
-                            <Button
-                              size="sm"
-                              color="warning"
-                              variant="solid"
-                              radius="md"
-                              startContent={<FiCheckCircle className="w-3.5 h-3.5" />}
-                              onPress={() => { setPendingPayout(seller); onPayoutOpen(); }}
-                              className="text-white font-semibold">
-                              Изплати
-                            </Button>
-                          )}
+
+                  {/* GRAND TOTAL КАРТИ */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
+                        <FiTrendingUp className="w-4.5 h-4.5 text-[#0071f5]" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
+                        <p className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</p>
+                      </div>
+                    </div>
+                    {isSuperAdmin && (
+                      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 px-4 py-3.5 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+                          <FiDollarSign className="w-4.5 h-4.5 text-orange-500" />
                         </div>
+                        <div>
+                          <p className="text-xs text-orange-400 font-medium">За изплащане</p>
+                          <p className="text-base font-bold text-orange-500">{formatCurrency(summary.grandPayout, 2)}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ДОСТАВЧИЦИ */}
+                  {summary.sellers.map((seller) => (
+                    <div key={seller._id ?? "unassigned"} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+                      {/* Хедър */}
+                      <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-[#0071f5]/5 to-transparent border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-[#0071f5] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                            {seller.sellerName?.charAt(0)?.toUpperCase() ?? "?"}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800">{seller.sellerName}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs font-semibold text-[#0071f5]">{formatCurrency(seller.sellerTotal, 2)}</span>
+                              {isSuperAdmin && <span className="text-xs text-slate-300">·</span>}
+                              {isSuperAdmin && <span className="text-xs font-semibold text-orange-500">{formatCurrency(seller.sellerPayout, 2)} за изпл.</span>}
+                            </div>
+                          </div>
+                        </div>
+                        {isSuperAdmin && seller._id && seller.sellerUnpaidCount > 0 && (
+                          <Button
+                            size="sm"
+                            color="warning"
+                            variant="solid"
+                            radius="full"
+                            startContent={<FiCheckCircle className="w-3.5 h-3.5" />}
+                            onPress={() => { setPendingPayout(seller); onPayoutOpen(); }}
+                            className="text-white font-semibold text-xs">
+                            Изплати
+                          </Button>
+                        )}
+                        {isSuperAdmin && seller._id && seller.sellerUnpaidCount === 0 && (
+                          <span className="flex items-center gap-1.5 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                            <FiCheckCircle className="w-3 h-3" />
+                            Изплатен
+                          </span>
+                        )}
                       </div>
 
                       {/* Колони */}
-                      <div className={`grid px-4 py-2 border-b border-gray-100 text-xs font-semibold text-slate-400 uppercase tracking-wide ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
+                      <div className={`grid px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
                         <span>Продукт</span>
                         <span className="text-center">Бройки</span>
                         <span className="text-right">Оборот</span>
@@ -368,65 +486,72 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                         .slice()
                         .sort((a, b) => b.totalRevenue - a.totalRevenue)
                         .map((item, i) => (
-                          <div key={i} className={`grid px-4 py-3 border-b border-gray-50 items-center hover:bg-slate-50 transition-colors ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
-                              <span className={`shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${item.unpaidCount === 0 ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}>
-                                {item.unpaidCount === 0 ? "Изплатено" : "Неизплатено"}
+                          <div key={i} className={`grid px-4 py-3 border-b border-gray-50 last:border-0 items-center group hover:bg-blue-50/30 transition-colors ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-sm font-medium text-slate-700 truncate">{productTitle(item.product)}</span>
+                              <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${item.unpaidCount === 0 ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
+                                {item.unpaidCount === 0 ? "✓" : "○"}
                               </span>
                             </div>
-                            <span className="text-sm text-slate-500 text-center">{item.totalQuantity} бр.</span>
-                            <span className="text-sm font-semibold text-slate-700 text-right">{formatCurrency(item.totalRevenue, 2)}</span>
-                            {isSuperAdmin && <span className="text-sm font-semibold text-orange-500 text-right">{formatCurrency(item.totalPayout, 2)}</span>}
+                            <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
+                            <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
+                            {isSuperAdmin && <span className="text-sm font-semibold text-orange-500 text-right tabular-nums">{formatCurrency(item.totalPayout, 2)}</span>}
                           </div>
                         ))}
 
-                      {/* Общо за доставчика */}
-                      <div className={`grid px-4 py-3 bg-slate-50 border-t border-gray-200 items-center ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
-                        <span className="text-sm font-bold text-slate-700">Общо</span>
+                      {/* Тотал ред */}
+                      <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
                         <span />
-                        <span className="text-sm font-bold text-[#0071f5] text-right">{formatCurrency(seller.sellerTotal, 2)}</span>
-                        {isSuperAdmin && <span className="text-sm font-bold text-orange-500 text-right">{formatCurrency(seller.sellerPayout, 2)}</span>}
+                        <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(seller.sellerTotal, 2)}</span>
+                        {isSuperAdmin && <span className="text-sm font-bold text-orange-500 text-right tabular-nums">{formatCurrency(seller.sellerPayout, 2)}</span>}
                       </div>
                     </div>
                   ))}
-
-                  {/* Общ оборот */}
-                  <div className="bg-white rounded-xl shadow-sm px-4 py-3 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-800">Общо</span>
-                    <div className="flex items-center gap-4">
-                      {isSuperAdmin && summary.grandPayout > 0 && (
-                        <span className="text-sm font-bold text-orange-500">{formatCurrency(summary.grandPayout, 2)} за изплащане</span>
-                      )}
-                      <span className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</span>
-                    </div>
-                  </div>
                 </div>
               )
             ) : (
               /* Seller — само неговите */
               !summary?.items?.length ? (
-                <div className="p-8 text-center text-slate-400">Няма доставени поръчки</div>
+                <div className="flex flex-col items-center justify-center py-16 gap-2">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-1">
+                    <FiTrendingUp className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <p className="text-sm font-semibold text-slate-400">Няма доставени поръчки</p>
+                  <p className="text-xs text-slate-300">за избрания период</p>
+                </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                  <div className="grid grid-cols-3 px-4 py-2.5 bg-slate-50 border-b border-gray-100 text-xs font-semibold text-slate-400 uppercase tracking-wide">
-                    <span>Продукт</span>
-                    <span className="text-center">Бройки</span>
-                    <span className="text-right">Оборот</span>
+                <div className="flex flex-col gap-4">
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
+                      <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
+                      <p className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</p>
+                    </div>
                   </div>
 
-                  {summary.items.map((item, i) => (
-                    <div key={i} className="grid grid-cols-3 px-4 py-3 border-b border-gray-50 last:border-0 items-center hover:bg-slate-50 transition-colors">
-                      <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
-                      <span className="text-sm text-slate-500 text-center">{item.totalQuantity} бр.</span>
-                      <span className="text-sm font-semibold text-slate-700 text-right">{formatCurrency(item.totalRevenue, 2)}</span>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="grid grid-cols-3 px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <span>Продукт</span>
+                      <span className="text-center">Бройки</span>
+                      <span className="text-right">Оборот</span>
                     </div>
-                  ))}
 
-                  <div className="grid grid-cols-3 px-4 py-3 bg-slate-50 border-t border-gray-200 items-center">
-                    <span className="text-sm font-bold text-slate-800">Общо</span>
-                    <span />
-                    <span className="text-sm font-bold text-[#0071f5] text-right">{formatCurrency(summary.grandTotal, 2)}</span>
+                    {summary.items.map((item, i) => (
+                      <div key={i} className="grid grid-cols-3 px-4 py-3 border-b border-gray-50 last:border-0 items-center hover:bg-blue-50/30 transition-colors">
+                        <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
+                        <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
+                        <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
+                      </div>
+                    ))}
+
+                    <div className="grid grid-cols-3 px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
+                      <span />
+                      <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(summary.grandTotal, 2)}</span>
+                    </div>
                   </div>
                 </div>
               )
@@ -455,7 +580,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             </p>
             <div className="flex items-center justify-between bg-orange-50 rounded-xl px-4 py-3 border border-orange-100">
               <span className="text-sm text-slate-600">За изплащане</span>
-              <span className="text-base font-bold text-orange-500">{formatCurrency(pendingPayout.sellerPayout, 2)}</span>
+              <span className="text-base font-bold text-orange-500">{formatCurrency(pendingPayout.sellerUnpaidPayout, 2)}</span>
             </div>
           </div>
         )}
