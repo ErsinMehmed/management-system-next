@@ -214,13 +214,17 @@ const ClientOrderDetailClient = ({ order }) => {
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-50">
 
               {order.address && (
-                <div className="flex items-start gap-3 px-5 py-3.5">
-                  <FiMapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors group">
+                  <FiMapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0 group-hover:text-[#0071f5] transition-colors" />
                   <div>
                     <p className="text-xs text-slate-400 font-medium mb-0.5">Адрес</p>
-                    <p className="text-sm font-medium text-slate-700">{order.address}</p>
+                    <p className="text-sm font-medium text-slate-700 group-hover:text-[#0071f5] transition-colors">{order.address}</p>
                   </div>
-                </div>
+                </a>
               )}
 
               {order.note && (

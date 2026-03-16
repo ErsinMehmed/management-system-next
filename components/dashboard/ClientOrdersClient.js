@@ -576,7 +576,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             )}
           </Tab>
           {/* ТАБ 3: История */}
-          {isSuperAdmin && <Tab key="history" title="История">
+          {(isSuperAdmin || session?.user?.role === "Seller") && <Tab key="history" title="История">
             {isHistoryLoading ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
@@ -588,6 +588,49 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                   <FiDollarSign className="w-6 h-6 text-slate-300" />
                 </div>
                 <p className="text-sm font-semibold text-slate-400">Няма изплатени суми</p>
+              </div>
+            ) : history.isSeller ? (
+              /* SELLER — опростен изглед */
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
+                      <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
+                      <p className="text-base font-bold text-[#0071f5]">{formatCurrency(history.grandTotal, 2)}</p>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-green-100 px-4 py-3.5 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                      <FiDollarSign className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-green-500 font-medium">Общо изплатено</p>
+                      <p className="text-base font-bold text-green-600">{formatCurrency(history.grandPayout, 2)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  {history.sellers[0]?.payments.map((payment, pi) => (
+                    <div key={pi} className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+                      <div className="flex items-center gap-2.5">
+                        <FiCheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold text-slate-700">
+                            {payment.paidAt
+                              ? new Date(payment.paidAt).toLocaleDateString("bg-BG", { day: "2-digit", month: "long", year: "numeric" })
+                              : "—"}
+                          </p>
+                          <p className="text-xs text-slate-400">{payment.orderCount} поръчки · {formatCurrency(payment.totalRevenue, 2)} оборот</p>
+                        </div>
+                      </div>
+                      <span className="text-base font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
@@ -603,17 +646,15 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                       <p className="text-base font-bold text-[#0071f5]">{formatCurrency(history.grandTotal, 2)}</p>
                     </div>
                   </div>
-                  {isSuperAdmin && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-green-100 px-4 py-3.5 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                        <FiDollarSign className="w-4 h-4 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-green-500 font-medium">Общо изплатено</p>
-                        <p className="text-base font-bold text-green-600">{formatCurrency(history.grandPayout, 2)}</p>
-                      </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-green-100 px-4 py-3.5 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                      <FiDollarSign className="w-4 h-4 text-green-600" />
                     </div>
-                  )}
+                    <div>
+                      <p className="text-xs text-green-500 font-medium">Общо изплатено</p>
+                      <p className="text-base font-bold text-green-600">{formatCurrency(history.grandPayout, 2)}</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* SELLER АКОРДИОНИ */}
@@ -621,10 +662,10 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                   variant="splitted"
                   className="gap-3 px-0"
                   itemClasses={{
-                    base: "bg-white rounded-2xl shadow-sm border border-gray-100 !px-0 overflow-hidden",
+                    base: "bg-white rounded-2xl shadow-sm border border-gray-100 !px-0 overflow-hidden hover:border-[#0071f5]/20 hover:shadow-md data-[open=true]:shadow-lg data-[open=true]:border-[#0071f5]/30 transition-all cursor-pointer",
                     heading: "px-4 py-0",
                     title: "text-sm w-full",
-                    trigger: "py-4 data-[hover=true]:bg-transparent",
+                    trigger: "py-4 cursor-pointer data-[hover=true]:bg-transparent",
                     content: "pt-0 pb-0",
                   }}>
                   {history.sellers.map((seller, si) => (
