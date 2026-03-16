@@ -548,7 +548,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             )}
           </Tab>
           {/* ТАБ 3: История */}
-          <Tab key="history" title="История">
+          {isSuperAdmin && <Tab key="history" title="История">
             {isHistoryLoading ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
@@ -683,7 +683,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
               </div>
             )}
-          </Tab>
+          </Tab>}
 
         </Tabs>
       </div>

@@ -10,6 +10,7 @@ const initialOrderData = {
   note: "",
   assignedTo: "",
   contactMethod: "",
+  deliveryCost: "",
 };
 
 const STATUS_COLORS = {

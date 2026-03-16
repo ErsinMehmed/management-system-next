@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Dashboard";
-import { FiArrowLeft, FiPhone, FiCopy, FiCheck, FiEye, FiEyeOff, FiEdit2, FiMapPin, FiFileText, FiUser, FiClock, FiCalendar, FiAlertCircle } from "react-icons/fi";
+import { FiArrowLeft, FiPhone, FiCopy, FiCheck, FiEye, FiEyeOff, FiEdit2, FiMapPin, FiFileText, FiUser, FiClock, FiCalendar, FiAlertCircle, FiTruck } from "react-icons/fi";
 import { FaViber, FaWhatsapp } from "react-icons/fa";
 import { Tooltip, Button, useDisclosure } from "@heroui/react";
 import { formatCurrency } from "@/utils";
@@ -223,6 +223,19 @@ const ClientOrderDetailClient = ({ order }) => {
                     <p className="text-xs text-slate-400 font-medium mb-0.5">Бележка</p>
                     <p className="text-sm font-medium text-slate-700">{order.note}</p>
                   </div>
+                </div>
+              )}
+
+              {order.deliveryCost > 0 && (
+                <div className="flex items-center justify-between px-5 py-3.5">
+                  <div className="flex items-center gap-3">
+                    <FiTruck className="w-4 h-4 text-slate-400 shrink-0" />
+                    <div>
+                      <p className="text-xs text-slate-400 font-medium mb-0.5">Доставка</p>
+                      <p className="text-sm font-medium text-slate-700">Допълнителна доставка</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold text-[#0071f5]">{formatCurrency(order.deliveryCost, 2)}</span>
                 </div>
               )}
 
