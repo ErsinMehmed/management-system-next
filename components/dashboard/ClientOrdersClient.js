@@ -401,7 +401,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                 <div className="flex flex-col gap-4">
 
                   {/* GRAND TOTAL КАРТИ */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
                         <FiTrendingUp className="w-4.5 h-4.5 text-[#0071f5]" />
@@ -409,6 +409,15 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                       <div>
                         <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
                         <p className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</p>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                        <FiTruck className="w-4 h-4 text-slate-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 font-medium">Доставки</p>
+                        <p className="text-base font-bold text-slate-700">{formatCurrency(summary.sellers?.reduce((s, x) => s + (x.sellerDelivery ?? 0), 0) ?? 0, 2)}</p>
                       </div>
                     </div>
                     {isSuperAdmin && (
@@ -436,8 +445,10 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                           </div>
                           <div>
                             <p className="text-sm font-bold text-slate-800">{seller.sellerName}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                               <span className="text-xs font-semibold text-[#0071f5]">{formatCurrency(seller.sellerTotal, 2)}</span>
+                              {seller.sellerDelivery > 0 && <span className="text-xs text-slate-300">·</span>}
+                              {seller.sellerDelivery > 0 && <span className="text-xs font-semibold text-slate-500">{formatCurrency(seller.sellerDelivery, 2)} дост.</span>}
                               {isSuperAdmin && <span className="text-xs text-slate-300">·</span>}
                               {isSuperAdmin && <span className="text-xs font-semibold text-orange-500">{formatCurrency(seller.sellerPayout, 2)} за изпл.</span>}
                             </div>
@@ -464,10 +475,11 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                       </div>
 
                       {/* Колони */}
-                      <div className={`grid px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
+                      <div className={`grid px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
                         <span>Продукт</span>
                         <span className="text-center">Бройки</span>
                         <span className="text-right">Оборот</span>
+                        <span className="text-right">Доставка</span>
                         {isSuperAdmin && <span className="text-right">За изплащане</span>}
                       </div>
 
@@ -476,7 +488,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                         .slice()
                         .sort((a, b) => b.totalRevenue - a.totalRevenue)
                         .map((item, i) => (
-                          <div key={i} className={`grid px-4 py-3 border-b border-gray-50 last:border-0 items-center group hover:bg-blue-50/30 transition-colors ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
+                          <div key={i} className={`grid px-4 py-3 border-b border-gray-50 last:border-0 items-center group hover:bg-blue-50/30 transition-colors ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
                             <div className="flex items-center gap-2 min-w-0">
                               <span className="text-sm font-medium text-slate-700 truncate">{productTitle(item.product)}</span>
                               <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${item.unpaidCount === 0 ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
@@ -485,15 +497,17 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                             </div>
                             <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
                             <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
+                            <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
                             {isSuperAdmin && <span className="text-sm font-semibold text-orange-500 text-right tabular-nums">{formatCurrency(item.totalPayout, 2)}</span>}
                           </div>
                         ))}
 
                       {/* Тотал ред */}
-                      <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
+                      <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
                         <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
                         <span />
                         <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(seller.sellerTotal, 2)}</span>
+                        <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{seller.sellerDelivery > 0 ? formatCurrency(seller.sellerDelivery, 2) : "—"}</span>
                         {isSuperAdmin && <span className="text-sm font-bold text-orange-500 text-right tabular-nums">{formatCurrency(seller.sellerPayout, 2)}</span>}
                       </div>
                     </div>
@@ -523,24 +537,27 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                   </div>
 
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="grid grid-cols-3 px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <div className="grid grid-cols-4 px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       <span>Продукт</span>
                       <span className="text-center">Бройки</span>
                       <span className="text-right">Оборот</span>
+                      <span className="text-right">Доставка</span>
                     </div>
 
                     {summary.items.map((item, i) => (
-                      <div key={i} className="grid grid-cols-3 px-4 py-3 border-b border-gray-50 last:border-0 items-center hover:bg-blue-50/30 transition-colors">
+                      <div key={i} className="grid grid-cols-4 px-4 py-3 border-b border-gray-50 last:border-0 items-center hover:bg-blue-50/30 transition-colors">
                         <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
                         <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
                         <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
+                        <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
                       </div>
                     ))}
 
-                    <div className="grid grid-cols-3 px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center">
+                    <div className="grid grid-cols-4 px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center">
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
                       <span />
                       <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(summary.grandTotal, 2)}</span>
+                      <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{summary.grandDelivery > 0 ? formatCurrency(summary.grandDelivery, 2) : "—"}</span>
                     </div>
                   </div>
                 </div>
@@ -615,6 +632,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                           </div>
                           <div className="flex flex-col items-end shrink-0 gap-0.5">
                             {isSuperAdmin && <span className="text-sm font-bold text-green-600 tabular-nums">{formatCurrency(seller.totalPayout, 2)} изпл.</span>}
+                            {isSuperAdmin && seller.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(seller.totalDelivery, 2)} доставки</span>}
                             <span className="text-xs text-slate-400 tabular-nums">{formatCurrency(seller.totalRevenue, 2)} оборот</span>
                           </div>
                         </div>
@@ -626,10 +644,11 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                           const grouped = Object.values(
                             (payment.products ?? []).reduce((acc, p) => {
                               const key = p.name ?? "—";
-                              if (!acc[key]) acc[key] = { name: key, quantity: 0, revenue: 0, payout: 0 };
-                              acc[key].quantity += p.quantity ?? 0;
-                              acc[key].revenue  += p.price   ?? 0;
-                              acc[key].payout   += p.payout  ?? 0;
+                              if (!acc[key]) acc[key] = { name: key, quantity: 0, revenue: 0, payout: 0, delivery: 0 };
+                              acc[key].quantity += p.quantity     ?? 0;
+                              acc[key].revenue  += p.price        ?? 0;
+                              acc[key].payout   += p.payout       ?? 0;
+                              acc[key].delivery += p.deliveryCost ?? 0;
                               return acc;
                             }, {})
                           ).sort((a, b) => b.revenue - a.revenue);
@@ -647,28 +666,31 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                                   </span>
                                   <span className="text-xs text-slate-400">· {payment.orderCount} поръчки</span>
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                  {isSuperAdmin && payment.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(payment.totalDelivery, 2)} дост.</span>}
                                   {isSuperAdmin && <span className="text-xs font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>}
                                   <span className="text-xs text-slate-400 tabular-nums">{formatCurrency(payment.totalRevenue, 2)}</span>
                                 </div>
                               </div>
 
                               {/* Продукти */}
-                              <div className={`grid px-4 py-1.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
+                              <div className={`grid px-4 py-1.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-5" : "grid-cols-3"}`}>
                                 <span>Продукт</span>
                                 <span className="text-center">Бройки</span>
                                 <span className="text-right">Оборот</span>
+                                {isSuperAdmin && <span className="text-right">Доставка</span>}
                                 {isSuperAdmin && <span className="text-right">Изплатено</span>}
                               </div>
 
                               {grouped.map((g, gi) => (
-                                <div key={gi} className={`grid px-4 py-2 border-t border-gray-50 items-center hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
+                                <div key={gi} className={`grid px-4 py-2 border-t border-gray-50 items-center hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? "grid-cols-5" : "grid-cols-3"}`}>
                                   <div className="flex items-center gap-2 min-w-0">
                                     <FiPackage className="w-3 h-3 text-slate-300 shrink-0" />
                                     <span className="text-sm text-slate-700 truncate">{g.name}</span>
                                   </div>
                                   <span className="text-sm text-slate-400 text-center tabular-nums">{g.quantity} бр.</span>
                                   <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(g.revenue, 2)}</span>
+                                  {isSuperAdmin && <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{g.delivery > 0 ? formatCurrency(g.delivery, 2) : "—"}</span>}
                                   {isSuperAdmin && <span className="text-sm font-semibold text-green-600 text-right tabular-nums">{formatCurrency(g.payout, 2)}</span>}
                                 </div>
                               ))}

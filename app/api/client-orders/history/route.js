@@ -34,6 +34,7 @@ export async function GET() {
         paidAt: { $first: "$paidAt" },
         totalPayout: { $sum: "$payout" },
         totalRevenue: { $sum: "$price" },
+        totalDelivery: { $sum: { $ifNull: ["$deliveryCost", 0] } },
         orderCount: { $sum: 1 },
         products: {
           $push: {
@@ -41,6 +42,7 @@ export async function GET() {
             quantity: "$quantity",
             price: "$price",
             payout: "$payout",
+            deliveryCost: "$deliveryCost",
           },
         },
       },
@@ -51,12 +53,14 @@ export async function GET() {
         _id: "$_id.seller",
         totalPayout: { $sum: "$totalPayout" },
         totalRevenue: { $sum: "$totalRevenue" },
+        totalDelivery: { $sum: "$totalDelivery" },
         orderCount: { $sum: "$orderCount" },
         payments: {
           $push: {
             paidAt: "$paidAt",
             totalPayout: "$totalPayout",
             totalRevenue: "$totalRevenue",
+            totalDelivery: "$totalDelivery",
             orderCount: "$orderCount",
             products: "$products",
           },
@@ -79,6 +83,7 @@ export async function GET() {
         sellerName: { $ifNull: ["$seller.name", "Неасайнати"] },
         totalPayout: 1,
         totalRevenue: 1,
+        totalDelivery: 1,
         orderCount: 1,
         payments: 1,
       },
