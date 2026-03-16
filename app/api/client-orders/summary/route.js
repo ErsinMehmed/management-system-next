@@ -66,6 +66,7 @@ export async function GET(request) {
           totalQuantity: { $sum: "$quantity" },
           totalRevenue: { $sum: "$price" },
           totalDelivery: { $sum: { $ifNull: ["$deliveryCost", 0] } },
+          paidPayout: { $sum: { $cond: [{ $eq: ["$isPaid", true] }, { $ifNull: ["$payout", 0] }, 0] } },
           unpaidCount: { $sum: { $cond: [{ $ne: ["$isPaid", true] }, 1, 0] } },
           product: { $first: "$productDoc" },
         },
@@ -75,7 +76,8 @@ export async function GET(request) {
 
     const grandTotal = items.reduce((sum, i) => sum + i.totalRevenue, 0);
     const grandDelivery = items.reduce((sum, i) => sum + i.totalDelivery, 0);
-    return NextResponse.json({ bySeller: false, items, grandTotal, grandDelivery });
+    const grandPaidPayout = items.reduce((sum, i) => sum + i.paidPayout, 0);
+    return NextResponse.json({ bySeller: false, items, grandTotal, grandDelivery, grandPaidPayout });
   }
 
   // Admin / Super Admin — всички доставени, групирани по доставчик → продукт
@@ -130,5 +132,6 @@ export async function GET(request) {
 
   const grandTotal = sellers.reduce((sum, s) => sum + s.sellerTotal, 0);
   const grandPayout = sellers.reduce((sum, s) => sum + s.sellerPayout, 0);
-  return NextResponse.json({ bySeller: true, sellers, grandTotal, grandPayout });
+  const grandPaidPayout = sellers.reduce((sum, s) => sum + (s.sellerPayout - s.sellerUnpaidPayout), 0);
+  return NextResponse.json({ bySeller: true, sellers, grandTotal, grandPayout, grandPaidPayout });
 }
