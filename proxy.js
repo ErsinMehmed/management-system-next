@@ -20,7 +20,11 @@ export default withAuth(
     if (role === "Super Admin") return NextResponse.next();
 
     if (role === "Admin" && path === "/dashboard/orders") {
-      return new NextResponse("Нямате достъп!");
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    }
+
+    if (role === "Seller" && !path.startsWith("/dashboard/client-orders")) {
+      return NextResponse.redirect(new URL("/dashboard/client-orders", req.url));
     }
 
     if (
@@ -29,9 +33,9 @@ export default withAuth(
       (path === "/dashboard/orders" ||
         path === "/dashboard/products" ||
         path === "/dashboard/incomes" ||
-          path === "/dashboard/sales")
+        path === "/dashboard/sales")
     ) {
-      return new NextResponse("Нямате достъп!");
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
   },
   {

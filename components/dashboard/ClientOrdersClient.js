@@ -526,13 +526,24 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
-                      <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
+                        <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
+                        <p className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
-                      <p className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</p>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                        <FiTruck className="w-4 h-4 text-slate-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 font-medium">Доставки</p>
+                        <p className="text-base font-bold text-slate-700">{formatCurrency(summary.grandDelivery ?? 0, 2)}</p>
+                      </div>
                     </div>
                   </div>
 
