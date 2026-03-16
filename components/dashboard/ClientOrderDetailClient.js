@@ -65,10 +65,17 @@ const ClientOrderDetailClient = ({ order }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const normalizePhone = (phone) => {
+    const d = phone.replace(/\D/g, "");
+    if (d.startsWith("00"))               return d.slice(2);          // 0048... → 48...
+    if (d.startsWith("0") && d.length === 10) return "359" + d.slice(1); // 0888... → 359888...
+    return d;                                                          // 49..., 48... → непроменен
+  };
+
   const phoneHref = order.contactMethod === "WhatsApp"
-    ? `https://wa.me/${order.phone.replace(/\D/g, "")}`
+    ? `https://wa.me/${normalizePhone(order.phone)}`
     : order.contactMethod === "Viber"
-    ? `viber://chat?number=${order.phone.replace(/\D/g, "")}`
+    ? `viber://chat?number=${normalizePhone(order.phone)}`
     : `tel:${order.phone}`;
 
   const productName = currentProductName
