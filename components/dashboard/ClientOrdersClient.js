@@ -6,9 +6,9 @@ import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
 import Pagination from "@/components/table/Pagination";
 import ClientOrderForm from "@/components/forms/ClientOrder";
-import { useDisclosure, Tabs, Tab } from "@heroui/react";
+import { useDisclosure, Tabs, Tab, Button } from "@heroui/react";
 import Link from "next/link";
-import { FiPlus, FiTrash2, FiRefreshCw, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiRefreshCw, FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
 import Select from "@/components/html/Select";
@@ -34,6 +34,9 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingRejection, setPendingRejection] = useState({ orderId: null, reason: "" });
   const [activeTab, setActiveTab] = useState("orders");
+  const { isOpen: isPayoutOpen, onOpen: onPayoutOpen, onOpenChange: onPayoutOpenChange } = useDisclosure();
+  const [pendingPayout, setPendingPayout] = useState(null);
+  const [isPayingOut, setIsPayingOut] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -90,24 +93,33 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
           {/* ТАБ 1: Списък */}
           <Tab key="orders" title="Заявки">
             <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
-              <button
-                onClick={async () => {
+              <Button
+                variant="solid"
+                color="primary"
+                radius="full"
+                size="sm"
+                isLoading={isRefreshing}
+                startContent={!isRefreshing && <FiRefreshCw className="w-4 h-4" />}
+                onPress={async () => {
                   setIsRefreshing(true);
                   await clientOrderStore.loadOrders();
                   setIsRefreshing(false);
                 }}
-                className="flex items-center justify-center gap-2 w-full sm:w-auto text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-3 sm:py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
-                <FiRefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
-                <span>Презареди</span>
-              </button>
+                className="w-full sm:w-auto font-semibold">
+                Презареди
+              </Button>
 
               {(isAdmin || session?.user?.role === "Seller") && (
-                <button
-                  onClick={onOpen}
-                  className="flex items-center justify-center gap-2 w-full sm:w-auto text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-1.5 sm:px-4 2xl:px-6 py-3 sm:py-1.5 2xl:py-2.5 text-center transition-all active:scale-90">
-                  <FiPlus className="w-4 h-4" />
-                  <span>Добави</span>
-                </button>
+                <Button
+                  variant="solid"
+                  color="primary"
+                  radius="full"
+                  size="sm"
+                  startContent={<FiPlus className="w-4 h-4" />}
+                  onPress={onOpen}
+                  className="w-full sm:w-auto font-semibold">
+                  Добави
+                </Button>
               )}
             </div>
 
@@ -178,12 +190,15 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                           baseClass="w-36"
                           classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${STATUS_STYLES[order.status]} ${["отказана", "доставена"].includes(order.status) && !isSuperAdmin ? "opacity-60 pointer-events-none" : ""}`}
                         />
-                        <button
-                          onClick={() => handleDelete(order._id)}
-                          disabled={deletingId === order._id}
-                          className="text-red-400 hover:text-red-600 transition-colors p-1">
+                        <Button
+                          isIconOnly
+                          variant="light"
+                          color="danger"
+                          size="sm"
+                          isLoading={deletingId === order._id}
+                          onPress={() => handleDelete(order._id)}>
                           <FiTrash2 className="w-4 h-4" />
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -220,7 +235,21 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                       {/* Хедър на доставчик */}
                       <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-gray-200">
                         <span className="text-sm font-bold text-slate-800">👤 {seller.sellerName}</span>
-                        <span className="text-sm font-semibold text-[#0071f5]">{formatCurrency(seller.sellerTotal, 2)}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-semibold text-[#0071f5]">{formatCurrency(seller.sellerTotal, 2)}</span>
+                          {isSuperAdmin && seller._id && seller.sellerUnpaidCount > 0 && (
+                            <Button
+                              size="sm"
+                              color="warning"
+                              variant="solid"
+                              radius="md"
+                              startContent={<FiCheckCircle className="w-3.5 h-3.5" />}
+                              onPress={() => { setPendingPayout(seller); onPayoutOpen(); }}
+                              className="text-white font-semibold">
+                              Изплати
+                            </Button>
+                          )}
+                        </div>
                       </div>
 
                       {/* Колони */}
@@ -237,7 +266,12 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                         .sort((a, b) => b.totalRevenue - a.totalRevenue)
                         .map((item, i) => (
                           <div key={i} className={`grid px-4 py-3 border-b border-gray-50 items-center hover:bg-slate-50 transition-colors ${isSuperAdmin ? "grid-cols-4" : "grid-cols-3"}`}>
-                            <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
+                              <span className={`shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${item.unpaidCount === 0 ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}>
+                                {item.unpaidCount === 0 ? "Изплатено" : "Неизплатено"}
+                              </span>
+                            </div>
                             <span className="text-sm text-slate-500 text-center">{item.totalQuantity} бр.</span>
                             <span className="text-sm font-semibold text-slate-700 text-right">{formatCurrency(item.totalRevenue, 2)}</span>
                             {isSuperAdmin && <span className="text-sm font-semibold text-orange-500 text-right">{formatCurrency(item.totalPayout, 2)}</span>}
@@ -254,7 +288,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                     </div>
                   ))}
 
-                  {/* Общ оборот + хонорар */}
+                  {/* Общ оборот */}
                   <div className="bg-white rounded-xl shadow-sm px-4 py-3 flex items-center justify-between">
                     <span className="text-sm font-bold text-slate-800">Общо</span>
                     <div className="flex items-center gap-4">
@@ -297,6 +331,32 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
           </Tab>
         </Tabs>
       </div>
+
+      <Modal
+        isOpen={isPayoutOpen}
+        onOpenChange={onPayoutOpenChange}
+        title="Потвърди изплащане"
+        primaryBtnText="Изплати"
+        isLoading={isPayingOut}
+        onSave={async () => {
+          setIsPayingOut(true);
+          await clientOrderStore.markSellerAsPaid(pendingPayout._id);
+          setIsPayingOut(false);
+          return true;
+        }}>
+        {pendingPayout && (
+          <div className="flex flex-col gap-3 py-1">
+            <p className="text-sm text-slate-600">
+              Сигурни ли сте, че искате да отбележите всички неизплатени доставки на{" "}
+              <span className="font-semibold text-slate-800">{pendingPayout.sellerName}</span> като изплатени?
+            </p>
+            <div className="flex items-center justify-between bg-orange-50 rounded-xl px-4 py-3 border border-orange-100">
+              <span className="text-sm text-slate-600">За изплащане</span>
+              <span className="text-base font-bold text-orange-500">{formatCurrency(pendingPayout.sellerPayout, 2)}</span>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal
         isOpen={isOpen}

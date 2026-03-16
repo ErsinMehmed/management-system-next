@@ -17,6 +17,7 @@ const clientOrderSchema = new Schema(
     assignedTo: { type: Schema.Types.ObjectId, ref: "User", default: null },
     contactMethod: { type: String, default: "" },
     payout: { type: Number, default: 0 },
+    isPaid: { type: Boolean, default: false },
     rejectionReason: { type: String, default: "" },
     viewedBySeller: { type: Boolean, default: false },
     statusChangedAt: { type: Date, default: null },

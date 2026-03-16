@@ -82,12 +82,14 @@ const ClientOrderDetailClient = ({ order }) => {
       <div className="max-w-xl mx-auto 2xl:px-10">
 
         {/* Бек бутон */}
-        <button
-          onClick={() => router.push("/dashboard/client-orders")}
-          className="flex items-center gap-1.5 mb-5 text-slate-500 hover:text-[#0071f5] text-sm font-medium transition-colors">
-          <FiArrowLeft className="w-4 h-4" />
+        <Button
+          variant="light"
+          size="sm"
+          startContent={<FiArrowLeft className="w-4 h-4" />}
+          onPress={() => router.push("/dashboard/client-orders")}
+          className="mb-5 text-slate-500 hover:text-[#0071f5] font-medium px-0">
           Назад
-        </button>
+        </Button>
 
         <div className="flex flex-col gap-3">
 
@@ -169,12 +171,16 @@ const ClientOrderDetailClient = ({ order }) => {
               <div className="flex items-start justify-between gap-2 mb-3">
                 <p className="text-base font-bold text-slate-800 leading-snug">{productName}</p>
                 {canEdit && (
-                  <button
-                    onClick={onEditOpen}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-[#0071f5] hover:text-blue-700 bg-white px-2.5 py-1.5 rounded-lg shadow-sm border border-blue-100 transition-colors shrink-0">
-                    <FiEdit2 className="w-3.5 h-3.5" />
+                  <Button
+                    size="sm"
+                    variant="solid"
+                    color="primary"
+                    radius="lg"
+                    startContent={<FiEdit2 className="w-3.5 h-3.5" />}
+                    onPress={onEditOpen}
+                    className="font-semibold shrink-0 bg-white text-[#0071f5] border border-blue-100 shadow-sm">
                     Редактирай
-                  </button>
+                  </Button>
                 )}
               </div>
               <div className="flex items-center gap-3 flex-wrap">
@@ -239,12 +245,19 @@ const ClientOrderDetailClient = ({ order }) => {
                       <p className="text-sm font-medium text-slate-700">{order.assignedTo.name}</p>
                     </div>
                   </div>
-                  {isSuperAdmin && (
-                    <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${viewed ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}>
-                      {viewed ? <FiEye className="w-3.5 h-3.5" /> : <FiEyeOff className="w-3.5 h-3.5" />}
-                      {viewed ? "Видяна" : "Не е видяна"}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isSuperAdmin && (
+                      <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${viewed ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}>
+                        {viewed ? <FiEye className="w-3.5 h-3.5" /> : <FiEyeOff className="w-3.5 h-3.5" />}
+                        {viewed ? "Видяна" : "Не е видяна"}
+                      </span>
+                    )}
+                    {isSuperAdmin && (
+                      <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${order.isPaid ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}>
+                        {order.isPaid ? "Изплатена" : "Неизплатена"}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

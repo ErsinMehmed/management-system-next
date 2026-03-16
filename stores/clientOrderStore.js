@@ -138,6 +138,17 @@ class ClientOrderStore {
     await fetch(`/api/client-orders/${id}`, { method: "PATCH" });
   };
 
+  markSellerAsPaid = async (sellerId) => {
+    const res = await fetch("/api/client-orders/pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sellerId }),
+    });
+    const data = await res.json();
+    if (data.status) await this.loadSummary();
+    return data.status;
+  };
+
   deleteOrder = async (id) => {
     const res = await fetch(`/api/client-orders/${id}`, { method: "DELETE" });
     const data = await res.json();

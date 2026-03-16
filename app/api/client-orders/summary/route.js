@@ -40,7 +40,7 @@ export async function GET() {
 
   const isSeller = session.user.role === "Seller";
 
-  // Seller — само неговите доставени поръчки, групирани по продукт (без хонорар)
+  // Seller — само неговите доставени поръчки, групирани по продукт
   if (isSeller) {
     const items = await ClientOrder.aggregate([
       { $match: { status: "доставена", assignedTo: new mongoose.Types.ObjectId(session.user.id) } },
@@ -50,6 +50,7 @@ export async function GET() {
           _id: "$product",
           totalQuantity: { $sum: "$quantity" },
           totalRevenue: { $sum: "$price" },
+          unpaidCount: { $sum: { $cond: [{ $ne: ["$isPaid", true] }, 1, 0] } },
           product: { $first: "$productDoc" },
         },
       },
@@ -70,6 +71,7 @@ export async function GET() {
         totalQuantity: { $sum: "$quantity" },
         totalRevenue: { $sum: "$price" },
         totalPayout: { $sum: "$orderPayout" },
+        unpaidCount: { $sum: { $cond: [{ $ne: ["$isPaid", true] }, 1, 0] } },
         product: { $first: "$productDoc" },
       },
     },
@@ -92,10 +94,12 @@ export async function GET() {
             totalQuantity: "$totalQuantity",
             totalRevenue: "$totalRevenue",
             totalPayout: "$totalPayout",
+            unpaidCount: "$unpaidCount",
           },
         },
         sellerTotal: { $sum: "$totalRevenue" },
         sellerPayout: { $sum: "$totalPayout" },
+        sellerUnpaidCount: { $sum: "$unpaidCount" },
       },
     },
     { $sort: { sellerTotal: -1 } },
