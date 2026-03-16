@@ -54,6 +54,10 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { isOpen: isPayoutOpen, onOpen: onPayoutOpen, onOpenChange: onPayoutOpenChange } = useDisclosure();
   const [pendingPayout, setPendingPayout] = useState(null);
   const [isPayingOut, setIsPayingOut] = useState(false);
+  const [visiblePayments, setVisiblePayments] = useState({});
+  const PAYMENTS_PAGE = 8;
+  const getVisibleCount = (si) => visiblePayments[si] ?? PAYMENTS_PAGE;
+  const loadMorePayments = (si) => setVisiblePayments((prev) => ({ ...prev, [si]: (prev[si] ?? PAYMENTS_PAGE) + PAYMENTS_PAGE }));
 
   useEffect(() => {
     if (initialData) {
@@ -692,7 +696,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
                       {/* Плащания на доставчика */}
                       <div className="border-t border-gray-100 divide-y divide-gray-50">
-                        {seller.payments.map((payment, pi) => {
+                        {seller.payments.slice(0, getVisibleCount(si)).map((payment, pi) => {
                           const grouped = Object.values(
                             (payment.products ?? []).reduce((acc, p) => {
                               const key = p.name ?? "—";
@@ -749,6 +753,19 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                             </div>
                           );
                         })}
+                        {seller.payments.length > getVisibleCount(si) && (
+                          <div className="px-4 py-3 flex justify-center border-t border-gray-50">
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              color="default"
+                              radius="full"
+                              onPress={() => loadMorePayments(si)}
+                              className="text-xs font-semibold text-slate-500">
+                              Зареди още ({seller.payments.length - getVisibleCount(si)} останали)
+                            </Button>
+                          </div>
+                        )}
                       </div>
 
                     </AccordionItem>

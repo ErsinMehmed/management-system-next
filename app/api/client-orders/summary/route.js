@@ -47,7 +47,13 @@ export async function GET(request) {
   if (to) dateFilter.$lte = new Date(to);
   const dateMatch = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
 
-  const isSeller = session.user.role === "Seller";
+  const role = session.user.role;
+  const isSeller = role === "Seller";
+  const isAdmin = ["Admin", "Super Admin"].includes(role);
+
+  if (!isSeller && !isAdmin) {
+    return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
+  }
 
   // Seller — само неговите доставени поръчки, групирани по продукт
   if (isSeller) {

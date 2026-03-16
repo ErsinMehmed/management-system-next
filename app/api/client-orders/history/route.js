@@ -11,7 +11,14 @@ export async function GET() {
 
   await connectMongoDB();
 
-  const isSeller = session.user.role === "Seller";
+  const role = session.user.role;
+  const isSeller = role === "Seller";
+  const isAdmin = ["Admin", "Super Admin"].includes(role);
+
+  if (!isSeller && !isAdmin) {
+    return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
+  }
+
   const baseMatch = isSeller
     ? { isPaid: true, assignedTo: new mongoose.Types.ObjectId(session.user.id) }
     : { isPaid: true };

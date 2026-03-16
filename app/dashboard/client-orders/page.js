@@ -8,7 +8,7 @@ import User from "@/models/user";
 export const dynamic = "force-dynamic";
 import ClientOrdersClient from "@/components/dashboard/ClientOrdersClient";
 
-const PER_PAGE = 10;
+const PER_PAGE = 9;
 
 export default async function ClientOrdersPage() {
   const session = await getServerSession(authOptions);

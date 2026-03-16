@@ -25,7 +25,7 @@ class ClientOrderStore {
   isLoading = true;
   isCreating = false;
   currentPage = 1;
-  perPage = "10";
+  perPage = "9";
   summary = { items: [], grandTotal: 0 };
   isSummaryLoading = false;
   history = { sellers: [], isSeller: false, grandTotal: 0, grandPayout: 0 };
