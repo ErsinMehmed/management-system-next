@@ -6,7 +6,8 @@ import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
 import Pagination from "@/components/table/Pagination";
 import ClientOrderForm from "@/components/forms/ClientOrder";
-import { useDisclosure, Tabs, Tab, Button } from "@heroui/react";
+import { useDisclosure, Tabs, Tab, Button, DatePicker } from "@heroui/react";
+import { parseAbsoluteToLocal, getLocalTimeZone, now } from "@internationalized/date";
 import Link from "next/link";
 import { FiPlus, FiTrash2, FiRefreshCw, FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
@@ -34,6 +35,9 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingRejection, setPendingRejection] = useState({ orderId: null, reason: "" });
   const [activeTab, setActiveTab] = useState("orders");
+  const [summaryPreset, setSummaryPreset] = useState("24h");
+  const [customFrom, setCustomFrom] = useState(null);
+  const [customTo, setCustomTo] = useState(null);
   const { isOpen: isPayoutOpen, onOpen: onPayoutOpen, onOpenChange: onPayoutOpenChange } = useDisclosure();
   const [pendingPayout, setPendingPayout] = useState(null);
   const [isPayingOut, setIsPayingOut] = useState(false);
@@ -68,6 +72,38 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
     }
   };
 
+  const computeRange = (preset, cfrom = customFrom, cto = customTo) => {
+    const now = new Date();
+    switch (preset) {
+      case "24h":   return { from: new Date(now - 24 * 60 * 60 * 1000).toISOString(), to: now.toISOString() };
+      case "today": { const s = new Date(now); s.setHours(0, 0, 0, 0); return { from: s.toISOString(), to: now.toISOString() }; }
+      case "yesterday": {
+        const s = new Date(now); s.setDate(s.getDate() - 1); s.setHours(0, 0, 0, 0);
+        const e = new Date(now); e.setDate(e.getDate() - 1); e.setHours(23, 59, 59, 999);
+        return { from: s.toISOString(), to: e.toISOString() };
+      }
+      case "week": {
+        const s = new Date(now);
+        const day = s.getDay();
+        s.setDate(s.getDate() - (day === 0 ? 6 : day - 1));
+        s.setHours(0, 0, 0, 0);
+        return { from: s.toISOString(), to: now.toISOString() };
+      }
+      case "month": {
+        const s = new Date(now.getFullYear(), now.getMonth(), 1);
+        return { from: s.toISOString(), to: now.toISOString() };
+      }
+      case "all":    return { from: null, to: null };
+      case "custom": return { from: cfrom ? cfrom.toDate(getLocalTimeZone()).toISOString() : null, to: cto ? cto.toDate(getLocalTimeZone()).toISOString() : null };
+      default:       return { from: null, to: null };
+    }
+  };
+
+  const applyFilter = (preset, cfrom = customFrom, cto = customTo) => {
+    const { from, to } = computeRange(preset, cfrom, cto);
+    clientOrderStore.loadSummary(from, to);
+  };
+
   const handleCreate = async () => {
     return await clientOrderStore.createOrder();
   };
@@ -86,7 +122,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
           selectedKey={activeTab}
           onSelectionChange={(key) => {
             setActiveTab(key);
-            if (key === "summary") clientOrderStore.loadSummary();
+            if (key === "summary") applyFilter(summaryPreset);
           }}
           classNames={{ tabList: "mb-4" }}>
 
@@ -222,6 +258,73 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
           {/* ТАБ 2: Обобщение */}
           <Tab key="summary" title="Обобщение">
+            {/* Филтри */}
+            <div className="flex flex-col gap-3 mb-4">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: "24h",       label: "24 часа" },
+                  { key: "today",     label: "Днес" },
+                  { key: "yesterday", label: "Вчера" },
+                  { key: "week",      label: "Тази седмица" },
+                  { key: "month",     label: "Този месец" },
+                  { key: "all",       label: "Всички" },
+                  { key: "custom",    label: "По избор" },
+                ].map(({ key, label }) => (
+                  <Button
+                    key={key}
+                    size="sm"
+                    radius="full"
+                    variant={summaryPreset === key ? "solid" : "bordered"}
+                    color={summaryPreset === key ? "primary" : "default"}
+                    onPress={() => {
+                      setSummaryPreset(key);
+                      if (key !== "custom") applyFilter(key);
+                    }}
+                    className="font-semibold">
+                    {label}
+                  </Button>
+                ))}
+              </div>
+
+              {summaryPreset === "custom" && (
+                <div className="flex flex-wrap items-end gap-3">
+                  <DatePicker
+                    label="От"
+                    granularity="minute"
+                    locale="bg-BG"
+                    hourCycle={24}
+                    value={customFrom}
+                    onChange={setCustomFrom}
+                    maxValue={customTo ?? now(getLocalTimeZone())}
+                    size="sm"
+                    radius="lg"
+                    className="w-56"
+                  />
+                  <DatePicker
+                    label="До"
+                    granularity="minute"
+                    locale="bg-BG"
+                    hourCycle={24}
+                    value={customTo}
+                    onChange={setCustomTo}
+                    minValue={customFrom ?? undefined}
+                    maxValue={now(getLocalTimeZone())}
+                    size="sm"
+                    radius="lg"
+                    className="w-56"
+                  />
+                  <Button
+                    size="sm"
+                    color="primary"
+                    radius="lg"
+                    className="font-semibold"
+                    onPress={() => applyFilter("custom", customFrom, customTo)}>
+                    Приложи
+                  </Button>
+                </div>
+              )}
+            </div>
+
             {isSummaryLoading ? (
               <div className="p-8 text-center text-slate-400">Зареждане...</div>
             ) : summary?.bySeller ? (

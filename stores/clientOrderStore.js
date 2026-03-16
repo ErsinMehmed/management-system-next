@@ -112,10 +112,13 @@ class ClientOrderStore {
     }
   };
 
-  loadSummary = async () => {
+  loadSummary = async (from = null, to = null) => {
     this.isSummaryLoading = true;
     try {
-      const res = await fetch("/api/client-orders/summary");
+      const params = new URLSearchParams();
+      if (from) params.set("from", from);
+      if (to) params.set("to", to);
+      const res = await fetch(`/api/client-orders/summary?${params}`);
       const data = await res.json();
       this.summary = data;
     } finally {

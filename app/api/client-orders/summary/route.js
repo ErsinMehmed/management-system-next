@@ -32,18 +32,27 @@ const productAndCategoryLookup = [
   { $unset: "categoryArr" },
 ];
 
-export async function GET() {
+export async function GET(request) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   await connectMongoDB();
+
+  const { searchParams } = request.nextUrl;
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+
+  const dateFilter = {};
+  if (from) dateFilter.$gte = new Date(from);
+  if (to) dateFilter.$lte = new Date(to);
+  const dateMatch = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
 
   const isSeller = session.user.role === "Seller";
 
   // Seller — само неговите доставени поръчки, групирани по продукт
   if (isSeller) {
     const items = await ClientOrder.aggregate([
-      { $match: { status: "доставена", assignedTo: new mongoose.Types.ObjectId(session.user.id) } },
+      { $match: { status: "доставена", assignedTo: new mongoose.Types.ObjectId(session.user.id), ...dateMatch } },
       ...productAndCategoryLookup,
       {
         $group: {
@@ -63,7 +72,7 @@ export async function GET() {
 
   // Admin / Super Admin — всички доставени, групирани по доставчик → продукт
   const sellers = await ClientOrder.aggregate([
-    { $match: { status: "доставена" } },
+    { $match: { status: "доставена", ...dateMatch } },
     ...productAndCategoryLookup,
     {
       $group: {
