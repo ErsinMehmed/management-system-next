@@ -707,7 +707,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                     <AccordionItem
                       key={si}
                       title={
-                        <div className="flex items-center justify-between w-full pr-2 gap-4">
+                        <div className="flex items-center justify-between w-full sm:pr-2 gap-4">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-9 h-9 rounded-xl bg-[#0071f5] flex items-center justify-center text-white text-xs font-bold shrink-0">
                               {seller.sellerName?.charAt(0)?.toUpperCase() ?? "?"}
