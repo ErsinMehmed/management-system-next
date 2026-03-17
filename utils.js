@@ -114,7 +114,7 @@ export function objectIsEmpty(obj) {
 }
 
 export function productTitle(product) {
-  switch (product?.category.name) {
+  switch (product?.category?.name) {
     case "Бутилки":
       return `${product.name} ${product.weight}гр.`;
     case "Балони":

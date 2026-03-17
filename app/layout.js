@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
         />
       </head>
 
-      <body>
+      <body suppressHydrationWarning>
         <AuthProvider>
           <Provider>{children}</Provider>
           <Colors />

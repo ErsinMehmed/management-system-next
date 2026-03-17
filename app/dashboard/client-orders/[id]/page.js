@@ -17,6 +17,7 @@ export default async function ClientOrderDetailPage({ params }) {
 
   const order = await ClientOrder.findById(id)
     .populate({ path: "product", select: "name weight flavor puffs count category", populate: { path: "category", select: "name" } })
+    .populate({ path: "secondProduct.product", select: "name weight flavor puffs count" })
     .populate({ path: "assignedTo", select: "name" })
     .lean();
 

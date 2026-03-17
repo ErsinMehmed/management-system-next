@@ -5,6 +5,54 @@ import ClientOrder from "@/models/clientOrder";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
+// Разгъва всяка поръчка в 1-2 реда (основен + втори продукт ако има)
+const expandProducts = [
+  {
+    $addFields: {
+      _entries: {
+        $concatArrays: [
+          [{
+            product:      "$product",
+            quantity:     "$quantity",
+            price:        "$price",
+            deliveryCost: { $ifNull: ["$deliveryCost", 0] },
+            payout:       { $subtract: [{ $ifNull: ["$payout", 0] }, { $ifNull: ["$secondProduct.payout", 0] }] },
+            isMain:       true,
+          }],
+          {
+            $cond: [
+              { $and: [
+                { $ne: [{ $ifNull: ["$secondProduct.product", null] }, null] },
+                { $gt: [{ $ifNull: ["$secondProduct.quantity", 0] }, 0] },
+              ]},
+              [{
+                product:      "$secondProduct.product",
+                quantity:     "$secondProduct.quantity",
+                price:        { $ifNull: ["$secondProduct.price", 0] },
+                deliveryCost: { $literal: 0 },
+                payout:       { $ifNull: ["$secondProduct.payout", 0] },
+                isMain:       false,
+              }],
+              [],
+            ],
+          },
+        ],
+      },
+    },
+  },
+  { $unwind: "$_entries" },
+  {
+    $addFields: {
+      product:      "$_entries.product",
+      quantity:     "$_entries.quantity",
+      price:        "$_entries.price",
+      deliveryCost: "$_entries.deliveryCost",
+      payout:       "$_entries.payout",
+      _isMain:      "$_entries.isMain",
+    },
+  },
+];
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
@@ -25,6 +73,7 @@ export async function GET() {
 
   const sellers = await ClientOrder.aggregate([
     { $match: baseMatch },
+    ...expandProducts,
     {
       $lookup: {
         from: "products",
@@ -38,17 +87,21 @@ export async function GET() {
     {
       $group: {
         _id: { seller: "$assignedTo", paidAt: "$paidAt" },
-        paidAt: { $first: "$paidAt" },
-        totalPayout: { $sum: "$payout" },
-        totalRevenue: { $sum: "$price" },
-        totalDelivery: { $sum: { $ifNull: ["$deliveryCost", 0] } },
-        orderCount: { $sum: 1 },
+        paidAt:        { $first: "$paidAt" },
+        totalPayout:   { $sum: "$payout" },
+        totalRevenue:  { $sum: "$price" },
+        totalDelivery: { $sum: "$deliveryCost" },
+        orderCount:    { $sum: { $cond: [{ $eq: ["$_isMain", true] }, 1, 0] } },
         products: {
           $push: {
-            name: "$productDoc.name",
-            quantity: "$quantity",
-            price: "$price",
-            payout: "$payout",
+            name:         "$productDoc.name",
+            weight:       "$productDoc.weight",
+            flavor:       "$productDoc.flavor",
+            puffs:        "$productDoc.puffs",
+            count:        "$productDoc.count",
+            quantity:     "$quantity",
+            price:        "$price",
+            payout:       "$payout",
             deliveryCost: "$deliveryCost",
           },
         },
@@ -58,18 +111,18 @@ export async function GET() {
     {
       $group: {
         _id: "$_id.seller",
-        totalPayout: { $sum: "$totalPayout" },
-        totalRevenue: { $sum: "$totalRevenue" },
+        totalPayout:   { $sum: "$totalPayout" },
+        totalRevenue:  { $sum: "$totalRevenue" },
         totalDelivery: { $sum: "$totalDelivery" },
-        orderCount: { $sum: "$orderCount" },
+        orderCount:    { $sum: "$orderCount" },
         payments: {
           $push: {
-            paidAt: "$paidAt",
-            totalPayout: "$totalPayout",
-            totalRevenue: "$totalRevenue",
+            paidAt:        "$paidAt",
+            totalPayout:   "$totalPayout",
+            totalRevenue:  "$totalRevenue",
             totalDelivery: "$totalDelivery",
-            orderCount: "$orderCount",
-            products: "$products",
+            orderCount:    "$orderCount",
+            products:      "$products",
           },
         },
       },
@@ -86,13 +139,13 @@ export async function GET() {
     {
       $project: {
         _id: 0,
-        sellerId: "$_id",
-        sellerName: { $ifNull: ["$seller.name", "Неасайнати"] },
-        totalPayout: 1,
-        totalRevenue: 1,
+        sellerId:      "$_id",
+        sellerName:    { $ifNull: ["$seller.name", "Неасайнати"] },
+        totalPayout:   1,
+        totalRevenue:  1,
         totalDelivery: 1,
-        orderCount: 1,
-        payments: 1,
+        orderCount:    1,
+        payments:      1,
       },
     },
     { $sort: { totalRevenue: -1 } },
@@ -101,7 +154,7 @@ export async function GET() {
   // Сортираме плащанията вътрешно по дата низходящо
   sellers.forEach((s) => s.payments.sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt)));
 
-  const grandTotal = sellers.reduce((s, x) => s + x.totalRevenue, 0);
+  const grandTotal  = sellers.reduce((s, x) => s + x.totalRevenue, 0);
   const grandPayout = sellers.reduce((s, x) => s + x.totalPayout, 0);
 
   return NextResponse.json({ sellers, isSeller, grandTotal, grandPayout });

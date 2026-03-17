@@ -11,6 +11,9 @@ const initialOrderData = {
   assignedTo: "",
   contactMethod: "",
   deliveryCost: "",
+  product2: "",
+  quantity2: "",
+  price2: "",
 };
 
 const STATUS_COLORS = {
@@ -129,11 +132,11 @@ class ClientOrderStore {
     }
   };
 
-  updateProductPrice = async (id, product, quantity, price, payout) => {
+  updateProductPrice = async (id, product, quantity, price, payout, secondProduct = undefined) => {
     const res = await fetch(`/api/client-orders/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ product, quantity, price, payout }),
+      body: JSON.stringify({ product, quantity, price, payout, secondProduct }),
     });
     const data = await res.json();
     if (data.status) commonStore.setSuccessMessage(data.message);

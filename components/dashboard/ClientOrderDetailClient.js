@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Dashboard";
-import { FiArrowLeft, FiPhone, FiCopy, FiCheck, FiEye, FiEyeOff, FiEdit2, FiMapPin, FiFileText, FiUser, FiClock, FiCalendar, FiAlertCircle, FiTruck } from "react-icons/fi";
+import { FiArrowLeft, FiPhone, FiCopy, FiCheck, FiEye, FiEyeOff, FiEdit2, FiMapPin, FiFileText, FiUser, FiClock, FiCalendar, FiAlertCircle, FiTruck, FiPlus, FiX } from "react-icons/fi";
 import { FaViber, FaWhatsapp } from "react-icons/fa";
 import { Tooltip, Button, useDisclosure } from "@heroui/react";
 import { formatCurrency } from "@/utils";
@@ -46,10 +46,17 @@ const ClientOrderDetailClient = ({ order }) => {
   const [editQuantity, setEditQuantity] = useState(order.quantity ?? 1);
   const [editPrice, setEditPrice] = useState(order.price ?? "");
   const [editPayout, setEditPayout] = useState(order.payout ?? 0);
+  const [editProduct2, setEditProduct2] = useState(order.secondProduct?.product?._id ?? "");
+  const [editQuantity2, setEditQuantity2] = useState(order.secondProduct?.quantity ?? "");
+  const [editPrice2, setEditPrice2] = useState(order.secondProduct?.price ?? "");
+  const [showEditSecond, setShowEditSecond] = useState(!!order.secondProduct?.product);
   const [currentProductName, setCurrentProductName] = useState(null);
   const [currentQuantity, setCurrentQuantity] = useState(order.quantity);
   const [currentPrice, setCurrentPrice] = useState(order.price);
   const [currentPayout, setCurrentPayout] = useState(order.payout ?? 0);
+  const [currentSecondProduct, setCurrentSecondProduct] = useState(order.secondProduct?.product ?? null);
+  const [currentQuantity2, setCurrentQuantity2] = useState(order.secondProduct?.quantity ?? 0);
+  const [currentPrice2, setCurrentPrice2] = useState(order.secondProduct?.price ?? 0);
 
   const canEdit = currentStatus === "нова" || isSuperAdmin;
   const statusCfg = STATUS_CONFIG[currentStatus] ?? STATUS_CONFIG["нова"];
@@ -83,6 +90,11 @@ const ClientOrderDetailClient = ({ order }) => {
       ? [order.product.name, order.product.flavor, order.product.weight && `${order.product.weight}г`, order.product.puffs && `${order.product.puffs}k`]
           .filter(Boolean).join(" ")
       : "—");
+
+  const secondProductName = currentSecondProduct
+    ? [currentSecondProduct.name, currentSecondProduct.flavor, currentSecondProduct.weight && `${currentSecondProduct.weight}г`, currentSecondProduct.puffs && `${currentSecondProduct.puffs}k`]
+        .filter(Boolean).join(" ")
+    : null;
 
   return (
     <Layout title="Детайли на заявката">
@@ -176,7 +188,26 @@ const ClientOrderDetailClient = ({ order }) => {
             {/* Продукт + метрики */}
             <div className="mx-4 mb-4 rounded-xl p-4 bg-slate-50 border border-slate-100">
               <div className="flex items-start justify-between gap-2 mb-3">
-                <p className="text-base font-bold text-slate-800 leading-snug">{productName}</p>
+                <div className="flex flex-col gap-1 min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-base font-bold text-slate-800 leading-snug">{productName}</p>
+                    {currentPrice2 > 0 && (
+                      <span className="text-sm font-bold text-slate-600">{formatCurrency(currentPrice, 2)}</span>
+                    )}
+                  </div>
+                  {secondProductName && (
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">+</span>
+                        <p className="text-sm font-semibold text-slate-600 leading-snug">{secondProductName}</p>
+                        <span className="text-xs font-medium text-slate-400">× {currentQuantity2} бр.</span>
+                      </div>
+                      {currentPrice2 > 0 && (
+                        <span className="text-sm font-bold text-[#0071f5]">{formatCurrency(currentPrice2, 2)}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
                 {canEdit && (
                   <Button
                     size="sm"
@@ -196,8 +227,8 @@ const ClientOrderDetailClient = ({ order }) => {
                   <span className="text-lg font-bold text-slate-800">{currentQuantity}</span>
                 </div>
                 <div className="bg-white rounded-lg px-3 py-2 flex flex-col items-center shadow-sm border border-white/80 min-w-[96px]">
-                  <span className="text-xs text-slate-400 font-medium">Цена</span>
-                  <span className="text-lg font-bold text-[#0071f5]">{formatCurrency(currentPrice, 2)}</span>
+                  <span className="text-xs text-slate-400 font-medium">{currentPrice2 > 0 ? "Обща цена" : "Цена"}</span>
+                  <span className="text-lg font-bold text-[#0071f5]">{formatCurrency(currentPrice + currentPrice2, 2)}</span>
                 </div>
                 {isSuperAdmin && (
                   <div className="bg-white rounded-lg px-3 py-2 flex flex-col items-center shadow-sm border border-orange-100 min-w-[96px]">
@@ -311,9 +342,13 @@ const ClientOrderDetailClient = ({ order }) => {
         title="Редактирай поръчка"
         primaryBtnText="Запази"
         onSave={async () => {
+          const secondProductPayload = showEditSecond && editProduct2
+            ? { product: editProduct2, quantity: Number(editQuantity2), price: Number(editPrice2) || 0 }
+            : null;
           const success = await clientOrderStore.updateProductPrice(
             order._id, editProduct, Number(editQuantity), Number(editPrice),
-            isSuperAdmin ? Number(editPayout) : undefined
+            isSuperAdmin ? Number(editPayout) : undefined,
+            secondProductPayload
           );
           if (success) {
             const selected = availableProducts.find((p) => p._id === editProduct);
@@ -321,6 +356,16 @@ const ClientOrderDetailClient = ({ order }) => {
             setCurrentQuantity(Number(editQuantity));
             setCurrentPrice(Number(editPrice));
             if (isSuperAdmin) setCurrentPayout(Number(editPayout));
+            if (showEditSecond && editProduct2) {
+              const sel2 = availableProducts.find((p) => p._id === editProduct2);
+              setCurrentSecondProduct(sel2 ?? null);
+              setCurrentQuantity2(Number(editQuantity2));
+              setCurrentPrice2(Number(editPrice2) || 0);
+            } else {
+              setCurrentSecondProduct(null);
+              setCurrentQuantity2(0);
+              setCurrentPrice2(0);
+            }
           }
           return success;
         }}>
@@ -361,7 +406,7 @@ const ClientOrderDetailClient = ({ order }) => {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-slate-500">Цена</label>
+            <label className="text-xs font-semibold text-slate-500">Обща цена</label>
             <input
               type="number"
               value={editPrice}
@@ -379,6 +424,64 @@ const ClientOrderDetailClient = ({ order }) => {
                 className="w-full rounded-xl border border-orange-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
+          )}
+
+          {/* Втори продукт */}
+          {showEditSecond ? (
+            <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-3.5 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#0071f5]">Втори продукт</span>
+                <button
+                  type="button"
+                  onClick={() => { setShowEditSecond(false); setEditProduct2(""); setEditQuantity2(""); setEditPrice2(""); }}
+                  className="w-6 h-6 rounded-full bg-slate-100 hover:bg-red-100 flex items-center justify-center transition-colors">
+                  <FiX className="w-3.5 h-3.5 text-slate-400 hover:text-red-500" />
+                </button>
+              </div>
+              <Select
+                controlled
+                value={editProduct2}
+                items={availableProducts.filter((p) => p._id !== editProduct).map((p) => ({ _id: p._id, value: p._id, name: p.name }))}
+                onChange={(val) => {
+                  const sel = availableProducts.find((p) => p._id === val);
+                  const qty = Number(editQuantity2);
+                  const autoPrice = sel?.sell_prices?.[qty - 1] ?? editPrice2;
+                  setEditProduct2(val);
+                  setEditPrice2(autoPrice);
+                }}
+              />
+              <input
+                type="number"
+                min={1}
+                placeholder="Брой"
+                value={editQuantity2}
+                disabled={!editProduct2}
+                onChange={(e) => {
+                  const qty = Number(e.target.value);
+                  setEditQuantity2(e.target.value);
+                  const sel = availableProducts.find((p) => p._id === editProduct2);
+                  const autoPrice = sel?.sell_prices?.[qty - 1];
+                  if (autoPrice !== undefined) setEditPrice2(autoPrice);
+                }}
+                className="w-full rounded-xl border border-blue-100 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              />
+              <input
+                type="number"
+                placeholder="Цена"
+                value={editPrice2}
+                disabled={!editProduct2}
+                onChange={(e) => setEditPrice2(e.target.value)}
+                className="w-full rounded-xl border border-blue-100 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowEditSecond(true)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-slate-200 text-slate-400 hover:border-[#0071f5]/40 hover:text-[#0071f5] hover:bg-blue-50/30 transition-all text-sm font-medium">
+              <FiPlus className="w-4 h-4" />
+              Добави втори продукт
+            </button>
           )}
         </div>
       </Modal>

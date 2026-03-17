@@ -1,5 +1,15 @@
 import mongoose, { Schema } from "mongoose";
 
+const secondProductSchema = new Schema(
+  {
+    product:  { type: Schema.Types.ObjectId, ref: "Product", default: null },
+    quantity: { type: Number, default: 0 },
+    price:    { type: Number, default: 0 },
+    payout:   { type: Number, default: 0 },
+  },
+  { _id: false }
+);
+
 const clientOrderSchema = new Schema(
   {
     phone: { type: String, required: true },
@@ -20,6 +30,7 @@ const clientOrderSchema = new Schema(
     isPaid: { type: Boolean, default: false },
     paidAt: { type: Date, default: null },
     deliveryCost: { type: Number, default: 0 },
+    secondProduct: { type: secondProductSchema, default: () => ({}) },
     rejectionReason: { type: String, default: "" },
     viewedBySeller: { type: Boolean, default: false },
     statusChangedAt: { type: Date, default: null },

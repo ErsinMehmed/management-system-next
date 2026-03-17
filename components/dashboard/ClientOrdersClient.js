@@ -84,6 +84,16 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
       const selected = updatedProducts.find((p) => p._id === orderData.product);
       const autoPrice = selected?.sell_prices?.[qty - 1] ?? "";
       clientOrderStore.setOrderData({ ...orderData, quantity: value, price: autoPrice });
+    } else if (name === "product2") {
+      const selected = updatedProducts.find((p) => p._id === value);
+      const qty = Number(orderData.quantity2);
+      const autoPrice2 = selected?.sell_prices?.[qty - 1] ?? "";
+      clientOrderStore.setOrderData({ ...orderData, product2: value, price2: autoPrice2 });
+    } else if (name === "quantity2") {
+      const qty = Number(value);
+      const selected = updatedProducts.find((p) => p._id === orderData.product2);
+      const autoPrice2 = selected?.sell_prices?.[qty - 1] ?? "";
+      clientOrderStore.setOrderData({ ...orderData, quantity2: value, price2: autoPrice2 });
     } else {
       clientOrderStore.setOrderData({ ...orderData, [name]: value });
     }
@@ -218,15 +228,26 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                       </div>
 
                       {/* Ред 2: продукт + метрики */}
-                      <div className="bg-slate-50 rounded-xl px-3 py-2.5 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <FiPackage className="w-4 h-4 text-slate-400 shrink-0" />
-                          <span className="text-sm font-semibold text-slate-700 truncate">{order.product?.name ?? "—"}</span>
+                      <div className="bg-slate-50 rounded-xl px-3 py-2.5 flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <FiPackage className="w-4 h-4 text-slate-400 shrink-0" />
+                            <span className="text-sm font-semibold text-slate-700 truncate">{order.product ? productTitle(order.product) : "—"}</span>
+                          </div>
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            <span className="text-sm text-slate-400 tabular-nums">{order.quantity} бр.</span>
+                            <span className="text-sm font-bold text-[#0071f5] tabular-nums">
+                              {formatCurrency(order.price + (order.secondProduct?.price ?? 0), 2)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2.5 shrink-0">
-                          <span className="text-sm text-slate-400 tabular-nums">{order.quantity} бр.</span>
-                          <span className="text-sm font-bold text-[#0071f5] tabular-nums">{formatCurrency(order.price, 2)}</span>
-                        </div>
+                        {order.secondProduct?.product && (
+                          <div className="flex items-center gap-2 min-w-0 pl-6">
+                            <span className="text-[10px] font-bold text-slate-400">+</span>
+                            <span className="text-xs font-medium text-slate-500 truncate">{productTitle(order.secondProduct.product)}</span>
+                            <span className="text-xs text-slate-400 tabular-nums shrink-0">× {order.secondProduct.quantity} бр.</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Ред 3: мета инфо */}
@@ -731,7 +752,11 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                           const grouped = Object.values(
                             (payment.products ?? []).reduce((acc, p) => {
                               const key = p.name ?? "—";
-                              if (!acc[key]) acc[key] = { name: key, quantity: 0, revenue: 0, payout: 0, delivery: 0 };
+                              if (!acc[key]) acc[key] = {
+                                name: key,
+                                weight: p.weight, flavor: p.flavor, puffs: p.puffs, count: p.count,
+                                quantity: 0, revenue: 0, payout: 0, delivery: 0,
+                              };
                               acc[key].quantity += p.quantity     ?? 0;
                               acc[key].revenue  += p.price        ?? 0;
                               acc[key].payout   += p.payout       ?? 0;
@@ -775,7 +800,9 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                                   style={{ minWidth: isSuperAdmin ? 480 : 320 }}>
                                   <div className="flex items-center gap-2 min-w-0">
                                     <FiPackage className="w-3 h-3 text-slate-300 shrink-0" />
-                                    <span className="text-sm text-slate-700 truncate">{g.name}</span>
+                                    <span className="text-sm text-slate-700 truncate">
+                                      {[g.name, g.flavor, g.weight && `${g.weight}г`, g.puffs && `${g.puffs}k`, g.count && `${g.count}бр.`].filter(Boolean).join(" ")}
+                                    </span>
                                   </div>
                                   <span className="text-sm text-slate-400 text-center tabular-nums">{g.quantity} бр.</span>
                                   <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(g.revenue, 2)}</span>

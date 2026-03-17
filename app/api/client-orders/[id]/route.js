@@ -18,7 +18,7 @@ export async function PUT(request, { params }) {
   const existing = await ClientOrder.findById(id).select("status product quantity assignedTo").lean();
 
   // Редактиране на продукт, цена, бройка и хонорар
-  if (body.product !== undefined || body.price !== undefined || body.payout !== undefined) {
+  if (body.product !== undefined || body.price !== undefined || body.payout !== undefined || body.secondProduct !== undefined) {
     if (existing?.status !== "нова" && session.user.role !== "Super Admin") {
       return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
     }
@@ -31,11 +31,32 @@ export async function PUT(request, { params }) {
     // иначе се авто-изчислява при смяна на продукт или бройка
     if (body.payout !== undefined && session.user.role === "Super Admin") {
       update.payout = body.payout;
-    } else if (body.product !== undefined || body.quantity !== undefined) {
+    } else if (body.product !== undefined || body.quantity !== undefined || body.secondProduct !== undefined) {
       const productId = body.product ?? existing?.product;
       const qty = body.quantity ?? existing?.quantity;
       const prod = await Product.findById(productId).select("seller_prices").lean();
-      update.payout = prod?.seller_prices?.[qty - 1] ?? 0;
+      let totalPayout = prod?.seller_prices?.[qty - 1] ?? 0;
+
+      // Пресмятаме пayout и за втори продукт
+      const sp = body.secondProduct !== undefined ? body.secondProduct : existing?.secondProduct;
+      if (sp?.product && sp?.quantity) {
+        const prod2 = await Product.findById(sp.product).select("seller_prices").lean();
+        const payout2 = prod2?.seller_prices?.[sp.quantity - 1] ?? 0;
+        update["secondProduct.payout"] = payout2;
+        totalPayout += payout2;
+      }
+      update.payout = totalPayout;
+    }
+
+    // Обновяване на полетата на втория продукт
+    if (body.secondProduct !== undefined) {
+      if (!body.secondProduct) {
+        update.secondProduct = { product: null, quantity: 0, price: 0, payout: 0 };
+      } else {
+        if (body.secondProduct.product !== undefined) update["secondProduct.product"] = body.secondProduct.product || null;
+        if (body.secondProduct.quantity !== undefined) update["secondProduct.quantity"] = body.secondProduct.quantity;
+        if (body.secondProduct.price !== undefined) update["secondProduct.price"] = body.secondProduct.price;
+      }
     }
 
     await ClientOrder.findByIdAndUpdate(id, update);

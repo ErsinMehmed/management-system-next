@@ -33,6 +33,7 @@ export async function GET(request) {
       .skip((page - 1) * perPage)
       .limit(perPage)
       .populate({ path: "product", select: "name weight flavor puffs count" })
+      .populate({ path: "secondProduct.product", select: "name weight flavor puffs count category", populate: { path: "category", select: "name" } })
       .populate({ path: "assignedTo", select: "name" })
       .lean(),
   ]);
@@ -69,11 +70,29 @@ export async function POST(request) {
 
   // Авто-изчисляване на хонорара
   const product = await Product.findById(data.product).select("seller_prices").lean();
-  data.payout = product?.seller_prices?.[data.quantity - 1] ?? 0;
+  let totalPayout = product?.seller_prices?.[data.quantity - 1] ?? 0;
+
+  // Втори продукт
+  if (data.product2 && data.quantity2) {
+    const product2 = await Product.findById(data.product2).select("seller_prices").lean();
+    const payout2 = product2?.seller_prices?.[Number(data.quantity2) - 1] ?? 0;
+    data.secondProduct = {
+      product:  data.product2,
+      quantity: Number(data.quantity2),
+      price:    Number(data.price2) || 0,
+      payout:   payout2,
+    };
+    totalPayout += payout2;
+  }
+  delete data.product2;
+  delete data.quantity2;
+  delete data.price2;
+  data.payout = totalPayout;
 
   const order = await ClientOrder.create(data);
   await order.populate([
     { path: "product", select: "name weight flavor puffs count" },
+    { path: "secondProduct.product", select: "name" },
     { path: "assignedTo", select: "name" },
   ]);
 

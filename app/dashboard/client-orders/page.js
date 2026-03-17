@@ -27,6 +27,7 @@ export default async function ClientOrdersPage() {
     ClientOrder.find(filter)
       .sort({ _id: -1 })
       .populate({ path: "product", select: "name weight flavor count category puffs units_per_box", populate: { path: "category", select: "name" } })
+      .populate({ path: "secondProduct.product", select: "name weight flavor puffs count category", populate: { path: "category", select: "name" } })
       .populate({ path: "assignedTo", select: "name" })
       .skip(0)
       .limit(PER_PAGE)
