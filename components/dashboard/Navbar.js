@@ -3,6 +3,7 @@ import Image from "next/image";
 import { HiMenuAlt1 } from "react-icons/hi";
 import { FaXmark } from "react-icons/fa6";
 import Dropdown from "./AccountDropdown";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = (props) => {
   return (
@@ -36,18 +37,8 @@ const Navbar = (props) => {
             />
           </div>
 
-          <div className='flex items-center'>
-            {/* {process.env.МODE === "dev" && (
-              <Modal
-                showFooter={true}
-                showHeader={true}
-                openButton={
-                  <IoChatbubblesOutline className='w-6 h-6 text-gray-400 mr-3 cursor-pointer' />
-                }>
-                <Chat />
-              </Modal>
-            )} */}
-
+          <div className='flex items-center gap-1'>
+            <NotificationBell />
             <Dropdown />
           </div>
         </div>

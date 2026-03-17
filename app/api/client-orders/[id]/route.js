@@ -5,7 +5,8 @@ import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { notifyOrderClients } from "@/libs/sseClients";
+import { notifyOrderClients } from "@/libs/pusher";
+import { saveNotification } from "@/libs/saveNotification";
 
 export async function PUT(request, { params }) {
   const session = await getServerSession(authOptions);
@@ -61,10 +62,9 @@ export async function PUT(request, { params }) {
     }
 
     await ClientOrder.findByIdAndUpdate(id, update);
-    notifyOrderClients(
-      { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, change: "edit" },
-      existing?.assignedTo
-    );
+    const editEvent = { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: existing?.assignedTo ? String(existing.assignedTo) : null, change: "edit" };
+    notifyOrderClients(editEvent);
+    saveNotification(editEvent).catch(console.error);
     return NextResponse.json({ message: "Поръчката е обновена", status: true });
   }
 
@@ -90,10 +90,9 @@ export async function PUT(request, { params }) {
     statusChangedAt: finalStatuses.includes(status) ? new Date() : null,
   };
   await ClientOrder.findByIdAndUpdate(id, update);
-  notifyOrderClients(
-    { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, status, change: "status" },
-    existing?.assignedTo
-  );
+  const statusEvent = { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: existing?.assignedTo ? String(existing.assignedTo) : null, status, change: "status" };
+  notifyOrderClients(statusEvent);
+  saveNotification(statusEvent).catch(console.error);
 
   return NextResponse.json({ message: "Статусът е обновен", status: true });
 }
@@ -130,10 +129,9 @@ export async function DELETE(request, { params }) {
 
   const toDelete = await ClientOrder.findById(id).select("assignedTo orderNumber").lean();
   await ClientOrder.findByIdAndDelete(id);
-  notifyOrderClients(
-    { type: "deleted", orderId: id, orderNumber: toDelete?.orderNumber, changedBy: session.user.name },
-    toDelete?.assignedTo
-  );
+  const deleteEvent = { type: "deleted", orderId: id, orderNumber: toDelete?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: toDelete?.assignedTo ? String(toDelete.assignedTo) : null };
+  notifyOrderClients(deleteEvent);
+  saveNotification(deleteEvent).catch(console.error);
 
   return NextResponse.json({ message: "Поръчката е изтрита", status: true });
 }

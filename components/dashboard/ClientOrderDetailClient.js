@@ -1,6 +1,6 @@
 "use client";
 import { observer } from "mobx-react-lite";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Dashboard";
@@ -10,6 +10,7 @@ import { Tooltip, Button, useDisclosure } from "@heroui/react";
 import { formatCurrency } from "@/utils";
 import { clientOrderStore, productStore } from "@/stores/useStore";
 import { addToast } from "@heroui/toast";
+import PusherClient from "pusher-js";
 import { productTitle } from "@/utils";
 import Select from "@/components/html/Select";
 import Modal from "@/components/Modal";
@@ -24,6 +25,8 @@ const STATUS_CONFIG = {
 
 const ClientOrderDetailClient = ({ order }) => {
   const { data: session } = useSession();
+  const sessionRef = useRef(session);
+  useEffect(() => { sessionRef.current = session; }, [session]);
   const isAdmin = ["Admin", "Super Admin"].includes(session?.user?.role);
   const isSuperAdmin = session?.user?.role === "Super Admin";
   const router = useRouter();
@@ -40,16 +43,29 @@ const ClientOrderDetailClient = ({ order }) => {
     }
   }, [session]);
 
-  // SSE — реално обновяване при промяна на тази поръчка
+  // Pusher — реално обновяване при промяна на поръчки
   useEffect(() => {
-    const es = new EventSource("/api/client-orders/stream");
-    es.onmessage = (e) => {
-      const event = JSON.parse(e.data);
-      if (event.type === "connected") return;
-      const num = event.orderNumber ? `#${event.orderNumber} ` : "";
-      const by = event.changedBy ? ` от ${event.changedBy}` : "";
+    const pusher = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+    });
+    const channel = pusher.subscribe("client-orders");
+    channel.bind("order-event", (event) => {
+      const userId = sessionRef.current?.user?.id;
+      const role = sessionRef.current?.user?.role;
+      const isOwn = event.changedByUserId && String(event.changedByUserId) === String(userId);
+      const isMine = role === "Seller" ? (event.assignedTo && String(event.assignedTo) === String(userId)) : true;
+      const showToast = !isOwn && isMine;
+
       if (event.type === "updated" && event.orderId === order._id) {
         router.refresh();
+      }
+
+      if (!showToast) return;
+
+      const num = event.orderNumber ? `#${event.orderNumber} ` : "";
+      const by = event.changedBy ? ` от ${event.changedBy}` : "";
+
+      if (event.type === "updated" && event.orderId === order._id) {
         if (event.change === "status") {
           const color = event.status === "доставена" ? "success" : event.status === "отказана" ? "danger" : "primary";
           addToast({ title: "Статус обновен", description: `${num}→ ${event.status}${by}`, color, timeout: 5000 });
@@ -61,9 +77,11 @@ const ClientOrderDetailClient = ({ order }) => {
       } else if (event.type === "deleted" && event.orderId === order._id) {
         addToast({ title: "Заявка изтрита", description: `${num}изтрита${by}`, color: "danger", timeout: 5000 });
       }
+    });
+    return () => {
+      channel.unbind_all();
+      pusher.disconnect();
     };
-    es.onerror = () => es.close();
-    return () => es.close();
   }, [order._id]);
 
   // Синхронизиране на локален статус при SSR refresh

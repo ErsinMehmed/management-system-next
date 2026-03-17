@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSession } from "next-auth/react";
 import Layout from "@/components/layout/Dashboard";
@@ -14,6 +14,7 @@ import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
 import Select from "@/components/html/Select";
 import { addToast } from "@heroui/toast";
+import PusherClient from "pusher-js";
 
 const STATUSES = ["нова", "доставена", "отказана"];
 
@@ -36,6 +37,14 @@ const STATUS_ICON = {
   отказана: FiXCircle,
 };
 
+function shouldShowToast(event, userId, role) {
+  // Никога не показвай на човека направил екшъна
+  if (event.changedByUserId && String(event.changedByUserId) === String(userId)) return false;
+  // Seller вижда само заявки асайнати на него
+  if (role === "Seller") return event.assignedTo && String(event.assignedTo) === String(userId);
+  return true;
+}
+
 function showOrderToast(event) {
   const num = event.orderNumber ? `#${event.orderNumber} ` : "";
   const by = event.changedBy ? ` от ${event.changedBy}` : "";
@@ -53,6 +62,8 @@ function showOrderToast(event) {
 
 const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { data: session } = useSession();
+  const sessionRef = useRef(session);
+  useEffect(() => { sessionRef.current = session; }, [session]);
   const isAdmin = ["Admin", "Super Admin"].includes(session?.user?.role);
   const isSuperAdmin = session?.user?.role === "Super Admin";
   const { orders, orderData, isLoading, isCreating, handlePageChange, handlePageClick, summary, isSummaryLoading, history, isHistoryLoading } = clientOrderStore;
@@ -81,15 +92,20 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
       clientOrderStore.loadOrders();
     }
 
-    const es = new EventSource("/api/client-orders/stream");
-    es.onmessage = (e) => {
-      const event = JSON.parse(e.data);
-      if (event.type === "connected") return;
+    const pusher = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+    });
+    const channel = pusher.subscribe("client-orders");
+    channel.bind("order-event", (event) => {
       clientOrderStore.loadOrders();
-      showOrderToast(event);
+      if (shouldShowToast(event, sessionRef.current?.user?.id, sessionRef.current?.user?.role)) {
+        showOrderToast(event);
+      }
+    });
+    return () => {
+      channel.unbind_all();
+      pusher.disconnect();
     };
-    es.onerror = () => es.close();
-    return () => es.close();
   }, []);
 
   const updatedProducts = useMemo(() => {

@@ -7,7 +7,8 @@ import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { notifyAllEmployees, notifyUser } from "@/services/pushNotification";
-import { notifyOrderClients } from "@/libs/sseClients";
+import { notifyOrderClients } from "@/libs/pusher";
+import { saveNotification } from "@/libs/saveNotification";
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
@@ -122,10 +123,9 @@ export async function POST(request) {
     notifyAllEmployees(notifPayload).catch(console.error);
   }
 
-  notifyOrderClients(
-    { type: "created", orderId: String(order._id), orderNumber: order.orderNumber, changedBy: session.user.name },
-    assignedToId
-  );
+  const createdEvent = { type: "created", orderId: String(order._id), orderNumber: order.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: assignedToId ? String(assignedToId) : null };
+  notifyOrderClients(createdEvent);
+  saveNotification(createdEvent).catch(console.error);
 
   return NextResponse.json(
     { message: "Поръчката е добавена успешно", status: true },
