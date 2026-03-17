@@ -151,7 +151,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                 variant="solid"
                 color="primary"
                 radius="full"
-                size="sm"
+                size="md"
                 isLoading={isRefreshing}
                 startContent={!isRefreshing && <FiRefreshCw className="w-4 h-4" />}
                 onPress={async () => {
@@ -168,7 +168,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                   variant="solid"
                   color="primary"
                   radius="full"
-                  size="sm"
+                  size="md"
                   startContent={<FiPlus className="w-4 h-4" />}
                   onPress={onOpen}
                   className="w-full sm:w-auto font-semibold">
@@ -489,41 +489,48 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                         )}
                       </div>
 
-                      {/* Колони */}
-                      <div className={`grid px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
-                        <span>Продукт</span>
-                        <span className="text-center">Бройки</span>
-                        <span className="text-right">Оборот</span>
-                        <span className="text-right">Доставка</span>
-                        {isSuperAdmin && <span className="text-right">За изплащане</span>}
-                      </div>
+                      {/* Таблица с хоризонтален скрол */}
+                      <div className="overflow-x-auto">
+                        <div className={isSuperAdmin ? "min-w-[520px]" : "min-w-[400px]"}>
 
-                      {/* Редове */}
-                      {seller.items
-                        .slice()
-                        .sort((a, b) => b.totalRevenue - a.totalRevenue)
-                        .map((item, i) => (
-                          <div key={i} className={`grid px-4 py-3 border-b border-gray-50 last:border-0 items-center group hover:bg-blue-50/30 transition-colors ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="text-sm font-medium text-slate-700 truncate">{productTitle(item.product)}</span>
-                              <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${item.unpaidCount === 0 ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
-                                {item.unpaidCount === 0 ? "✓" : "○"}
-                              </span>
-                            </div>
-                            <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
-                            <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
-                            <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
-                            {isSuperAdmin && <span className={`text-sm font-semibold text-right tabular-nums ${item.unpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(item.totalPayout, 2)}</span>}
+                          {/* Колони */}
+                          <div className={`grid px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
+                            <span>Продукт</span>
+                            <span className="text-center">Бройки</span>
+                            <span className="text-right">Оборот</span>
+                            <span className="text-right">Доставка</span>
+                            {isSuperAdmin && <span className="text-right">За изплащане</span>}
                           </div>
-                        ))}
 
-                      {/* Тотал ред */}
-                      <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
-                        <span />
-                        <span className="text-sm font-bold text-slate-800 text-right tabular-nums">{formatCurrency(seller.sellerTotal, 2)}</span>
-                        <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{seller.sellerDelivery > 0 ? formatCurrency(seller.sellerDelivery, 2) : "—"}</span>
-                        {isSuperAdmin && <span className={`text-sm font-bold text-right tabular-nums ${seller.sellerUnpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(seller.sellerPayout, 2)}</span>}
+                          {/* Редове */}
+                          {seller.items
+                            .slice()
+                            .sort((a, b) => b.totalRevenue - a.totalRevenue)
+                            .map((item, i) => (
+                              <div key={i} className={`grid px-4 py-3 border-b border-gray-50 last:border-0 items-center group hover:bg-blue-50/30 transition-colors ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="text-sm font-medium text-slate-700 truncate">{productTitle(item.product)}</span>
+                                  <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${item.unpaidCount === 0 ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
+                                    {item.unpaidCount === 0 ? "✓" : "○"}
+                                  </span>
+                                </div>
+                                <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
+                                <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
+                                <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
+                                {isSuperAdmin && <span className={`text-sm font-semibold text-right tabular-nums ${item.unpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(item.totalPayout, 2)}</span>}
+                              </div>
+                            ))}
+
+                          {/* Тотал ред */}
+                          <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
+                            <span />
+                            <span className="text-sm font-bold text-slate-800 text-right tabular-nums">{formatCurrency(seller.sellerTotal, 2)}</span>
+                            <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{seller.sellerDelivery > 0 ? formatCurrency(seller.sellerDelivery, 2) : "—"}</span>
+                            {isSuperAdmin && <span className={`text-sm font-bold text-right tabular-nums ${seller.sellerUnpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(seller.sellerPayout, 2)}</span>}
+                          </div>
+
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -572,27 +579,31 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                   </div>
 
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="grid grid-cols-4 px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      <span>Продукт</span>
-                      <span className="text-center">Бройки</span>
-                      <span className="text-right">Оборот</span>
-                      <span className="text-right">Доставка</span>
-                    </div>
+                    <div className="overflow-x-auto">
+                      <div className="min-w-[400px]">
+                        <div className="grid grid-cols-4 px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          <span>Продукт</span>
+                          <span className="text-center">Бройки</span>
+                          <span className="text-right">Оборот</span>
+                          <span className="text-right">Доставка</span>
+                        </div>
 
-                    {summary.items.map((item, i) => (
-                      <div key={i} className="grid grid-cols-4 px-4 py-3 border-b border-gray-50 last:border-0 items-center hover:bg-blue-50/30 transition-colors">
-                        <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
-                        <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
-                        <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
-                        <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
+                        {summary.items.map((item, i) => (
+                          <div key={i} className="grid grid-cols-4 px-4 py-3 border-b border-gray-50 last:border-0 items-center hover:bg-blue-50/30 transition-colors">
+                            <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
+                            <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
+                            <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
+                            <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
+                          </div>
+                        ))}
+
+                        <div className="grid grid-cols-4 px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center">
+                          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
+                          <span />
+                          <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(summary.grandTotal, 2)}</span>
+                          <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{summary.grandDelivery > 0 ? formatCurrency(summary.grandDelivery, 2) : "—"}</span>
+                        </div>
                       </div>
-                    ))}
-
-                    <div className="grid grid-cols-4 px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
-                      <span />
-                      <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(summary.grandTotal, 2)}</span>
-                      <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{summary.grandDelivery > 0 ? formatCurrency(summary.grandDelivery, 2) : "—"}</span>
                     </div>
                   </div>
                 </div>
@@ -686,11 +697,11 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                   variant="splitted"
                   className="gap-3 px-0"
                   itemClasses={{
-                    base: "bg-white rounded-2xl shadow-sm border border-gray-100 !px-0 overflow-hidden hover:border-[#0071f5]/20 hover:shadow-md data-[open=true]:shadow-lg data-[open=true]:border-[#0071f5]/30 transition-all cursor-pointer",
-                    heading: "px-4 py-0",
+                    base: "bg-white rounded-2xl shadow-sm border border-gray-100 !px-0 hover:border-[#0071f5]/20 hover:shadow-md data-[open=true]:shadow-lg data-[open=true]:border-[#0071f5]/30 transition-all cursor-pointer",
+                    heading: "px-4 py-0 overflow-hidden rounded-2xl",
                     title: "text-sm w-full",
                     trigger: "py-4 cursor-pointer data-[hover=true]:bg-transparent",
-                    content: "pt-0 pb-0",
+                    content: "pt-0 pb-0 overflow-x-auto",
                   }}>
                   {history.sellers.map((seller, si) => (
                     <AccordionItem
@@ -750,7 +761,8 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                               </div>
 
                               {/* Продукти */}
-                              <div className={`grid px-4 py-1.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-5" : "grid-cols-3"}`}>
+                              <div className={`grid px-4 py-1.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-5" : "grid-cols-3"}`}
+                                style={{ minWidth: isSuperAdmin ? 480 : 320 }}>
                                 <span>Продукт</span>
                                 <span className="text-center">Бройки</span>
                                 <span className="text-right">Оборот</span>
@@ -759,7 +771,8 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                               </div>
 
                               {grouped.map((g, gi) => (
-                                <div key={gi} className={`grid px-4 py-2 border-t border-gray-50 items-center hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? "grid-cols-5" : "grid-cols-3"}`}>
+                                <div key={gi} className={`grid px-4 py-2 border-t border-gray-50 items-center hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? "grid-cols-5" : "grid-cols-3"}`}
+                                  style={{ minWidth: isSuperAdmin ? 480 : 320 }}>
                                   <div className="flex items-center gap-2 min-w-0">
                                     <FiPackage className="w-3 h-3 text-slate-300 shrink-0" />
                                     <span className="text-sm text-slate-700 truncate">{g.name}</span>
