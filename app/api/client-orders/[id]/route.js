@@ -5,6 +5,7 @@ import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { notifyOrderClients } from "@/libs/sseClients";
 
 export async function PUT(request, { params }) {
   const session = await getServerSession(authOptions);
@@ -15,7 +16,7 @@ export async function PUT(request, { params }) {
 
   await connectMongoDB();
 
-  const existing = await ClientOrder.findById(id).select("status product quantity assignedTo").lean();
+  const existing = await ClientOrder.findById(id).select("status product quantity assignedTo orderNumber secondProduct").lean();
 
   // Редактиране на продукт, цена, бройка и хонорар
   if (body.product !== undefined || body.price !== undefined || body.payout !== undefined || body.secondProduct !== undefined) {
@@ -60,6 +61,10 @@ export async function PUT(request, { params }) {
     }
 
     await ClientOrder.findByIdAndUpdate(id, update);
+    notifyOrderClients(
+      { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, change: "edit" },
+      existing?.assignedTo
+    );
     return NextResponse.json({ message: "Поръчката е обновена", status: true });
   }
 
@@ -85,6 +90,10 @@ export async function PUT(request, { params }) {
     statusChangedAt: finalStatuses.includes(status) ? new Date() : null,
   };
   await ClientOrder.findByIdAndUpdate(id, update);
+  notifyOrderClients(
+    { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, status, change: "status" },
+    existing?.assignedTo
+  );
 
   return NextResponse.json({ message: "Статусът е обновен", status: true });
 }
@@ -112,14 +121,19 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const { error } = await requireAdmin();
+  const { error, session } = await requireAdmin();
   if (error) return error;
 
   const { id } = await params;
 
   await connectMongoDB();
 
+  const toDelete = await ClientOrder.findById(id).select("assignedTo orderNumber").lean();
   await ClientOrder.findByIdAndDelete(id);
+  notifyOrderClients(
+    { type: "deleted", orderId: id, orderNumber: toDelete?.orderNumber, changedBy: session.user.name },
+    toDelete?.assignedTo
+  );
 
   return NextResponse.json({ message: "Поръчката е изтрита", status: true });
 }

@@ -34,6 +34,7 @@ const clientOrderSchema = new Schema(
     rejectionReason: { type: String, default: "" },
     viewedBySeller: { type: Boolean, default: false },
     statusChangedAt: { type: Date, default: null },
+    orderNumber: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

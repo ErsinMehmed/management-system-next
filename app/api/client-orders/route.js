@@ -2,10 +2,12 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
+import mongoose from "mongoose";
 import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { notifyAllEmployees, notifyUser } from "@/services/pushNotification";
+import { notifyOrderClients } from "@/libs/sseClients";
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
@@ -89,7 +91,18 @@ export async function POST(request) {
   delete data.price2;
   data.payout = totalPayout;
 
+  // Атомарен автоинкремент на номера на поръчката
+  const counter = await mongoose.connection.db
+    .collection("counters")
+    .findOneAndUpdate(
+      { _id: "clientOrderNumber" },
+      { $inc: { seq: 1 } },
+      { upsert: true, returnDocument: "after" }
+    );
+  data.orderNumber = counter.seq;
+
   const order = await ClientOrder.create(data);
+  const assignedToId = order.assignedTo; // raw ObjectId — преди populate
   await order.populate([
     { path: "product", select: "name weight flavor puffs count" },
     { path: "secondProduct.product", select: "name" },
@@ -108,6 +121,11 @@ export async function POST(request) {
   } else {
     notifyAllEmployees(notifPayload).catch(console.error);
   }
+
+  notifyOrderClients(
+    { type: "created", orderId: String(order._id), orderNumber: order.orderNumber, changedBy: session.user.name },
+    assignedToId
+  );
 
   return NextResponse.json(
     { message: "Поръчката е добавена успешно", status: true },

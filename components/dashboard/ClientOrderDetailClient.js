@@ -9,6 +9,7 @@ import { FaViber, FaWhatsapp } from "react-icons/fa";
 import { Tooltip, Button, useDisclosure } from "@heroui/react";
 import { formatCurrency } from "@/utils";
 import { clientOrderStore, productStore } from "@/stores/useStore";
+import { addToast } from "@heroui/toast";
 import { productTitle } from "@/utils";
 import Select from "@/components/html/Select";
 import Modal from "@/components/Modal";
@@ -38,6 +39,39 @@ const ClientOrderDetailClient = ({ order }) => {
       clientOrderStore.markAsViewed(order._id).then(() => setViewed(true));
     }
   }, [session]);
+
+  // SSE — реално обновяване при промяна на тази поръчка
+  useEffect(() => {
+    const es = new EventSource("/api/client-orders/stream");
+    es.onmessage = (e) => {
+      const event = JSON.parse(e.data);
+      if (event.type === "connected") return;
+      const num = event.orderNumber ? `#${event.orderNumber} ` : "";
+      const by = event.changedBy ? ` от ${event.changedBy}` : "";
+      if (event.type === "updated" && event.orderId === order._id) {
+        router.refresh();
+        if (event.change === "status") {
+          const color = event.status === "доставена" ? "success" : event.status === "отказана" ? "danger" : "primary";
+          addToast({ title: "Статус обновен", description: `${num}→ ${event.status}${by}`, color, timeout: 5000 });
+        } else {
+          addToast({ title: "Заявка редактирана", description: `${num}редактирана${by}`, color: "default", timeout: 5000 });
+        }
+      } else if (event.type === "created") {
+        addToast({ title: "Нова заявка", description: `${num}добавена${by}`, color: "success", timeout: 5000 });
+      } else if (event.type === "deleted" && event.orderId === order._id) {
+        addToast({ title: "Заявка изтрита", description: `${num}изтрита${by}`, color: "danger", timeout: 5000 });
+      }
+    };
+    es.onerror = () => es.close();
+    return () => es.close();
+  }, [order._id]);
+
+  // Синхронизиране на локален статус при SSR refresh
+  useEffect(() => {
+    setCurrentStatus(order.status);
+    setCurrentRejectionReason(order.rejectionReason || "");
+    setStatusChangedAt(order.statusChangedAt || null);
+  }, [order.status, order.rejectionReason, order.statusChangedAt]);
 
   const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
@@ -129,6 +163,9 @@ const ClientOrderDetailClient = ({ order }) => {
                     <FiPhone className="w-5 h-5 text-[#0071f5]" />
                     {order.phone}
                   </a>
+                  {order.orderNumber > 0 && (
+                    <span className="text-sm font-bold text-slate-400">#{order.orderNumber}</span>
+                  )}
                   <Tooltip content="Копирано" color="default" isOpen={copied}>
                     <Button isIconOnly size="sm" variant="light" onPress={handleCopy} className="text-slate-400 hover:text-slate-600">
                       {copied ? <FiCheck className="w-4 h-4 text-green-500" /> : <FiCopy className="w-4 h-4" />}

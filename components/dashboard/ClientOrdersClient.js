@@ -9,10 +9,11 @@ import ClientOrderForm from "@/components/forms/ClientOrder";
 import { useDisclosure, Tabs, Tab, Button, DatePicker, Accordion, AccordionItem } from "@heroui/react";
 import { parseAbsoluteToLocal, getLocalTimeZone, now } from "@internationalized/date";
 import Link from "next/link";
-import { FiPlus, FiTrash2, FiRefreshCw, FiEye, FiEyeOff, FiCheckCircle, FiFilter, FiTrendingUp, FiDollarSign, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiXCircle, FiTruck } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiCheckCircle, FiFilter, FiTrendingUp, FiDollarSign, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiXCircle, FiTruck } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
 import Select from "@/components/html/Select";
+import { addToast } from "@heroui/toast";
 
 const STATUSES = ["нова", "доставена", "отказана"];
 
@@ -35,6 +36,21 @@ const STATUS_ICON = {
   отказана: FiXCircle,
 };
 
+function showOrderToast(event) {
+  const num = event.orderNumber ? `#${event.orderNumber} ` : "";
+  const by = event.changedBy ? ` от ${event.changedBy}` : "";
+  if (event.type === "created") {
+    addToast({ title: "Нова заявка", description: `${num}добавена${by}`, color: "success", timeout: 5000 });
+  } else if (event.type === "updated" && event.change === "status") {
+    const color = event.status === "доставена" ? "success" : event.status === "отказана" ? "danger" : "primary";
+    addToast({ title: "Статус обновен", description: `${num}→ ${event.status}${by}`, color, timeout: 5000 });
+  } else if (event.type === "updated") {
+    addToast({ title: "Заявка редактирана", description: `${num}редактирана${by}`, color: "default", timeout: 5000 });
+  } else if (event.type === "deleted") {
+    addToast({ title: "Заявка изтрита", description: `${num}изтрита${by}`, color: "danger", timeout: 5000 });
+  }
+}
+
 const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { data: session } = useSession();
   const isAdmin = ["Admin", "Super Admin"].includes(session?.user?.role);
@@ -45,7 +61,6 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
   const [deletingId, setDeletingId] = useState(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingRejection, setPendingRejection] = useState({ orderId: null, reason: "" });
   const [activeTab, setActiveTab] = useState("orders");
   const [summaryPreset, setSummaryPreset] = useState("24h");
@@ -62,9 +77,19 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   useEffect(() => {
     if (initialData) {
       clientOrderStore.hydrateOrders(initialData.orders);
-      return;
+    } else {
+      clientOrderStore.loadOrders();
     }
-    clientOrderStore.loadOrders();
+
+    const es = new EventSource("/api/client-orders/stream");
+    es.onmessage = (e) => {
+      const event = JSON.parse(e.data);
+      if (event.type === "connected") return;
+      clientOrderStore.loadOrders();
+      showOrderToast(event);
+    };
+    es.onerror = () => es.close();
+    return () => es.close();
   }, []);
 
   const updatedProducts = useMemo(() => {
@@ -157,22 +182,6 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
           {/* ТАБ 1: Списък */}
           <Tab key="orders" title="Заявки">
             <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
-              <Button
-                variant="solid"
-                color="primary"
-                radius="full"
-                size="md"
-                isLoading={isRefreshing}
-                startContent={!isRefreshing && <FiRefreshCw className="w-4 h-4" />}
-                onPress={async () => {
-                  setIsRefreshing(true);
-                  await clientOrderStore.loadOrders();
-                  setIsRefreshing(false);
-                }}
-                className="w-full sm:w-auto font-semibold">
-                Презареди
-              </Button>
-
               {(isAdmin || session?.user?.role === "Seller") && (
                 <Button
                   variant="solid"
@@ -216,7 +225,12 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                             {(() => { const Icon = STATUS_ICON[order.status] ?? FiPhone; return <Icon className="w-3.5 h-3.5 text-slate-400" />; })()}
                           </div>
                           <div>
-                            <p className="font-bold text-slate-800 text-base leading-tight">{order.phone}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-slate-800 text-base leading-tight">{order.phone}</p>
+                              {order.orderNumber > 0 && (
+                                <span className="text-xs font-bold text-slate-400">#{order.orderNumber}</span>
+                              )}
+                            </div>
                             <span className={`text-xs font-semibold ${order.isNewClient ? "text-green-600" : "text-slate-400"}`}>
                               {order.isNewClient ? "✦ Нов клиент" : "Съществуващ"}
                             </span>
