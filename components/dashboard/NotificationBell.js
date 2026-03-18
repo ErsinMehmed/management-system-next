@@ -5,6 +5,8 @@ import { Popover, PopoverTrigger, PopoverContent } from "@heroui/react";
 import { FiBell, FiPlus, FiEdit2, FiTrash2, FiRefreshCw } from "react-icons/fi";
 import PusherClient from "pusher-js";
 
+// ─── helpers ────────────────────────────────────────────────────────────────
+
 function timeAgo(date) {
   const diff = Date.now() - new Date(date).getTime();
   const mins = Math.floor(diff / 60000);
@@ -40,6 +42,108 @@ function shouldReceive(event, userId, role) {
   return true;
 }
 
+// ─── SwipeableItem ───────────────────────────────────────────────────────────
+
+const SWIPE_THRESHOLD = 80; // px наляво за изтриване
+
+const SwipeableItem = ({ id, onDelete, children }) => {
+  const [offset, setOffset]     = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [removing, setRemoving] = useState(false);
+
+  const startXRef    = useRef(null);
+  const startYRef    = useRef(null);
+  const lockedRef    = useRef(null); // 'h' | 'v' | null
+
+  const onStart = (clientX, clientY) => {
+    startXRef.current = clientX;
+    startYRef.current = clientY;
+    lockedRef.current = null;
+  };
+
+  const onMove = (clientX, clientY, preventDefault) => {
+    if (startXRef.current === null) return;
+    const dx = clientX - startXRef.current;
+    const dy = clientY - startYRef.current;
+
+    // Определяме посоката при първото движение
+    if (!lockedRef.current) {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        lockedRef.current = "h";
+      } else {
+        lockedRef.current = "v";
+        startXRef.current = null;
+        return;
+      }
+    }
+    if (lockedRef.current !== "h") return;
+
+    preventDefault?.();
+    if (!dragging) setDragging(true);
+    setOffset(Math.min(0, dx)); // само наляво
+  };
+
+  const onEnd = () => {
+    if (startXRef.current === null) return;
+    startXRef.current = null;
+    setDragging(false);
+
+    if (offset < -SWIPE_THRESHOLD) {
+      setRemoving(true);
+      setOffset(-320);
+      setTimeout(() => onDelete(id), 280);
+    } else {
+      setOffset(0);
+    }
+  };
+
+  // Touch
+  const onTouchStart = (e) => onStart(e.touches[0].clientX, e.touches[0].clientY);
+  const onTouchMove  = (e) => onMove(e.touches[0].clientX, e.touches[0].clientY, () => e.preventDefault());
+  const onTouchEnd   = () => onEnd();
+
+  // Mouse (desktop)
+  const onMouseDown  = (e) => { e.preventDefault(); onStart(e.clientX, e.clientY); };
+  const onMouseMove  = (e) => { if (startXRef.current !== null) onMove(e.clientX, e.clientY); };
+  const onMouseUp    = () => onEnd();
+  const onMouseLeave = () => { if (startXRef.current !== null) onEnd(); };
+
+  const revealWidth = Math.min(64, Math.abs(offset));
+
+  return (
+    <div
+      className="relative overflow-hidden select-none"
+      style={{ height: removing ? 0 : undefined, transition: removing ? "height 0.28s ease" : undefined }}>
+
+      {/* Червен фон с кошче */}
+      <div
+        className="absolute inset-y-0 right-0 bg-red-500 flex items-center justify-center"
+        style={{ width: revealWidth, transition: dragging ? "none" : "width 0.25s ease" }}>
+        {revealWidth > 24 && <FiTrash2 className="w-4 h-4 text-white" />}
+      </div>
+
+      {/* Съдържание */}
+      <div
+        style={{
+          transform:  `translateX(${offset}px)`,
+          transition: dragging ? "none" : "transform 0.25s ease",
+          touchAction: "pan-y",
+        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseLeave}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
+// ─── NotificationBell ────────────────────────────────────────────────────────
+
 const NotificationBell = () => {
   const { data: session } = useSession();
   const sessionRef = useRef(session);
@@ -55,7 +159,6 @@ const NotificationBell = () => {
   const pageRef      = useRef(1);
   const isLoadingRef = useRef(false);
   const hasMoreRef   = useRef(false);
-  const scrollRef    = useRef(null);
 
   const fetchPage = useCallback(async (page, replace = false) => {
     if (isLoadingRef.current) return;
@@ -76,10 +179,9 @@ const NotificationBell = () => {
     }
   }, []);
 
-  // Initial load
   useEffect(() => { fetchPage(1, true); }, [fetchPage]);
 
-  // Pusher — само incrementира badge, не модифицира списъка
+  // Pusher — само badge
   useEffect(() => {
     const pusher = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
@@ -93,7 +195,6 @@ const NotificationBell = () => {
     return () => { channel.unbind_all(); pusher.disconnect(); };
   }, []);
 
-  // Infinite scroll чрез onScroll
   const handleScroll = useCallback((e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - scrollTop - clientHeight < 60 && hasMoreRef.current && !isLoadingRef.current) {
@@ -105,14 +206,17 @@ const NotificationBell = () => {
     setIsOpen(open);
     if (!open) return;
     (async () => {
-      // Зареди актуален списък
       await fetchPage(1, true);
-      // Маркирай всички като прочетени
       await fetch("/api/notifications", { method: "PATCH" });
       setUnreadCount(0);
       setMarkedReadAt(new Date());
     })();
   };
+
+  const handleDelete = useCallback(async (id) => {
+    setNotifications(prev => prev.filter(n => String(n._id) !== String(id)));
+    await fetch(`/api/notifications/${id}`, { method: "DELETE" });
+  }, []);
 
   const isUnread = (n) => {
     if (markedReadAt && new Date(n.createdAt) <= markedReadAt) return false;
@@ -134,7 +238,6 @@ const NotificationBell = () => {
       </PopoverTrigger>
 
       <PopoverContent className="p-0 w-80 overflow-hidden">
-        {/* Хедър */}
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
           <span className="font-semibold text-slate-700 text-sm">Известия</span>
           {unreadCount > 0 && (
@@ -142,12 +245,7 @@ const NotificationBell = () => {
           )}
         </div>
 
-        {/* Списък */}
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="overflow-y-auto"
-          style={{ maxHeight: 380 }}>
+        <div onScroll={handleScroll} className="overflow-y-auto" style={{ maxHeight: 380 }}>
 
           {notifications.length === 0 && !isLoading && (
             <p className="text-sm text-slate-400 text-center py-10">Няма известия</p>
@@ -157,22 +255,21 @@ const NotificationBell = () => {
             const { text, Icon, color } = notifInfo(n);
             const unread = isUnread(n);
             return (
-              <div
-                key={n._id}
-                className={`px-4 py-3 border-b border-slate-50 flex gap-3 items-start transition-colors ${unread ? "bg-blue-50/50" : "hover:bg-slate-50"}`}>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${color}`}>
-                  <Icon className="w-3.5 h-3.5" />
+              <SwipeableItem key={n._id} id={n._id} onDelete={handleDelete}>
+                <div className={`px-4 py-3 border-b border-slate-50 flex gap-3 items-start transition-colors cursor-default ${unread ? "bg-blue-50/50 hover:bg-blue-100/60" : "bg-white hover:bg-slate-50"}`}>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${color}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-700 leading-snug">{text}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{timeAgo(n.createdAt)}</p>
+                  </div>
+                  {unread && <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-2" />}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-700 leading-snug">{text}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{timeAgo(n.createdAt)}</p>
-                </div>
-                {unread && <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-2" />}
-              </div>
+              </SwipeableItem>
             );
           })}
 
-          {/* Loader / sentinel */}
           <div className="py-3 flex justify-center min-h-[36px]">
             {isLoading && <span className="text-xs text-slate-400">Зарежда...</span>}
             {!isLoading && !hasMore && notifications.length > 0 && (
