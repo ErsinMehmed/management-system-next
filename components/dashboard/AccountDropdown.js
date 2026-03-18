@@ -1,6 +1,7 @@
 "use client";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Dropdown,
   DropdownTrigger,
@@ -12,6 +13,7 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 
 const AccountDropdown = () => {
   const { data: session } = useSession();
+  const router = useRouter();
 
   const getUserFirstName = () => {
     let firstName = session?.user.name.split(" ")[0];
@@ -46,7 +48,7 @@ const AccountDropdown = () => {
         </DropdownTrigger>
 
         <DropdownMenu aria-label="User Actions" variant="flat">
-          <DropdownItem key="my_data">Моите данни</DropdownItem>
+          <DropdownItem key="my_data" onPress={() => router.push("/dashboard/profile")}>Моите данни</DropdownItem>
           <DropdownItem onPress={() => signOut()} key="logout" color="danger">
             Изход
           </DropdownItem>

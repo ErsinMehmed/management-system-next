@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import Alert from "@/components/Alert";
 import Input from "@/components/html/Input";
 import LinearLoader from "@/components/LinearLoader";
+import Link from "next/link";
 
 const Login = () => {
   const { loginData, setLoginData, login } = authStore;
@@ -66,14 +67,12 @@ const Login = () => {
                 Вход
               </Button>
 
-              {/* <p className='text-sm font-light text-gray-500'>
+              <p className='text-sm font-light text-gray-500 text-center'>
                 Нямате профил все още?{" "}
-                <Link
-                  className='ml-1 hover:underline text-blue-500'
-                  href='/'>
+                <Link className='hover:underline text-blue-500 font-medium' href='/register'>
                   Регистрация
                 </Link>
-              </p> */}
+              </p>
             </div>
           </div>
         </div>

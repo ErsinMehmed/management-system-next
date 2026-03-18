@@ -3,46 +3,28 @@ import User from "@/models/user";
 import Role from "@/models/role";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { validateFields } from "@/utils";
-import { generateRegisterRules } from "@/rules/register";
 
 export async function POST(request) {
-  const data = await request.json();
+  const { name, email, password } = await request.json();
 
-  const registerRules = generateRegisterRules();
-  const validationErrors = validateFields(data, registerRules);
+  if (!name || !email || !password)
+    return NextResponse.json({ message: "Попълнете всички полета." }, { status: 400 });
 
-  if (validationErrors) {
-    return NextResponse.json({ status: false, errorFields: validationErrors });
-  }
-
-  if (data.password !== data.passwordRep) {
-    return NextResponse.json({ status: false, status_code: 1 });
-  }
+  if (password.length < 8)
+    return NextResponse.json({ message: "Паролата трябва да е поне 8 символа." }, { status: 400 });
 
   await connectMongoDB();
 
-  const userExist = await User.findOne({ email: data.email });
-  if (userExist) {
-    return NextResponse.json({ status: false, status_code: 2 });
-  }
+  const existing = await User.findOne({ email });
+  if (existing)
+    return NextResponse.json({ message: "Вече съществува акаунт с този имейл." }, { status: 400 });
 
   const sellerRole = await Role.findOne({ name: "Seller" });
-  if (!sellerRole) {
-    return NextResponse.json(
-      { status: false, message: "Ролята Seller не е намерена" },
-      { status: 500 }
-    );
-  }
+  if (!sellerRole)
+    return NextResponse.json({ message: "Системна грешка — роля не е намерена." }, { status: 500 });
 
-  const hashedPassword = await bcrypt.hash(data.password, 10);
+  const hashed = await bcrypt.hash(password, 10);
+  await User.create({ name, email, password: hashed, role: sellerRole._id });
 
-  await User.create({
-    name: data.name,
-    email: data.email,
-    password: hashedPassword,
-    role: sellerRole._id,
-  });
-
-  return NextResponse.json({ status: true, status_code: 3 }, { status: 201 });
+  return NextResponse.json({ message: "Акаунтът е създаден успешно." }, { status: 201 });
 }
