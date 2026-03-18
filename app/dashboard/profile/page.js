@@ -67,6 +67,7 @@ export default function ProfilePage() {
 
     // Upload to Cloudinary
     setIsUploading(true);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
