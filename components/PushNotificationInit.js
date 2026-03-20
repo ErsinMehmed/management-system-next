@@ -18,6 +18,13 @@ export default function PushNotificationInit() {
     if (!session) return;
     if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
 
+    // На iOS push нотификациите работят само от standalone PWA (Add to Home Screen).
+    // Ако се отваря от Safari — пропускаме, за да не блокираме разрешението за в бъдеще.
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+      || window.navigator.standalone === true;
+    if (isIOS && !isStandalone) return;
+
     const init = async () => {
       try {
         // Регистрираме Service Worker и му подаваме Firebase конфига
