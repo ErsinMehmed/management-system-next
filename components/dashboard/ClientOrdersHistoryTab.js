@@ -4,10 +4,32 @@ import { useState } from "react";
 import { Button, Accordion, AccordionItem } from "@heroui/react";
 import { FiDollarSign, FiTrendingUp, FiCheckCircle, FiPackage } from "react-icons/fi";
 import { formatCurrency } from "@/utils";
+import { clientOrderStore } from "@/stores/useStore";
 
 const PAYMENTS_PAGE = 8;
 
+const RevenueConfirmBadge = ({ payment, sellerId, isSuperAdmin }) => {
+  if (payment.revenueConfirmed) {
+    return (
+      <span className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg bg-green-100 text-green-700">
+        <FiCheckCircle className="w-3 h-3" />
+        Взет оборот
+      </span>
+    );
+  }
+  if (!isSuperAdmin) return null;
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); clientOrderStore.confirmRevenue(sellerId, payment.paidAt); }}
+      className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg bg-slate-100 text-slate-400 hover:bg-blue-100 hover:text-blue-700 transition-colors">
+      <FiCheckCircle className="w-3 h-3" />
+      Взех оборота
+    </button>
+  );
+};
+
 const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => {
+  const isSeller = history.isSeller;
   const [visiblePayments, setVisiblePayments] = useState({});
   const getVisibleCount = (si) => visiblePayments[si] ?? PAYMENTS_PAGE;
   const loadMorePayments = (si) => setVisiblePayments((prev) => ({ ...prev, [si]: (prev[si] ?? PAYMENTS_PAGE) + PAYMENTS_PAGE }));
@@ -57,10 +79,10 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {history.sellers[0]?.payments.map((payment, pi) => (
-            <div key={pi} className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-              <div className="flex items-center gap-2.5">
+            <div key={pi} className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50 last:border-0 hover:bg-slate-50/60 transition-colors gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <FiCheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-700">
                     {payment.paidAt
                       ? new Date(payment.paidAt).toLocaleDateString("bg-BG", { day: "2-digit", month: "long", year: "numeric" })
@@ -69,9 +91,12 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
                   <p className="text-xs text-slate-400">{payment.orderCount} поръчки · {formatCurrency(payment.totalRevenue, 2)} оборот</p>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-0.5">
-                <span className="text-base font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>
-                <span className="text-xs font-semibold text-red-500 tabular-nums">дължи {formatCurrency(payment.totalRevenue - payment.totalPayout, 2)}</span>
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="text-base font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>
+                  <span className="text-xs font-semibold text-red-500 tabular-nums">дължи {formatCurrency(payment.totalRevenue - payment.totalPayout, 2)}</span>
+                </div>
+                <RevenueConfirmBadge payment={payment} sellerId={history.sellers[0]?.sellerId} isSuperAdmin={false} />
               </div>
             </div>
           ))}
@@ -157,20 +182,21 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
 
                 return (
                   <div key={pi}>
-                    <div className="flex items-center justify-between px-4 py-3 bg-slate-50/60">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between px-4 py-3 bg-slate-50/60 gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <FiCheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                        <span className="text-xs font-semibold text-slate-600">
+                        <span className="text-xs font-semibold text-slate-600 truncate">
                           {payment.paidAt
                             ? new Date(payment.paidAt).toLocaleDateString("bg-BG", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
                             : "—"}
                         </span>
-                        <span className="text-xs text-slate-400">· {payment.orderCount} поръчки</span>
+                        <span className="text-xs text-slate-400 shrink-0">· {payment.orderCount} поръчки</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         {isSuperAdmin && payment.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(payment.totalDelivery, 2)} дост.</span>}
                         {isSuperAdmin && <span className="text-xs font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>}
                         <span className="text-xs text-slate-400 tabular-nums">{formatCurrency(payment.totalRevenue, 2)}</span>
+                        <RevenueConfirmBadge payment={payment} sellerId={seller.sellerId} isSuperAdmin={isSuperAdmin} />
                       </div>
                     </div>
 

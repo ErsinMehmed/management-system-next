@@ -33,6 +33,7 @@ const clientOrderSchema = new Schema(
     secondProduct: { type: secondProductSchema, default: () => ({}) },
     rejectionReason: { type: String, default: "" },
     viewedBySeller: { type: Boolean, default: false },
+    revenueConfirmed: { type: Boolean, default: false },
     statusChangedAt: { type: Date, default: null },
     orderNumber: { type: Number, default: 0 },
   },

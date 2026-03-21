@@ -87,11 +87,12 @@ export async function GET() {
     {
       $group: {
         _id: { seller: "$assignedTo", paidAt: "$paidAt" },
-        paidAt:        { $first: "$paidAt" },
-        totalPayout:   { $sum: "$payout" },
-        totalRevenue:  { $sum: "$price" },
-        totalDelivery: { $sum: "$deliveryCost" },
-        orderCount:    { $sum: { $cond: [{ $eq: ["$_isMain", true] }, 1, 0] } },
+        paidAt:           { $first: "$paidAt" },
+        totalPayout:      { $sum: "$payout" },
+        totalRevenue:     { $sum: "$price" },
+        totalDelivery:    { $sum: "$deliveryCost" },
+        orderCount:       { $sum: { $cond: [{ $eq: ["$_isMain", true] }, 1, 0] } },
+        revenueConfirmed: { $first: "$revenueConfirmed" },
         products: {
           $push: {
             name:         "$productDoc.name",
@@ -117,12 +118,13 @@ export async function GET() {
         orderCount:    { $sum: "$orderCount" },
         payments: {
           $push: {
-            paidAt:        "$paidAt",
-            totalPayout:   "$totalPayout",
-            totalRevenue:  "$totalRevenue",
-            totalDelivery: "$totalDelivery",
-            orderCount:    "$orderCount",
-            products:      "$products",
+            paidAt:           "$paidAt",
+            totalPayout:      "$totalPayout",
+            totalRevenue:     "$totalRevenue",
+            totalDelivery:    "$totalDelivery",
+            orderCount:       "$orderCount",
+            products:         "$products",
+            revenueConfirmed: "$revenueConfirmed",
           },
         },
       },

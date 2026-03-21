@@ -158,6 +158,28 @@ class ClientOrderStore {
     }
   };
 
+  confirmRevenue = async (sellerId, paidAt) => {
+    // Оптимистичен update
+    const sellers = this.history.sellers.map((s) => {
+      if (String(s.sellerId) !== String(sellerId)) return s;
+      return {
+        ...s,
+        payments: s.payments.map((p) =>
+          String(p.paidAt) === String(paidAt) ? { ...p, revenueConfirmed: true } : p
+        ),
+      };
+    });
+    this.history = { ...this.history, sellers };
+
+    const res = await fetch("/api/client-orders/payment-confirm", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sellerId, paidAt }),
+    });
+    const data = await res.json();
+    if (!data.status) await this.loadHistory();
+  };
+
   markSellerAsPaid = async (sellerId) => {
     const res = await fetch("/api/client-orders/pay", {
       method: "POST",
