@@ -7,6 +7,7 @@ import {
   BsCashCoin,
   BsClipboard,
 } from "react-icons/bs";
+import { FiPhone, FiTruck, FiXCircle } from "react-icons/fi";
 
 const perPageResult = [
   { value: "5" },
@@ -84,10 +85,20 @@ const dashboardLinks = [
 
 const salesTableHeaders = ["ПРОДУКТ", "КОЛИЧЕСТВО", "ПРИХОДИ", "РАЗХОДИ"];
 
+const clientOrderStatuses = ["нова", "доставена", "отказана"];
+
+const clientOrderStatusConfig = {
+  нова:      { badge: "bg-blue-100 text-blue-700",   accent: "bg-blue-500",   icon: FiPhone },
+  доставена: { badge: "bg-green-100 text-green-700", accent: "bg-green-500",  icon: FiTruck },
+  отказана:  { badge: "bg-red-100 text-red-700",     accent: "bg-red-500",    icon: FiXCircle },
+};
+
 export {
   periods,
   dropdownPeriods,
   perPageResult,
   dashboardLinks,
   salesTableHeaders,
+  clientOrderStatuses,
+  clientOrderStatusConfig,
 };

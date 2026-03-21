@@ -2,31 +2,12 @@
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
-import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiXCircle, FiTruck } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage } from "react-icons/fi";
 import Pagination from "@/components/table/Pagination";
 import Select from "@/components/html/Select";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
-
-const STATUSES = ["нова", "доставена", "отказана"];
-
-const STATUS_STYLES = {
-  нова: "bg-blue-100 text-blue-700",
-  доставена: "bg-green-100 text-green-700",
-  отказана: "bg-red-100 text-red-700",
-};
-
-const STATUS_ACCENT = {
-  нова: "bg-blue-500",
-  доставена: "bg-green-500",
-  отказана: "bg-red-500",
-};
-
-const STATUS_ICON = {
-  нова: FiPhone,
-  доставена: FiTruck,
-  отказана: FiXCircle,
-};
+import { clientOrderStatuses, clientOrderStatusConfig } from "@/data";
 
 const ClientOrdersOrdersTab = ({
   orders, isLoading, isAdmin, isSuperAdmin, session,
@@ -66,13 +47,13 @@ const ClientOrdersOrdersTab = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {orders?.items?.map((order) => (
           <div key={order._id} className="bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
-            <div className={`h-1 w-full ${STATUS_ACCENT[order.status] ?? "bg-slate-300"}`} />
+            <div className={`h-1 w-full ${clientOrderStatusConfig[order.status]?.accent ?? "bg-slate-300"}`} />
 
             <Link href={`/dashboard/client-orders/${order._id}`} className="px-4 pt-3.5 pb-3 flex flex-col gap-3 flex-1">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-slate-100">
-                    {(() => { const Icon = STATUS_ICON[order.status] ?? FiPhone; return <Icon className="w-3.5 h-3.5 text-slate-400" />; })()}
+                    {(() => { const Icon = clientOrderStatusConfig[order.status]?.icon ?? FiPhone; return <Icon className="w-3.5 h-3.5 text-slate-400" />; })()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -86,7 +67,7 @@ const ClientOrdersOrdersTab = ({
                     </span>
                   </div>
                 </div>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-lg shrink-0 ${STATUS_STYLES[order.status]}`}>
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-lg shrink-0 ${clientOrderStatusConfig[order.status]?.badge}`}>
                   {order.status}
                 </span>
               </div>
@@ -151,7 +132,7 @@ const ClientOrdersOrdersTab = ({
                   controlled
                   value={order.status}
                   disabled={["отказана", "доставена"].includes(order.status) && !isSuperAdmin}
-                  items={STATUSES.map((s) => ({ _id: s, value: s, name: s }))}
+                  items={clientOrderStatuses.map((s) => ({ _id: s, value: s, name: s }))}
                   onChange={(val) => {
                     if (val === "отказана") {
                       setPendingRejection({ orderId: order._id, reason: "" });
@@ -161,7 +142,7 @@ const ClientOrdersOrdersTab = ({
                     }
                   }}
                   baseClass="w-36"
-                  classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${STATUS_STYLES[order.status]} ${["отказана", "доставена"].includes(order.status) && !isSuperAdmin ? "opacity-60 pointer-events-none" : ""}`}
+                  classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${clientOrderStatusConfig[order.status]?.badge} ${["отказана", "доставена"].includes(order.status) && !isSuperAdmin ? "opacity-60 pointer-events-none" : ""}`}
                 />
                 <Button
                   isIconOnly
