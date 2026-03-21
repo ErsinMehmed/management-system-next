@@ -1,59 +1,74 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 
-// Инициализация на Google доставчика
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
-});
+const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
 function fmt(n) {
-  return Number(n ?? 0).toFixed(2) + " лв";
+  return Number(n ?? 0).toFixed(2) + " €";
 }
 
 function productName(p) {
   if (!p) return "Непознат";
-  const parts = [
-    p.name,
-    p.weight,
-    p.flavor,
-    p.puffs ? `${p.puffs} puffs` : null,
-    p.count ? `x${p.count}` : null
-  ];
+  const parts = [p.name, p.weight, p.flavor, p.puffs ? `${p.puffs} puffs` : null, p.count ? `x${p.count}` : null];
   return parts.filter(Boolean).join(" ");
 }
 
 function buildPrompt({ summary, period, isSuperAdmin }) {
-  const lines = [`Период: ${period}`];
+  const lines = [`ПЕРИОД: ${period}`];
 
   if (summary.bySeller && summary.sellers?.length) {
+    const totalDelivery = summary.sellers.reduce((s, x) => s + (x.sellerDelivery ?? 0), 0);
     lines.push(`Общ оборот: ${fmt(summary.grandTotal)}`);
+    lines.push(`Общо доставки: ${fmt(totalDelivery)}`);
     if (isSuperAdmin) {
-      lines.push(`За изплащане (общо): ${fmt(summary.grandPayout)}`);
+      lines.push(`За изплащане на доставчици: ${fmt(summary.grandPayout)}`);
+      lines.push(`Нето приход (оборот - изплащания): ${fmt(summary.grandTotal - summary.grandPayout)}`);
     }
-    lines.push(`\nДоставчици (${summary.sellers.length}):`);
+    lines.push(`\nДОСТАВЧИЦИ (${summary.sellers.length}):`);
     for (const s of summary.sellers) {
-      lines.push(`  • ${s.sellerName}: оборот ${fmt(s.sellerTotal)}, изплащане ${fmt(s.sellerPayout)}`);
-      const topProducts = (s.items ?? [])
-          .sort((a, b) => b.totalRevenue - a.totalRevenue)
-          .slice(0, 3);
-      for (const item of topProducts) {
-        lines.push(`    - ${productName(item.product)}: ${item.totalQuantity} бр., ${fmt(item.totalRevenue)}`);
+      const pct = summary.grandTotal > 0 ? ((s.sellerTotal / summary.grandTotal) * 100).toFixed(1) : "0";
+      lines.push(`\n${s.sellerName}: ${fmt(s.sellerTotal)} (${pct}% от оборота)`);
+      if (isSuperAdmin) lines.push(`  За изплащане: ${fmt(s.sellerPayout)}, Неизплатени: ${s.sellerUnpaidCount} бр.`);
+      const sorted = (s.items ?? []).sort((a, b) => b.totalRevenue - a.totalRevenue);
+      for (const item of sorted) {
+        lines.push(`  - ${productName(item.product)}: ${item.totalQuantity} бр. × ${fmt(item.totalRevenue / (item.totalQuantity || 1))} = ${fmt(item.totalRevenue)}`);
       }
     }
   } else if (summary.items?.length) {
     lines.push(`Общ оборот: ${fmt(summary.grandTotal)}`);
-    lines.push(`\nПродукти:`);
+    lines.push(`Общо доставки: ${fmt(summary.grandDelivery ?? 0)}`);
+    lines.push(`\nПРОДУКТИ:`);
     for (const item of summary.items) {
-      lines.push(`  • ${productName(item.product)}: ${item.totalQuantity} бр., ${fmt(item.totalRevenue)}`);
+      const pct = summary.grandTotal > 0 ? ((item.totalRevenue / summary.grandTotal) * 100).toFixed(1) : "0";
+      lines.push(`  - ${productName(item.product)}: ${item.totalQuantity} бр., ${fmt(item.totalRevenue)} (${pct}%)`);
     }
   } else {
     return null;
   }
 
-  return `Ти си бизнес асистент. Анализирай следните данни за клиентски поръчки и дай кратко, полезно обобщение на български. Бъди директен и конкретен. Максимум 3 изречения. Без markdown форматиране.\n\n${lines.join("\n")}`;
+  return `Ти си бизнес асистент. Анализирай данните и върни САМО форматиран отчет на БЪЛГАРСКИ. Без обяснения, без уводни изречения — само самия отчет.
+
+ФОРМАТ (използвай точно тези емоджи и структура, всеки ред на нов ред):
+📊 [оборот] · Доставки: [сума] · Нето: [оборот минус изплащания ако има]
+👥 [брой доставчика] доставчика  ← само ако има bySeller данни
+🥇 [Име] — [сума] ([%]) · Неизплатени: [N]  ← топ доставчик (само ако има bySeller)
+🥈 [Име] — [сума] ([%])  ← втори (само ако има)
+🥉 [Име] — [сума] ([%])  ← трети (само ако има)
+🏆 Топ продукт: [продукт] — [бр.] бр., [сума] ([%])
+💡 [една кратка бележка или препоръка само ако има ясен извод — иначе пропусни реда]
+
+ПРАВИЛА:
+- Всички суми са в ЕВРО (€) — копирай ги точно от данните
+- Без markdown (без **, без ##, без -)
+- Без обяснения преди или след отчета
+- Пропускай редове за които няма данни
+- Максимум 8 реда
+
+ДАННИ:
+${lines.join("\n")}`;
 }
 
 export async function POST(request) {
@@ -74,9 +89,9 @@ export async function POST(request) {
 
     // Извикване на AI модела с правилния идентификатор и обработка на грешки
     const { text } = await generateText({
-      model: google("gemini-1.5-flash"),
+      model: groq("llama-3.1-8b-instant"),
       prompt,
-      maxTokens: 256,
+      maxTokens: 400,
     });
 
     return NextResponse.json({ text });

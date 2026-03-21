@@ -140,7 +140,7 @@ const ClientOrdersSummaryTab = ({
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-[#0071f5] mb-1">AI Обобщение</p>
-              <p className="text-sm text-slate-700 leading-relaxed">{aiInsight}</p>
+              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{aiInsight}</p>
               <button
                 onClick={() => { setAiInsight(null); handleAiAnalysis(); }}
                 className="mt-2 text-xs text-slate-400 hover:text-[#0071f5] transition-colors">
