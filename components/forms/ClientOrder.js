@@ -45,8 +45,9 @@ const ClientOrderForm = ({data, errorFields, products, sellers = [], handleField
 
             <Input
                 type="number"
-                label="Цена (обща)"
+                label="Цена"
                 value={data.price || ""}
+                disabled={!data.quantity}
                 errorMessage={errorFields?.price}
                 onChange={(value) => handleFieldChange("price", value)}
             />
