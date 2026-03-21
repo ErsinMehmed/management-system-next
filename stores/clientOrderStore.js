@@ -33,6 +33,7 @@ class ClientOrderStore {
   isSummaryLoading = false;
   history = { sellers: [], isSeller: false, grandTotal: 0, grandPayout: 0 };
   isHistoryLoading = false;
+  isLoadingMore = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -63,6 +64,21 @@ class ClientOrderStore {
     if (orders) {
       this.orders = orders;
       this.isLoading = false;
+    }
+  };
+
+  loadMoreOrders = async () => {
+    if (this.isLoadingMore) return;
+    const nextPage = (this.orders.pagination?.current_page ?? 0) + 1;
+    if (nextPage > (this.orders.pagination?.total_pages ?? 1)) return;
+
+    this.isLoadingMore = true;
+    try {
+      const res = await fetch(`/api/client-orders?page=${nextPage}&per_page=${this.perPage}`);
+      const data = await res.json();
+      this.orders = { ...data, items: [...(this.orders.items ?? []), ...(data.items ?? [])] };
+    } finally {
+      this.isLoadingMore = false;
     }
   };
 

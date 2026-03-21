@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
@@ -14,7 +15,21 @@ const ClientOrdersOrdersTab = ({
   onOpen, deletingId, handleDelete,
   onRejectionTrigger,
   handlePageChange, handlePageClick,
-}) => (
+}) => {
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || window.innerWidth >= 640) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) clientOrderStore.loadMoreOrders(); },
+      { threshold: 0.1 }
+    );
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
   <>
     <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
       {(isAdmin || session?.user?.role === "Seller") && (
@@ -159,7 +174,8 @@ const ClientOrdersOrdersTab = ({
       </div>
     )}
 
-    <div className="mt-4">
+    {/* Desktop pagination */}
+    <div className="hidden sm:block mt-4">
       <Pagination
         isLoading={isLoading}
         currentPage={orders.pagination?.current_page}
@@ -171,7 +187,15 @@ const ClientOrdersOrdersTab = ({
         handlePageClick={handlePageClick}
       />
     </div>
+
+    {/* Mobile infinite scroll sentinel */}
+    <div ref={sentinelRef} className="sm:hidden mt-4 flex justify-center h-8">
+      {clientOrderStore.isLoadingMore && (
+        <div className="w-6 h-6 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
+      )}
+    </div>
   </>
-);
+  );
+};
 
 export default observer(ClientOrdersOrdersTab);
