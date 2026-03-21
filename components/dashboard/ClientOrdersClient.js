@@ -4,43 +4,19 @@ import { observer } from "mobx-react-lite";
 import { useSession } from "next-auth/react";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
-import Pagination from "@/components/table/Pagination";
 import ClientOrderForm from "@/components/forms/ClientOrder";
-import { useDisclosure, Tabs, Tab, Button, DatePicker, Accordion, AccordionItem } from "@heroui/react";
-import { parseAbsoluteToLocal, getLocalTimeZone, now } from "@internationalized/date";
-import Link from "next/link";
-import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiCheckCircle, FiFilter, FiTrendingUp, FiDollarSign, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiXCircle, FiTruck } from "react-icons/fi";
+import { useDisclosure, Tabs, Tab } from "@heroui/react";
+import { getLocalTimeZone } from "@internationalized/date";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
-import Select from "@/components/html/Select";
 import { addToast } from "@heroui/toast";
 import PusherClient from "pusher-js";
-
-const STATUSES = ["нова", "доставена", "отказана"];
-
-const STATUS_STYLES = {
-  нова: "bg-blue-100 text-blue-700",
-  доставена: "bg-green-100 text-green-700",
-  отказана: "bg-red-100 text-red-700",
-};
-
-const STATUS_ACCENT = {
-  нова: "bg-blue-500",
-  доставена: "bg-green-500",
-  отказана: "bg-red-500",
-};
-
-
-const STATUS_ICON = {
-  нова: FiPhone,
-  доставена: FiTruck,
-  отказана: FiXCircle,
-};
+import ClientOrdersOrdersTab from "@/components/dashboard/ClientOrdersOrdersTab";
+import ClientOrdersSummaryTab from "@/components/dashboard/ClientOrdersSummaryTab";
+import ClientOrdersHistoryTab from "@/components/dashboard/ClientOrdersHistoryTab";
 
 function shouldShowToast(event, userId, role) {
-  // Никога не показвай на човека направил екшъна
   if (event.changedByUserId && String(event.changedByUserId) === String(userId)) return false;
-  // Seller вижда само заявки асайнати на него
   if (role === "Seller") return event.assignedTo && String(event.assignedTo) === String(userId);
   return true;
 }
@@ -71,15 +47,15 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { errorFields } = commonStore;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
+  const { isOpen: isPayoutOpen, onOpen: onPayoutOpen, onOpenChange: onPayoutOpenChange } = useDisclosure();
   const [deletingId, setDeletingId] = useState(null);
   const [pendingRejection, setPendingRejection] = useState({ orderId: null, reason: "" });
+  const [pendingPayout, setPendingPayout] = useState(null);
+  const [isPayingOut, setIsPayingOut] = useState(false);
   const [activeTab, setActiveTab] = useState("orders");
   const [summaryPreset, setSummaryPreset] = useState("24h");
   const [customFrom, setCustomFrom] = useState(null);
   const [customTo, setCustomTo] = useState(null);
-  const { isOpen: isPayoutOpen, onOpen: onPayoutOpen, onOpenChange: onPayoutOpenChange } = useDisclosure();
-  const [pendingPayout, setPendingPayout] = useState(null);
-  const [isPayingOut, setIsPayingOut] = useState(false);
   const [visiblePayments, setVisiblePayments] = useState({});
   const PAYMENTS_PAGE = 8;
   const getVisibleCount = (si) => visiblePayments[si] ?? PAYMENTS_PAGE;
@@ -162,8 +138,10 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
         return { from: s.toISOString(), to: now.toISOString() };
       }
       case "all":    return { from: null, to: null };
-      case "custom": return { from: cfrom ? cfrom.toDate(getLocalTimeZone()).toISOString() : null, to: cto ? cto.toDate(getLocalTimeZone()).toISOString() : null };
-      default:       return { from: null, to: null };
+      case "custom": {
+        return { from: cfrom ? cfrom.toDate(getLocalTimeZone()).toISOString() : null, to: cto ? cto.toDate(getLocalTimeZone()).toISOString() : null };
+      }
+      default: return { from: null, to: null };
     }
   };
 
@@ -172,9 +150,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
     clientOrderStore.loadSummary(from, to);
   };
 
-  const handleCreate = async () => {
-    return await clientOrderStore.createOrder();
-  };
+  const handleCreate = async () => await clientOrderStore.createOrder();
 
   const handleDelete = async (id) => {
     setDeletingId(id);
@@ -195,683 +171,51 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
           }}
           classNames={{ tabList: "mb-4" }}>
 
-          {/* ТАБ 1: Списък */}
           <Tab key="orders" title="Заявки">
-            <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
-              {(isAdmin || session?.user?.role === "Seller") && (
-                <Button
-                  variant="solid"
-                  color="primary"
-                  radius="full"
-                  size="md"
-                  startContent={<FiPlus className="w-4 h-4" />}
-                  onPress={onOpen}
-                  className="w-full sm:w-auto font-semibold">
-                  Добави
-                </Button>
-              )}
-            </div>
-
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
-                <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
-              </div>
-            ) : orders?.items?.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-2">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-1">
-                  <FiPackage className="w-6 h-6 text-slate-300" />
-                </div>
-                <p className="text-sm font-semibold text-slate-400">Няма поръчки</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {orders?.items?.map((order) => (
-                  <div key={order._id} className="bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
-
-                    {/* Цветна лента */}
-                    <div className={`h-1 w-full ${STATUS_ACCENT[order.status] ?? "bg-slate-300"}`} />
-
-                    <Link href={`/dashboard/client-orders/${order._id}`} className="px-4 pt-3.5 pb-3 flex flex-col gap-3 flex-1">
-
-                      {/* Ред 1: телефон + статус */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-slate-100">
-                            {(() => { const Icon = STATUS_ICON[order.status] ?? FiPhone; return <Icon className="w-3.5 h-3.5 text-slate-400" />; })()}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="font-bold text-slate-800 text-base leading-tight">{order.phone}</p>
-                              {order.orderNumber > 0 && (
-                                <span className="text-xs font-bold text-slate-400">#{order.orderNumber}</span>
-                              )}
-                            </div>
-                            <span className={`text-xs font-semibold ${order.isNewClient ? "text-green-600" : "text-slate-400"}`}>
-                              {order.isNewClient ? "✦ Нов клиент" : "Съществуващ"}
-                            </span>
-                          </div>
-                        </div>
-                        <span className={`text-xs font-bold px-2.5 py-1 rounded-lg shrink-0 ${STATUS_STYLES[order.status]}`}>
-                          {order.status}
-                        </span>
-                      </div>
-
-                      {/* Ред 2: продукт + метрики */}
-                      <div className="bg-slate-50 rounded-xl px-3 py-2.5 flex flex-col gap-1.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <FiPackage className="w-4 h-4 text-slate-400 shrink-0" />
-                            <span className="text-sm font-semibold text-slate-700 truncate">{order.product ? productTitle(order.product) : "—"}</span>
-                          </div>
-                          <div className="flex items-center gap-2.5 shrink-0">
-                            <span className="text-sm text-slate-400 tabular-nums">{order.quantity} бр.</span>
-                            <span className="text-sm font-bold text-[#0071f5] tabular-nums">
-                              {formatCurrency(order.price + (order.secondProduct?.price ?? 0), 2)}
-                            </span>
-                          </div>
-                        </div>
-                        {order.secondProduct?.product && (
-                          <div className="flex items-center gap-2 min-w-0 pl-6">
-                            <span className="text-[10px] font-bold text-slate-400">+</span>
-                            <span className="text-xs font-medium text-slate-500 truncate">{productTitle(order.secondProduct.product)}</span>
-                            <span className="text-xs text-slate-400 tabular-nums shrink-0">× {order.secondProduct.quantity} бр.</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Ред 3: мета инфо */}
-                      {(order.address || order.note || order.assignedTo?.name) && (
-                        <div className="flex flex-col gap-1.5 border-t border-gray-50 pt-2.5">
-                          {order.address && (
-                            <div className="flex items-center gap-1.5 text-sm text-slate-400">
-                              <FiMapPin className="w-3.5 h-3.5 shrink-0" />
-                              <span className="truncate">{order.address}</span>
-                            </div>
-                          )}
-                          {order.note && (
-                            <div className="flex items-center gap-1.5 text-sm text-slate-400">
-                              <FiFileText className="w-3.5 h-3.5 shrink-0" />
-                              <span className="truncate">{order.note}</span>
-                            </div>
-                          )}
-                          {order.assignedTo?.name && (
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-1.5 text-sm text-slate-400">
-                                <FiUser className="w-3.5 h-3.5 shrink-0" />
-                                <span>{order.assignedTo.name}</span>
-                              </div>
-                              {isSuperAdmin && (
-                                <span className={`flex items-center gap-1 text-xs font-semibold ${order.viewedBySeller ? "text-green-500" : "text-gray-300"}`}>
-                                  {order.viewedBySeller ? <FiEye className="w-3.5 h-3.5" /> : <FiEyeOff className="w-3.5 h-3.5" />}
-                                  {order.viewedBySeller ? "Видяна" : "Не е видяна"}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </Link>
-
-                    {isAdmin && (
-                      <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-50 gap-2">
-                        <Select
-                          controlled
-                          value={order.status}
-                          disabled={["отказана", "доставена"].includes(order.status) && !isSuperAdmin}
-                          items={STATUSES.map((s) => ({ _id: s, value: s, name: s }))}
-                          onChange={(val) => {
-                            if (val === "отказана") {
-                              setPendingRejection({ orderId: order._id, reason: "" });
-                              onRejectionOpen();
-                            } else {
-                              clientOrderStore.updateStatus(order._id, val);
-                            }
-                          }}
-                          baseClass="w-36"
-                          classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${STATUS_STYLES[order.status]} ${["отказана", "доставена"].includes(order.status) && !isSuperAdmin ? "opacity-60 pointer-events-none" : ""}`}
-                        />
-                        <Button
-                          isIconOnly
-                          variant="light"
-                          color="danger"
-                          size="sm"
-                          isLoading={deletingId === order._id}
-                          onPress={() => handleDelete(order._id)}>
-                          <FiTrash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-4">
-              <Pagination
-                isLoading={isLoading}
-                currentPage={orders.pagination?.current_page}
-                totalPages={orders.pagination?.total_pages}
-                totalItems={orders.pagination?.total_results}
-                perPage={orders.pagination?.per_page}
-                handlePrevPage={handlePageChange}
-                handleNextPage={() => handlePageChange("next")}
-                handlePageClick={handlePageClick}
-              />
-            </div>
+            <ClientOrdersOrdersTab
+              orders={orders}
+              isLoading={isLoading}
+              isAdmin={isAdmin}
+              isSuperAdmin={isSuperAdmin}
+              session={session}
+              onOpen={onOpen}
+              deletingId={deletingId}
+              handleDelete={handleDelete}
+              setPendingRejection={setPendingRejection}
+              onRejectionOpen={onRejectionOpen}
+              handlePageChange={handlePageChange}
+              handlePageClick={handlePageClick}
+            />
           </Tab>
 
-          {/* ТАБ 2: Обобщение */}
           <Tab key="summary" title="Обобщение">
-
-            {/* ФИЛТЪР ПАНЕЛ */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-lg bg-[#0071f5]/10 flex items-center justify-center">
-                  <FiFilter className="w-3.5 h-3.5 text-[#0071f5]" />
-                </div>
-                <span className="text-sm font-bold text-slate-700">Период</span>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { key: "24h",       label: "24 часа" },
-                  { key: "today",     label: "Днес" },
-                  { key: "yesterday", label: "Вчера" },
-                  { key: "week",      label: "Тази седмица" },
-                  { key: "month",     label: "Този месец" },
-                  { key: "all",       label: "Всички" },
-                  { key: "custom",    label: "По избор" },
-                ].map(({ key, label }) => (
-                  <Button
-                    key={key}
-                    size="sm"
-                    radius="full"
-                    variant={summaryPreset === key ? "solid" : "flat"}
-                    color={summaryPreset === key ? "primary" : "default"}
-                    onPress={() => {
-                      setSummaryPreset(key);
-                      if (key !== "custom") applyFilter(key);
-                    }}
-                    className={`font-semibold text-xs ${summaryPreset !== key ? "text-slate-500" : ""}`}>
-                    {label}
-                  </Button>
-                ))}
-              </div>
-
-              {summaryPreset === "custom" && (
-                <div className="flex flex-wrap items-end gap-3 mt-4 pt-4 border-t border-gray-100">
-                  <DatePicker
-                    label="От"
-                    granularity="minute"
-                    locale="bg-BG"
-                    hourCycle={24}
-                    value={customFrom}
-                    onChange={setCustomFrom}
-                    maxValue={customTo ?? now(getLocalTimeZone())}
-                    size="sm"
-                    radius="lg"
-                    className="w-56"
-                  />
-                  <DatePicker
-                    label="До"
-                    granularity="minute"
-                    locale="bg-BG"
-                    hourCycle={24}
-                    value={customTo}
-                    onChange={setCustomTo}
-                    minValue={customFrom ?? undefined}
-                    maxValue={now(getLocalTimeZone())}
-                    size="sm"
-                    radius="lg"
-                    className="w-56"
-                  />
-                  <Button
-                    size="sm"
-                    color="primary"
-                    radius="lg"
-                    className="font-semibold"
-                    onPress={() => applyFilter("custom", customFrom, customTo)}>
-                    Приложи
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {isSummaryLoading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
-                <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
-              </div>
-            ) : summary?.bySeller ? (
-              !summary?.sellers?.length ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-1">
-                    <FiTrendingUp className="w-6 h-6 text-slate-300" />
-                  </div>
-                  <p className="text-sm font-semibold text-slate-400">Няма доставени поръчки</p>
-                  <p className="text-xs text-slate-300">за избрания период</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-
-                  {/* GRAND TOTAL КАРТИ */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
-                        <FiTrendingUp className="w-4.5 h-4.5 text-[#0071f5]" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
-                        <p className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</p>
-                      </div>
-                    </div>
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-                        <FiTruck className="w-4 h-4 text-slate-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400 font-medium">Доставки</p>
-                        <p className="text-base font-bold text-slate-700">{formatCurrency(summary.sellers?.reduce((s, x) => s + (x.sellerDelivery ?? 0), 0) ?? 0, 2)}</p>
-                      </div>
-                    </div>
-                    {isSuperAdmin && (
-                      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 px-4 py-3.5 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
-                          <FiDollarSign className="w-4.5 h-4.5 text-orange-500" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-orange-400 font-medium">За изплащане</p>
-                          <p className="text-base font-bold text-orange-500">{formatCurrency(summary.grandPayout, 2)}</p>
-                        </div>
-                      </div>
-                    )}
-                    {isSuperAdmin && (
-                      <div className="bg-white rounded-2xl shadow-sm border border-green-100 px-4 py-3.5 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                          <FiCheckCircle className="w-4 h-4 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-green-500 font-medium">Изплатени</p>
-                          <p className="text-base font-bold text-green-600">{formatCurrency(summary.grandPaidPayout ?? 0, 2)}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ДОСТАВЧИЦИ */}
-                  {summary.sellers.map((seller) => (
-                    <div key={seller._id ?? "unassigned"} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-                      {/* Хедър */}
-                      <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-[#0071f5]/5 to-transparent border-b border-gray-100">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-[#0071f5] flex items-center justify-center text-white text-xs font-bold shrink-0">
-                            {seller.sellerName?.charAt(0)?.toUpperCase() ?? "?"}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-800">{seller.sellerName}</p>
-                            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                              <span className="text-xs font-semibold text-[#0071f5]">{formatCurrency(seller.sellerTotal, 2)}</span>
-                              {seller.sellerDelivery > 0 && <span className="text-xs text-slate-300">·</span>}
-                              {seller.sellerDelivery > 0 && <span className="text-xs font-semibold text-slate-500">{formatCurrency(seller.sellerDelivery, 2)} дост.</span>}
-                              {isSuperAdmin && <span className="text-xs text-slate-300">·</span>}
-                              {isSuperAdmin && <span className="text-xs font-semibold text-orange-500">{formatCurrency(seller.sellerPayout, 2)} за изпл.</span>}
-                            </div>
-                          </div>
-                        </div>
-                        {isSuperAdmin && seller._id && seller.sellerUnpaidCount > 0 && (
-                          <Button
-                            size="sm"
-                            color="warning"
-                            variant="solid"
-                            radius="full"
-                            startContent={<FiCheckCircle className="w-3.5 h-3.5" />}
-                            onPress={() => { setPendingPayout(seller); onPayoutOpen(); }}
-                            className="text-white font-semibold text-xs">
-                            Изплати
-                          </Button>
-                        )}
-                        {isSuperAdmin && seller._id && seller.sellerUnpaidCount === 0 && (
-                          <span className="flex items-center gap-1.5 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
-                            <FiCheckCircle className="w-3 h-3" />
-                            Изплатен
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Таблица с хоризонтален скрол */}
-                      <div className="overflow-x-auto">
-                        <div className={isSuperAdmin ? "min-w-[520px]" : "min-w-[400px]"}>
-
-                          {/* Колони */}
-                          <div className={`grid px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
-                            <span>Продукт</span>
-                            <span className="text-center">Бройки</span>
-                            <span className="text-right">Оборот</span>
-                            <span className="text-right">Доставка</span>
-                            {isSuperAdmin && <span className="text-right">За изплащане</span>}
-                          </div>
-
-                          {/* Редове */}
-                          {seller.items
-                            .slice()
-                            .sort((a, b) => b.totalRevenue - a.totalRevenue)
-                            .map((item, i) => (
-                              <div key={i} className={`grid px-4 py-3 border-b border-gray-50 last:border-0 items-center group hover:bg-blue-50/30 transition-colors ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <span className="text-sm font-medium text-slate-700 truncate">{productTitle(item.product)}</span>
-                                  <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${item.unpaidCount === 0 ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
-                                    {item.unpaidCount === 0 ? "✓" : "○"}
-                                  </span>
-                                </div>
-                                <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
-                                <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
-                                <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
-                                {isSuperAdmin && <span className={`text-sm font-semibold text-right tabular-nums ${item.unpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(item.totalPayout, 2)}</span>}
-                              </div>
-                            ))}
-
-                          {/* Тотал ред */}
-                          <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-5" : "grid-cols-4"}`}>
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
-                            <span />
-                            <span className="text-sm font-bold text-slate-800 text-right tabular-nums">{formatCurrency(seller.sellerTotal, 2)}</span>
-                            <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{seller.sellerDelivery > 0 ? formatCurrency(seller.sellerDelivery, 2) : "—"}</span>
-                            {isSuperAdmin && <span className={`text-sm font-bold text-right tabular-nums ${seller.sellerUnpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(seller.sellerPayout, 2)}</span>}
-                          </div>
-
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
-            ) : (
-              /* Seller — само неговите */
-              !summary?.items?.length ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-1">
-                    <FiTrendingUp className="w-6 h-6 text-slate-300" />
-                  </div>
-                  <p className="text-sm font-semibold text-slate-400">Няма доставени поръчки</p>
-                  <p className="text-xs text-slate-300">за избрания период</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
-                        <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
-                        <p className="text-base font-bold text-[#0071f5]">{formatCurrency(summary.grandTotal, 2)}</p>
-                      </div>
-                    </div>
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-                        <FiTruck className="w-4 h-4 text-slate-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400 font-medium">Доставки</p>
-                        <p className="text-base font-bold text-slate-700">{formatCurrency(summary.grandDelivery ?? 0, 2)}</p>
-                      </div>
-                    </div>
-                    <div className="bg-white rounded-2xl shadow-sm border border-green-100 px-4 py-3.5 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                        <FiCheckCircle className="w-4 h-4 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-green-500 font-medium">Изплатени</p>
-                        <p className="text-base font-bold text-green-600">{formatCurrency(summary.grandPaidPayout ?? 0, 2)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <div className="min-w-[400px]">
-                        <div className="grid grid-cols-4 px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          <span>Продукт</span>
-                          <span className="text-center">Бройки</span>
-                          <span className="text-right">Оборот</span>
-                          <span className="text-right">Доставка</span>
-                        </div>
-
-                        {summary.items.map((item, i) => (
-                          <div key={i} className="grid grid-cols-4 px-4 py-3 border-b border-gray-50 last:border-0 items-center hover:bg-blue-50/30 transition-colors">
-                            <span className="text-sm font-medium text-slate-700">{productTitle(item.product)}</span>
-                            <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
-                            <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
-                            <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
-                          </div>
-                        ))}
-
-                        <div className="grid grid-cols-4 px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center">
-                          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
-                          <span />
-                          <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(summary.grandTotal, 2)}</span>
-                          <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{summary.grandDelivery > 0 ? formatCurrency(summary.grandDelivery, 2) : "—"}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )
-            )}
+            <ClientOrdersSummaryTab
+              summary={summary}
+              isSummaryLoading={isSummaryLoading}
+              isSuperAdmin={isSuperAdmin}
+              summaryPreset={summaryPreset}
+              setSummaryPreset={setSummaryPreset}
+              applyFilter={applyFilter}
+              customFrom={customFrom}
+              setCustomFrom={setCustomFrom}
+              customTo={customTo}
+              setCustomTo={setCustomTo}
+              setPendingPayout={setPendingPayout}
+              onPayoutOpen={onPayoutOpen}
+            />
           </Tab>
-          {/* ТАБ 3: История */}
-          {(isSuperAdmin || session?.user?.role === "Seller") && <Tab key="history" title="История">
-            {isHistoryLoading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
-                <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
-              </div>
-            ) : !history?.sellers?.length ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-2">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-1">
-                  <FiDollarSign className="w-6 h-6 text-slate-300" />
-                </div>
-                <p className="text-sm font-semibold text-slate-400">Няма изплатени суми</p>
-              </div>
-            ) : history.isSeller ? (
-              /* SELLER — опростен изглед */
-              <div className="flex flex-col gap-3">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
-                      <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
-                      <p className="text-base font-bold text-[#0071f5]">{formatCurrency(history.grandTotal, 2)}</p>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-2xl shadow-sm border border-green-100 px-4 py-3.5 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                      <FiDollarSign className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-green-500 font-medium">Общо изплатено</p>
-                      <p className="text-base font-bold text-green-600">{formatCurrency(history.grandPayout, 2)}</p>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  {history.sellers[0]?.payments.map((payment, pi) => (
-                    <div key={pi} className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                      <div className="flex items-center gap-2.5">
-                        <FiCheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                        <div>
-                          <p className="text-sm font-semibold text-slate-700">
-                            {payment.paidAt
-                              ? new Date(payment.paidAt).toLocaleDateString("bg-BG", { day: "2-digit", month: "long", year: "numeric" })
-                              : "—"}
-                          </p>
-                          <p className="text-xs text-slate-400">{payment.orderCount} поръчки · {formatCurrency(payment.totalRevenue, 2)} оборот</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-0.5">
-                        <span className="text-base font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>
-                        <span className="text-xs font-semibold text-red-500 tabular-nums">дължи {formatCurrency(payment.totalRevenue - payment.totalPayout, 2)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-
-                {/* GRAND SUMMARY */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
-                      <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
-                      <p className="text-base font-bold text-[#0071f5]">{formatCurrency(history.grandTotal, 2)}</p>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-2xl shadow-sm border border-green-100 px-4 py-3.5 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                      <FiDollarSign className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-green-500 font-medium">Общо изплатено</p>
-                      <p className="text-base font-bold text-green-600">{formatCurrency(history.grandPayout, 2)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SELLER АКОРДИОНИ */}
-                <Accordion
-                  variant="splitted"
-                  className="gap-3 px-0"
-                  itemClasses={{
-                    base: "bg-white rounded-2xl shadow-sm border border-gray-100 !px-0 hover:border-[#0071f5]/20 hover:shadow-md data-[open=true]:shadow-lg data-[open=true]:border-[#0071f5]/30 transition-all cursor-pointer",
-                    heading: "px-4 py-0 overflow-hidden rounded-2xl",
-                    title: "text-sm w-full",
-                    trigger: "py-4 cursor-pointer data-[hover=true]:bg-transparent",
-                    content: "pt-0 pb-0 overflow-x-auto",
-                  }}>
-                  {history.sellers.map((seller, si) => (
-                    <AccordionItem
-                      key={si}
-                      title={
-                        <div className="flex items-center justify-between w-full sm:pr-2 gap-4">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-xl bg-[#0071f5] flex items-center justify-center text-white text-xs font-bold shrink-0">
-                              {seller.sellerName?.charAt(0)?.toUpperCase() ?? "?"}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-slate-800">{seller.sellerName}</p>
-                              <p className="text-xs text-slate-400">{seller.payments.length} плащания · {seller.orderCount} поръчки</p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end shrink-0 gap-0.5">
-                            {seller.owedAmount > 0 && (
-                              <span className="text-sm font-bold text-red-500 tabular-nums">{formatCurrency(seller.owedAmount, 2)} дължи</span>
-                            )}
-                            {isSuperAdmin && <span className="text-xs font-semibold text-green-600 tabular-nums">{formatCurrency(seller.totalPayout, 2)} изпл.</span>}
-                            {isSuperAdmin && seller.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(seller.totalDelivery, 2)} доставки</span>}
-                            <span className="text-xs text-slate-400 tabular-nums">{formatCurrency(seller.totalRevenue, 2)} оборот</span>
-                          </div>
-                        </div>
-                      }>
-
-                      {/* Плащания на доставчика */}
-                      <div className="border-t border-gray-100 divide-y divide-gray-50">
-                        {seller.payments.slice(0, getVisibleCount(si)).map((payment, pi) => {
-                          const grouped = Object.values(
-                            (payment.products ?? []).reduce((acc, p) => {
-                              const key = p.name ?? "—";
-                              if (!acc[key]) acc[key] = {
-                                name: key,
-                                weight: p.weight, flavor: p.flavor, puffs: p.puffs, count: p.count,
-                                quantity: 0, revenue: 0, payout: 0, delivery: 0,
-                              };
-                              acc[key].quantity += p.quantity     ?? 0;
-                              acc[key].revenue  += p.price        ?? 0;
-                              acc[key].payout   += p.payout       ?? 0;
-                              acc[key].delivery += p.deliveryCost ?? 0;
-                              return acc;
-                            }, {})
-                          ).sort((a, b) => b.revenue - a.revenue);
-
-                          return (
-                            <div key={pi}>
-                              {/* Хедър на плащане */}
-                              <div className="flex items-center justify-between px-4 py-3 bg-slate-50/60">
-                                <div className="flex items-center gap-2">
-                                  <FiCheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                                  <span className="text-xs font-semibold text-slate-600">
-                                    {payment.paidAt
-                                      ? new Date(payment.paidAt).toLocaleDateString("bg-BG", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
-                                      : "—"}
-                                  </span>
-                                  <span className="text-xs text-slate-400">· {payment.orderCount} поръчки</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  {isSuperAdmin && payment.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(payment.totalDelivery, 2)} дост.</span>}
-                                  {isSuperAdmin && <span className="text-xs font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>}
-                                  <span className="text-xs text-slate-400 tabular-nums">{formatCurrency(payment.totalRevenue, 2)}</span>
-                                </div>
-                              </div>
-
-                              {/* Продукти */}
-                              <div className={`grid px-4 py-1.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-5" : "grid-cols-3"}`}
-                                style={{ minWidth: isSuperAdmin ? 480 : 320 }}>
-                                <span>Продукт</span>
-                                <span className="text-center">Бройки</span>
-                                <span className="text-right">Оборот</span>
-                                {isSuperAdmin && <span className="text-right">Доставка</span>}
-                                {isSuperAdmin && <span className="text-right">Изплатено</span>}
-                              </div>
-
-                              {grouped.map((g, gi) => (
-                                <div key={gi} className={`grid px-4 py-2 border-t border-gray-50 items-center hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? "grid-cols-5" : "grid-cols-3"}`}
-                                  style={{ minWidth: isSuperAdmin ? 480 : 320 }}>
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <FiPackage className="w-3 h-3 text-slate-300 shrink-0" />
-                                    <span className="text-sm text-slate-700 truncate">
-                                      {[g.name, g.flavor, g.weight && `${g.weight}г`, g.puffs && `${g.puffs}k`, g.count && `${g.count}бр.`].filter(Boolean).join(" ")}
-                                    </span>
-                                  </div>
-                                  <span className="text-sm text-slate-400 text-center tabular-nums">{g.quantity} бр.</span>
-                                  <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(g.revenue, 2)}</span>
-                                  {isSuperAdmin && <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{g.delivery > 0 ? formatCurrency(g.delivery, 2) : "—"}</span>}
-                                  {isSuperAdmin && <span className="text-sm font-semibold text-green-600 text-right tabular-nums">{formatCurrency(g.payout, 2)}</span>}
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })}
-                        {seller.payments.length > getVisibleCount(si) && (
-                          <div className="px-4 py-3 flex justify-center border-t border-gray-50">
-                            <Button
-                              size="sm"
-                              variant="flat"
-                              color="default"
-                              radius="full"
-                              onPress={() => loadMorePayments(si)}
-                              className="text-xs font-semibold text-slate-500">
-                              Зареди още ({seller.payments.length - getVisibleCount(si)} останали)
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-
-              </div>
-            )}
-          </Tab>}
-
+          {(isSuperAdmin || session?.user?.role === "Seller") && (
+            <Tab key="history" title="История">
+              <ClientOrdersHistoryTab
+                history={history}
+                isHistoryLoading={isHistoryLoading}
+                isSuperAdmin={isSuperAdmin}
+                getVisibleCount={getVisibleCount}
+                loadMorePayments={loadMorePayments}
+              />
+            </Tab>
+          )}
         </Tabs>
       </div>
 
