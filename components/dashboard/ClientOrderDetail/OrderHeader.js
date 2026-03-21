@@ -37,12 +37,12 @@ export default function OrderHeader({ order, currentStatus, statusChangedAt, isS
     <div className="px-5 pt-4 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <a
-            href={phoneHref}
+          <button
+            onClick={() => { window.location.href = phoneHref; }}
             className="flex items-center gap-2 text-2xl font-bold text-slate-800 hover:text-[#0071f5] transition-colors">
             <FiPhone className="w-5 h-5 text-[#0071f5]" />
             {order.phone}
-          </a>
+          </button>
           {order.orderNumber > 0 && (
             <span className="text-sm font-bold text-slate-400">#{order.orderNumber}</span>
           )}
@@ -52,14 +52,18 @@ export default function OrderHeader({ order, currentStatus, statusChangedAt, isS
             </Button>
           </Tooltip>
           {order.contactMethod === "Viber" && (
-            <a href={phoneHref} className="p-1.5 rounded-lg bg-[#7360F2]/10 hover:bg-[#7360F2]/20 transition-colors">
+            <button
+              onClick={() => { window.location.href = phoneHref; }}
+              className="p-1.5 rounded-lg bg-[#7360F2]/10 hover:bg-[#7360F2]/20 transition-colors">
               <FaViber className="w-4 h-4 text-[#7360F2]" />
-            </a>
+            </button>
           )}
           {order.contactMethod === "WhatsApp" && (
-            <a href={phoneHref} className="p-1.5 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/20 transition-colors">
+            <button
+              onClick={() => { window.location.href = phoneHref; }}
+              className="p-1.5 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/20 transition-colors">
               <FaWhatsapp className="w-4 h-4 text-[#25D366]" />
-            </a>
+            </button>
           )}
         </div>
 

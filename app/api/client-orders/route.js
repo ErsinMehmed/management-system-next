@@ -64,6 +64,9 @@ export async function POST(request) {
 
   const data = await request.json();
 
+  // Нормализираме телефона — премахваме интервали и whitespace
+  if (data.phone) data.phone = data.phone.replace(/\s+/g, "");
+
   // Seller винаги се асайнва на себе си
   if (isSeller) data.assignedTo = session.user.id;
 
