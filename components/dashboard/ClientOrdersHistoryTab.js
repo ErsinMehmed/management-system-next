@@ -1,13 +1,16 @@
 "use client";
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
 import { Button, Accordion, AccordionItem } from "@heroui/react";
 import { FiDollarSign, FiTrendingUp, FiCheckCircle, FiPackage } from "react-icons/fi";
 import { formatCurrency } from "@/utils";
 
-const ClientOrdersHistoryTab = ({
-  history, isHistoryLoading, isSuperAdmin,
-  getVisibleCount, loadMorePayments,
-}) => {
+const PAYMENTS_PAGE = 8;
+
+const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => {
+  const [visiblePayments, setVisiblePayments] = useState({});
+  const getVisibleCount = (si) => visiblePayments[si] ?? PAYMENTS_PAGE;
+  const loadMorePayments = (si) => setVisiblePayments((prev) => ({ ...prev, [si]: (prev[si] ?? PAYMENTS_PAGE) + PAYMENTS_PAGE }));
   if (isHistoryLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">

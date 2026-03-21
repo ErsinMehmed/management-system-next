@@ -10,7 +10,7 @@ const ClientOrdersSummaryTab = ({
   summary, isSummaryLoading, isSuperAdmin,
   summaryPreset, setSummaryPreset, applyFilter,
   customFrom, setCustomFrom, customTo, setCustomTo,
-  setPendingPayout, onPayoutOpen,
+  onPayoutTrigger,
 }) => (
   <>
     {/* ФИЛТЪР ПАНЕЛ */}
@@ -173,7 +173,7 @@ const ClientOrdersSummaryTab = ({
                     variant="solid"
                     radius="full"
                     startContent={<FiCheckCircle className="w-3.5 h-3.5" />}
-                    onPress={() => { setPendingPayout(seller); onPayoutOpen(); }}
+                    onPress={() => onPayoutTrigger(seller)}
                     className="text-white font-semibold text-xs">
                     Изплати
                   </Button>

@@ -12,7 +12,7 @@ import { clientOrderStatuses, clientOrderStatusConfig } from "@/data";
 const ClientOrdersOrdersTab = ({
   orders, isLoading, isAdmin, isSuperAdmin, session,
   onOpen, deletingId, handleDelete,
-  setPendingRejection, onRejectionOpen,
+  onRejectionTrigger,
   handlePageChange, handlePageClick,
 }) => (
   <>
@@ -135,8 +135,7 @@ const ClientOrdersOrdersTab = ({
                   items={clientOrderStatuses.map((s) => ({ _id: s, value: s, name: s }))}
                   onChange={(val) => {
                     if (val === "отказана") {
-                      setPendingRejection({ orderId: order._id, reason: "" });
-                      onRejectionOpen();
+                      onRejectionTrigger(order._id);
                     } else {
                       clientOrderStore.updateStatus(order._id, val);
                     }
