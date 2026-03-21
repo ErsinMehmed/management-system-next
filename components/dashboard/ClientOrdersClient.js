@@ -678,7 +678,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             ) : history.isSeller ? (
               /* SELLER — опростен изглед */
               <div className="flex flex-col gap-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
                       <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
@@ -713,7 +713,10 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                           <p className="text-xs text-slate-400">{payment.orderCount} поръчки · {formatCurrency(payment.totalRevenue, 2)} оборот</p>
                         </div>
                       </div>
-                      <span className="text-base font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-base font-bold text-green-600 tabular-nums">{formatCurrency(payment.totalPayout, 2)}</span>
+                        <span className="text-xs font-semibold text-red-500 tabular-nums">дължи {formatCurrency(payment.totalRevenue - payment.totalPayout, 2)}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -769,7 +772,10 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
                             </div>
                           </div>
                           <div className="flex flex-col items-end shrink-0 gap-0.5">
-                            {isSuperAdmin && <span className="text-sm font-bold text-green-600 tabular-nums">{formatCurrency(seller.totalPayout, 2)} изпл.</span>}
+                            {seller.owedAmount > 0 && (
+                              <span className="text-sm font-bold text-red-500 tabular-nums">{formatCurrency(seller.owedAmount, 2)} дължи</span>
+                            )}
+                            {isSuperAdmin && <span className="text-xs font-semibold text-green-600 tabular-nums">{formatCurrency(seller.totalPayout, 2)} изпл.</span>}
                             {isSuperAdmin && seller.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(seller.totalDelivery, 2)} доставки</span>}
                             <span className="text-xs text-slate-400 tabular-nums">{formatCurrency(seller.totalRevenue, 2)} оборот</span>
                           </div>

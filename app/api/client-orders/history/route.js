@@ -157,5 +157,35 @@ export async function GET() {
   const grandTotal  = sellers.reduce((s, x) => s + x.totalRevenue, 0);
   const grandPayout = sellers.reduce((s, x) => s + x.totalPayout, 0);
 
-  return NextResponse.json({ sellers, isSeller, grandTotal, grandPayout });
+  // Изчисляваме дълга за всички доставени поръчки (платени + неплатени) — по доставчик
+  const owedAgg = await ClientOrder.aggregate([
+    {
+      $match: isSeller
+        ? { status: "доставена", assignedTo: new mongoose.Types.ObjectId(session.user.id) }
+        : { status: "доставена" },
+    },
+    {
+      $group: {
+        _id: "$assignedTo",
+        totalRevenue:  { $sum: { $add: ["$price", { $ifNull: ["$secondProduct.price", 0] }] } },
+        totalPayout:   { $sum: { $add: [{ $ifNull: ["$payout", 0] }, { $ifNull: ["$secondProduct.payout", 0] }] } },
+      },
+    },
+  ]);
+
+  // Добавяме owedAmount към всеки seller
+  const owedMap = {};
+  let owedTotal = 0;
+  let grandOwedTotal = 0;
+  for (const row of owedAgg) {
+    const owed = row.totalRevenue - row.totalPayout;
+    owedMap[String(row._id)] = owed;
+    grandOwedTotal += owed;
+  }
+  sellers.forEach((s) => {
+    s.owedAmount = owedMap[String(s.sellerId)] ?? 0;
+  });
+  if (isSeller) owedTotal = grandOwedTotal;
+
+  return NextResponse.json({ sellers, isSeller, grandTotal, grandPayout, owedTotal: isSeller ? owedTotal : null, grandOwedTotal: !isSeller ? grandOwedTotal : null });
 }
