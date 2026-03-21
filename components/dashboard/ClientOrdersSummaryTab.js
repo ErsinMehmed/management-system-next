@@ -1,7 +1,7 @@
 "use client";
 import { observer } from "mobx-react-lite";
 import { Button, DatePicker } from "@heroui/react";
-import { getLocalTimeZone, now } from "@internationalized/date";
+import { now, getLocalTimeZone, toCalendarDateTime } from "@internationalized/date";
 import { FiFilter, FiTrendingUp, FiDollarSign, FiCheckCircle, FiTruck } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
@@ -47,7 +47,13 @@ const ClientOrdersSummaryTab = ({
             color={summaryPreset === key ? "primary" : "default"}
             onPress={() => {
               setSummaryPreset(key);
-              if (key !== "custom") applyFilter(key);
+              if (key !== "custom") {
+                applyFilter(key);
+              } else {
+                const nowDT = toCalendarDateTime(now(getLocalTimeZone()));
+                if (!customFrom) setCustomFrom(nowDT);
+                if (!customTo) setCustomTo(nowDT);
+              }
             }}
             className={`font-semibold text-xs ${summaryPreset !== key ? "text-slate-500" : ""}`}>
             {label}
@@ -64,7 +70,6 @@ const ClientOrdersSummaryTab = ({
             hourCycle={24}
             value={customFrom}
             onChange={setCustomFrom}
-            maxValue={customTo ?? now(getLocalTimeZone())}
             size="sm"
             radius="lg"
             className="w-56"
@@ -77,7 +82,6 @@ const ClientOrdersSummaryTab = ({
             value={customTo}
             onChange={setCustomTo}
             minValue={customFrom ?? undefined}
-            maxValue={now(getLocalTimeZone())}
             size="sm"
             radius="lg"
             className="w-56"

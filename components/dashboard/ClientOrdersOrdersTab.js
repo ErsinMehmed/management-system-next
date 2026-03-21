@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
-import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX } from "react-icons/fi";
 import Pagination from "@/components/table/Pagination";
 import Select from "@/components/html/Select";
 import { productTitle, formatCurrency } from "@/utils";
@@ -12,7 +12,7 @@ import { clientOrderStatuses, clientOrderStatusConfig } from "@/data";
 
 const SWIPE_THRESHOLD = 72;
 
-const SwipeableCard = ({ children, onDelete, onSwipeRight, isAdmin, deletingId }) => {
+const SwipeableCard = ({ children, onSwipeLeft, onSwipeRight, canSwipe, isSeller, deletingId }) => {
   const [dx, setDx] = useState(0);
   const [settling, setSettling] = useState(false);
   const startX = useRef(0);
@@ -21,9 +21,9 @@ const SwipeableCard = ({ children, onDelete, onSwipeRight, isAdmin, deletingId }
 
   const commit = (finalDx) => {
     setSettling(true);
-    if (finalDx < -SWIPE_THRESHOLD) {
+    if (finalDx < -SWIPE_THRESHOLD && onSwipeLeft) {
       setDx(-SWIPE_THRESHOLD * 1.5);
-      setTimeout(() => { onDelete(); setDx(0); setSettling(false); }, 200);
+      setTimeout(() => { onSwipeLeft(); setDx(0); setSettling(false); }, 200);
     } else if (finalDx > SWIPE_THRESHOLD && onSwipeRight) {
       setDx(0);
       setSettling(false);
@@ -42,7 +42,7 @@ const SwipeableCard = ({ children, onDelete, onSwipeRight, isAdmin, deletingId }
   };
 
   const onTouchMove = (e) => {
-    if (!isAdmin) return;
+    if (!canSwipe) return;
     const deltaX = e.touches[0].clientX - startX.current;
     const deltaY = e.touches[0].clientY - startY.current;
 
@@ -54,7 +54,6 @@ const SwipeableCard = ({ children, onDelete, onSwipeRight, isAdmin, deletingId }
     if (direction.current !== "h") return;
 
     e.preventDefault();
-    // Resist going right if no status action
     const clamped = deltaX > 0
       ? Math.min(deltaX, SWIPE_THRESHOLD * 1.2)
       : Math.max(deltaX, -SWIPE_THRESHOLD * 1.8);
@@ -66,8 +65,6 @@ const SwipeableCard = ({ children, onDelete, onSwipeRight, isAdmin, deletingId }
     commit(dx);
   };
 
-  const leftReveal = dx > 8;
-  const rightReveal = dx < -8;
   const leftReady = dx >= SWIPE_THRESHOLD;
   const rightReady = dx <= -SWIPE_THRESHOLD;
 
@@ -78,27 +75,35 @@ const SwipeableCard = ({ children, onDelete, onSwipeRight, isAdmin, deletingId }
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}>
 
-      {/* Swipe-right background — смени статус */}
+      {/* Swipe-right background */}
       {onSwipeRight && (
-        <div className={`absolute inset-0 rounded-2xl flex items-center pl-5 transition-colors ${leftReady ? "bg-[#0071f5]" : "bg-[#0071f5]/70"}`}>
+        <div className={`absolute inset-0 rounded-2xl flex items-center pl-5 transition-colors ${
+          isSeller
+            ? (leftReady ? "bg-green-500" : "bg-green-500/70")
+            : (leftReady ? "bg-[#0071f5]" : "bg-[#0071f5]/70")
+        }`}>
           <div className="flex flex-col items-center gap-1">
             <FiCheck className="w-5 h-5 text-white" />
-            <span className="text-[10px] font-bold text-white">Статус</span>
+            <span className="text-[10px] font-bold text-white">{isSeller ? "Доставена" : "Статус"}</span>
           </div>
         </div>
       )}
 
-      {/* Swipe-left background — изтрий */}
-      <div className={`absolute inset-0 rounded-2xl flex items-center justify-end pr-5 transition-colors ${rightReady ? "bg-red-500" : "bg-red-400/80"}`}>
-        <div className="flex flex-col items-center gap-1">
-          {deletingId ? (
-            <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-          ) : (
-            <FiTrash2 className="w-5 h-5 text-white" />
-          )}
-          <span className="text-[10px] font-bold text-white">Изтрий</span>
+      {/* Swipe-left background */}
+      {onSwipeLeft && (
+        <div className={`absolute inset-0 rounded-2xl flex items-center justify-end pr-5 transition-colors ${rightReady ? "bg-red-500" : "bg-red-400/80"}`}>
+          <div className="flex flex-col items-center gap-1">
+            {isSeller ? (
+              <FiX className="w-5 h-5 text-white" />
+            ) : deletingId ? (
+              <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            ) : (
+              <FiTrash2 className="w-5 h-5 text-white" />
+            )}
+            <span className="text-[10px] font-bold text-white">{isSeller ? "Отказана" : "Изтрий"}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Card — slides over backgrounds */}
       <div
@@ -270,16 +275,27 @@ const ClientOrdersOrdersTab = ({
           );
 
           // Mobile: wrap in swipeable, desktop: plain card
+          const isSeller = session?.user?.role === "Seller";
           return (
             <div key={order._id}>
               <div className="sm:hidden">
-                <SwipeableCard
-                  isAdmin={isAdmin}
-                  deletingId={deletingId === order._id}
-                  onDelete={() => handleDelete(order._id)}
-                  onSwipeRight={!isLocked ? () => setStatusPickerOrder(order) : null}>
-                  {cardInner}
-                </SwipeableCard>
+                {isSeller ? (
+                  <SwipeableCard
+                    canSwipe={!isLocked}
+                    isSeller
+                    onSwipeRight={!isLocked ? () => clientOrderStore.updateStatus(order._id, "доставена") : null}
+                    onSwipeLeft={!isLocked ? () => onRejectionTrigger(order._id) : null}>
+                    {cardInner}
+                  </SwipeableCard>
+                ) : (
+                  <SwipeableCard
+                    canSwipe={isAdmin}
+                    deletingId={deletingId === order._id}
+                    onSwipeLeft={() => handleDelete(order._id)}
+                    onSwipeRight={!isLocked ? () => setStatusPickerOrder(order) : null}>
+                    {cardInner}
+                  </SwipeableCard>
+                )}
               </div>
               <div className="hidden sm:block">{cardInner}</div>
             </div>
