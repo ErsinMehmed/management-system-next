@@ -1,10 +1,21 @@
 "use client";
+import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Button, DatePicker } from "@heroui/react";
 import { now, getLocalTimeZone, toCalendarDateTime } from "@internationalized/date";
-import { FiFilter, FiTrendingUp, FiDollarSign, FiCheckCircle, FiTruck } from "react-icons/fi";
+import { FiFilter, FiTrendingUp, FiDollarSign, FiCheckCircle, FiTruck, FiZap } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
+
+const PERIOD_LABELS = {
+  "24h": "последните 24 часа",
+  "today": "днес",
+  "yesterday": "вчера",
+  "week": "тази седмица",
+  "month": "този месец",
+  "all": "всички времена",
+  "custom": "избран период",
+};
 
 const ClientOrdersSummaryTab = ({
   summary, isSummaryLoading, isSuperAdmin,
@@ -12,6 +23,27 @@ const ClientOrdersSummaryTab = ({
   customFrom, setCustomFrom, customTo, setCustomTo,
   onPayoutTrigger,
 }) => {
+  const [aiInsight, setAiInsight] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleAiAnalysis = async () => {
+    setIsAnalyzing(true);
+    setAiInsight(null);
+    try {
+      const res = await fetch("/api/client-orders/ai-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summary, period: PERIOD_LABELS[summaryPreset] ?? summaryPreset }),
+      });
+      const data = await res.json();
+      setAiInsight(data.text ?? "Неуспешен анализ.");
+    } catch {
+      setAiInsight("Грешка при анализа. Провери API ключа.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const grandCost = summary?.bySeller && summary?.sellers
     ? summary.sellers.reduce((s, sel) => s + sel.items.reduce((si, item) => si + (item.product?.price ?? 0) * item.totalQuantity, 0), 0)
     : 0;
@@ -97,6 +129,39 @@ const ClientOrdersSummaryTab = ({
         </div>
       )}
     </div>
+
+    {/* AI АНАЛИЗ */}
+    {!isSummaryLoading && summary?.grandTotal > 0 && (
+      <div className="mb-5">
+        {aiInsight ? (
+          <div className="bg-gradient-to-br from-[#0071f5]/5 to-purple-50 rounded-2xl border border-[#0071f5]/10 px-4 py-4 flex gap-3">
+            <div className="w-7 h-7 rounded-lg bg-[#0071f5]/10 flex items-center justify-center shrink-0 mt-0.5">
+              <FiZap className="w-3.5 h-3.5 text-[#0071f5]" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-bold text-[#0071f5] mb-1">AI Обобщение</p>
+              <p className="text-sm text-slate-700 leading-relaxed">{aiInsight}</p>
+              <button
+                onClick={() => { setAiInsight(null); handleAiAnalysis(); }}
+                className="mt-2 text-xs text-slate-400 hover:text-[#0071f5] transition-colors">
+                Обнови анализа
+              </button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            variant="flat"
+            radius="lg"
+            isLoading={isAnalyzing}
+            onPress={handleAiAnalysis}
+            startContent={!isAnalyzing && <FiZap className="w-3.5 h-3.5" />}
+            className="font-semibold text-[#0071f5] bg-[#0071f5]/8">
+            {isAnalyzing ? "Анализирам..." : "AI Обобщение"}
+          </Button>
+        )}
+      </div>
+    )}
 
     {isSummaryLoading ? (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
