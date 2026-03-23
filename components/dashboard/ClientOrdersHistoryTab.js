@@ -138,7 +138,11 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
           trigger: "py-4 cursor-pointer data-[hover=true]:bg-transparent",
           content: "pt-0 pb-0 overflow-x-auto",
         }}>
-        {history.sellers.map((seller, si) => (
+        {history.sellers.map((seller, si) => {
+          const unconfirmedRevenue = seller.payments
+            .filter((p) => !p.revenueConfirmed)
+            .reduce((sum, p) => sum + ((p.totalRevenue ?? 0) - (p.totalPayout ?? 0)), 0);
+          return (
           <AccordionItem
             key={si}
             title={
@@ -153,8 +157,8 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
                   </div>
                 </div>
                 <div className="flex flex-col items-end shrink-0 gap-0.5">
-                  {seller.owedAmount > 0 && (
-                    <span className="text-sm font-bold text-red-500 tabular-nums">{formatCurrency(seller.owedAmount, 2)} дължи</span>
+                  {isSuperAdmin && unconfirmedRevenue > 0 && (
+                    <span className="text-sm font-bold text-red-500 tabular-nums">{formatCurrency(unconfirmedRevenue, 2)} дължи</span>
                   )}
                   {isSuperAdmin && <span className="text-xs font-semibold text-green-600 tabular-nums">{formatCurrency(seller.totalPayout, 2)} изпл.</span>}
                   {isSuperAdmin && seller.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(seller.totalDelivery, 2)} доставки</span>}
@@ -242,7 +246,8 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
               )}
             </div>
           </AccordionItem>
-        ))}
+          );
+        })}
       </Accordion>
     </div>
   );
