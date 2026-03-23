@@ -29,7 +29,11 @@ export async function GET(request) {
   if (status) filter.status = status;
   if (!isAdmin) filter.assignedTo = session.user.id;
 
-  const [totalItems, items] = await Promise.all([
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const dailyFilter = { status: "доставена", createdAt: { $gte: since24h } };
+  if (!isAdmin) dailyFilter.assignedTo = session.user.id;
+
+  const [totalItems, items, dailyCount] = await Promise.all([
     ClientOrder.countDocuments(filter),
     ClientOrder.find(filter)
       .sort({ _id: -1 })
@@ -39,6 +43,7 @@ export async function GET(request) {
       .populate({ path: "secondProduct.product", select: "name weight flavor puffs count category", populate: { path: "category", select: "name" } })
       .populate({ path: "assignedTo", select: "name" })
       .lean(),
+    ClientOrder.countDocuments(dailyFilter),
   ]);
 
   return NextResponse.json({
@@ -49,6 +54,7 @@ export async function GET(request) {
       total_results: totalItems,
       per_page: perPage,
     },
+    dailyCount,
   });
 }
 

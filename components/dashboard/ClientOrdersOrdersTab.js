@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
-import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX, FiClock } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX, FiClock, FiRefreshCw } from "react-icons/fi";
 import moment from "moment";
 import "moment/locale/bg";
 
@@ -141,19 +141,39 @@ const ClientOrdersOrdersTab = ({
 
   return (
   <>
-    <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
-      {(isAdmin || session?.user?.role === "Seller") && (
+    <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-50 border border-green-100">
+        <FiCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
+        <span className="text-sm font-semibold text-green-700">Поръчки днес:</span>
+        <span className="text-sm font-bold text-green-600 tabular-nums">
+          {isLoading ? "—" : (orders?.dailyCount ?? 0)}
+        </span>
+      </div>
+      <div className="flex flex-col sm:flex-row items-center gap-2 sm:ml-auto w-full sm:w-auto">
         <Button
           variant="solid"
           color="primary"
           radius="full"
           size="md"
-          startContent={<FiPlus className="w-4 h-4" />}
-          onPress={onOpen}
+          isLoading={isLoading}
+          startContent={!isLoading && <FiRefreshCw className="w-4 h-4" />}
+          onPress={() => clientOrderStore.loadOrders()}
           className="w-full sm:w-auto font-semibold">
-          Добави
+          Обнови
         </Button>
-      )}
+        {(isAdmin || session?.user?.role === "Seller") && (
+          <Button
+            variant="solid"
+            color="primary"
+            radius="full"
+            size="md"
+            startContent={<FiPlus className="w-4 h-4" />}
+            onPress={onOpen}
+            className="w-full sm:w-auto font-semibold">
+            Добави
+          </Button>
+        )}
+      </div>
     </div>
 
     {isLoading ? (

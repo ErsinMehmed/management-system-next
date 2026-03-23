@@ -22,7 +22,11 @@ export default async function ClientOrdersPage() {
   // Filter orders: admins see all, sellers see only their own
   const filter = isAdmin ? {} : { assignedTo: session.user.id };
 
-  const [totalItems, items, sellers] = await Promise.all([
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const dailyFilter = { status: "доставена", createdAt: { $gte: since24h } };
+  if (!isAdmin) dailyFilter.assignedTo = session.user.id;
+
+  const [totalItems, items, sellers, dailyCount] = await Promise.all([
     ClientOrder.countDocuments(filter),
     ClientOrder.find(filter)
       .sort({ _id: -1 })
@@ -39,6 +43,7 @@ export default async function ClientOrdersPage() {
           .lean()
           .then((users) => users.filter((u) => u.role?.name === "Seller"))
       : Promise.resolve([]),
+    ClientOrder.countDocuments(dailyFilter),
   ]);
 
   const initialData = JSON.parse(
@@ -51,6 +56,7 @@ export default async function ClientOrdersPage() {
           total_results: totalItems,
           per_page: PER_PAGE,
         },
+        dailyCount,
       },
     })
   );
