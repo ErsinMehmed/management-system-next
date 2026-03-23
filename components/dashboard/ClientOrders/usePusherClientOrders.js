@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import PusherClient from "pusher-js";
-import { addToast } from "@heroui/toast";
+import { toast } from "@heroui/react";
 import { clientOrderStore } from "@/stores/useStore";
 
 function shouldShowToast(event, userId, role) {
@@ -13,14 +13,18 @@ function showOrderToast(event) {
   const num = event.orderNumber ? `#${event.orderNumber} ` : "";
   const by = event.changedBy ? ` от ${event.changedBy}` : "";
   if (event.type === "created") {
-    addToast({ title: "Нова заявка", description: `${num}добавена${by}`, color: "success", timeout: 5000 });
+    toast.success("Нова заявка", { description: `${num}добавена${by}`, timeout: 5000 });
   } else if (event.type === "updated" && event.change === "status") {
-    const color = event.status === "доставена" ? "success" : event.status === "отказана" ? "danger" : "primary";
-    addToast({ title: "Статус обновен", description: `${num}→ ${event.status}${by}`, color, timeout: 5000 });
+    const isDelivered = event.status === "доставена";
+    const isRejected = event.status === "отказана";
+    const desc = { description: `${num}→ ${event.status}${by}`, timeout: 5000 };
+    if (isDelivered) toast.success("Статус обновен", desc);
+    else if (isRejected) toast.danger("Статус обновен", desc);
+    else toast("Статус обновен", desc);
   } else if (event.type === "updated") {
-    addToast({ title: "Заявка редактирана", description: `${num}редактирана${by}`, color: "default", timeout: 5000 });
+    toast("Заявка редактирана", { description: `${num}редактирана${by}`, timeout: 5000 });
   } else if (event.type === "deleted") {
-    addToast({ title: "Заявка изтрита", description: `${num}изтрита${by}`, color: "danger", timeout: 5000 });
+    toast.danger("Заявка изтрита", { description: `${num}изтрита${by}`, timeout: 5000 });
   }
 }
 

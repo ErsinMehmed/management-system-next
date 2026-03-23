@@ -6,7 +6,6 @@ import Modal from "@/components/Modal";
 import Table from "@/components/table/Table";
 import Pagination from "@/components/table/Pagination";
 import IncomeForm from "@/components/forms/Income";
-import { useDisclosure } from "@heroui/react";
 import { FiPlus } from "react-icons/fi";
 import { commonStore, incomeStore, userStore } from "@/stores/useStore";
 import { formatCurrency } from "@/utils";
@@ -34,7 +33,9 @@ const IncomesClient = ({ initialData }) => {
   } = incomeStore;
   const { distributors, loadDistributors } = userStore;
   const { errorFields } = commonStore;
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => setIsOpen(true);
+  const onOpenChange = (open) => setIsOpen(open);
 
   useEffect(() => {
     if (initialData) {

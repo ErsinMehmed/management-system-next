@@ -1,76 +1,74 @@
-import React, { useState } from "react";
-import { Input } from "@heroui/react";
-import { AiOutlineEye } from "react-icons/ai";
-import { AiOutlineEyeInvisible } from "react-icons/ai";
+"use client";
+import { useState } from "react";
+import { TextField, Label, Input, FieldError } from "@heroui/react";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const InputComponent = (props) => {
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleChange = (event) => {
-    if (props.onChange) {
-      props.onChange(event.target.value);
-    }
-  };
+  const inputType =
+    props.type === "password" ? (isVisible ? "text" : "password") : props.type;
 
-  const toggleVisibility = () => {
-    setIsVisible(!isVisible);
-  };
+  const isInvalid = !!props.errorMessage;
 
-  const style = {
-    classNames: {
-      inputWrapper: [props.inputWrapperClasses],
-    },
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter" && props.onEnterPress) {
-      props.onEnterPress();
-    }
-  };
+  const inputClassName = [
+    "w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all",
+    isInvalid
+      ? "border-danger/60 bg-danger-50 focus:border-danger focus:ring-1 focus:ring-danger/30"
+      : "border-default-200 bg-default-50 focus:border-primary focus:ring-1 focus:ring-primary/30",
+    props.disabled ? "opacity-50 cursor-not-allowed" : "",
+    props.inputWrapperClasses ?? "",
+    props.type === "password" ? "pr-10" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <Input
-      size={"sm"}
-      type={
-        props.type === "password"
-          ? isVisible
-            ? "text"
-            : "password"
-          : props.type
-      }
-      {...style}
-      label={props.label}
-      value={props.value}
+    <TextField
+      isInvalid={isInvalid}
       isDisabled={props.disabled}
-      isInvalid={props.errorMessage ? true : false}
-      errorMessage={props.errorMessage}
-      placeholder={props.placeholder}
-      onChange={handleChange}
-      onKeyDown={handleKeyDown}
-      endContent={
-        props.type == "password" && (
+      className="w-full"
+    >
+      {props.label && (
+        <Label className="text-sm font-medium text-foreground/70 mb-1 block">
+          {props.label}
+        </Label>
+      )}
+      <div className="relative">
+        <Input
+          type={inputType}
+          value={props.value}
+          placeholder={props.placeholder}
+          className={inputClassName}
+          onChange={(e) => props.onChange?.(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") props.onEnterPress?.();
+          }}
+        />
+        {props.type === "password" && (
           <button
-            className="focus:outline-none"
             type="button"
-            onClick={toggleVisibility}
+            onClick={() => setIsVisible((v) => !v)}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 focus:outline-none"
           >
             {isVisible ? (
               <AiOutlineEye
-                className={`text-2xl ${
-                  props.errorMessage ? "text-red-400" : "text-default-400"
-                } text-default-400`}
+                className={`text-xl ${isInvalid ? "text-danger" : "text-default-400"}`}
               />
             ) : (
               <AiOutlineEyeInvisible
-                className={`text-2xl ${
-                  props.errorMessage ? "text-red-400" : "text-default-400"
-                } text-default-400`}
+                className={`text-xl ${isInvalid ? "text-danger" : "text-default-400"}`}
               />
             )}
           </button>
-        )
-      }
-    />
+        )}
+      </div>
+      {isInvalid && (
+        <FieldError className="text-xs text-danger mt-1">
+          {props.errorMessage}
+        </FieldError>
+      )}
+    </TextField>
   );
 };
 

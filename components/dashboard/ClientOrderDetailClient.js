@@ -1,11 +1,11 @@
 "use client";
 import { observer } from "mobx-react-lite";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button, useDisclosure } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { FiArrowLeft, FiCalendar } from "react-icons/fi";
-import { addToast } from "@heroui/toast";
+import { toast } from "@heroui/react";
 import PusherClient from "pusher-js";
 import Layout from "@/components/layout/Dashboard";
 import { clientOrderStore } from "@/stores/useStore";
@@ -41,8 +41,12 @@ const ClientOrderDetailClient = ({ order }) => {
     availableProducts,
   } = useOrderState(order);
 
-  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
-  const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const onEditOpen = () => setIsEditOpen(true);
+  const onEditOpenChange = (open) => setIsEditOpen(open);
+  const [isRejectionOpen, setIsRejectionOpen] = useState(false);
+  const onRejectionOpen = () => setIsRejectionOpen(true);
+  const onRejectionOpenChange = (open) => setIsRejectionOpen(open);
 
   const canEdit = currentStatus === "нова" || isSuperAdmin;
   const statusCfg = clientOrderStatusConfig[currentStatus] ?? clientOrderStatusConfig["нова"];
@@ -79,15 +83,17 @@ const ClientOrderDetailClient = ({ order }) => {
 
       if (event.type === "updated" && event.orderId === order._id) {
         if (event.change === "status") {
-          const color = event.status === "доставена" ? "success" : event.status === "отказана" ? "danger" : "primary";
-          addToast({ title: "Статус обновен", description: `${num}→ ${event.status}${by}`, color, timeout: 5000 });
+          const desc = { description: `${num}→ ${event.status}${by}`, timeout: 5000 };
+          if (event.status === "доставена") toast.success("Статус обновен", desc);
+          else if (event.status === "отказана") toast.danger("Статус обновен", desc);
+          else toast("Статус обновен", desc);
         } else {
-          addToast({ title: "Заявка редактирана", description: `${num}редактирана${by}`, color: "default", timeout: 5000 });
+          toast("Заявка редактирана", { description: `${num}редактирана${by}`, timeout: 5000 });
         }
       } else if (event.type === "created") {
-        addToast({ title: "Нова заявка", description: `${num}добавена${by}`, color: "success", timeout: 5000 });
+        toast.success("Нова заявка", { description: `${num}добавена${by}`, timeout: 5000 });
       } else if (event.type === "deleted" && event.orderId === order._id) {
-        addToast({ title: "Заявка изтрита", description: `${num}изтрита${by}`, color: "danger", timeout: 5000 });
+        toast.danger("Заявка изтрита", { description: `${num}изтрита${by}`, timeout: 5000 });
       }
     });
 

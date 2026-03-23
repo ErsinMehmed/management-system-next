@@ -1,10 +1,5 @@
 "use client";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-} from "@heroui/react";
+import { Modal } from "@heroui/react";
 
 const ConfirmModal = ({
   isOpen,
@@ -16,21 +11,21 @@ const ConfirmModal = ({
   cancelText = "Откажи",
 }) => {
   return (
-    <Modal placement="center" isOpen={isOpen} onOpenChange={onOpenChange}>
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex flex-col gap-1 text-2xl mt-3">
+    <Modal>
+      <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange} isDismissable>
+        <Modal.Container placement="center">
+          <Modal.Dialog>
+            <Modal.Header className="flex flex-col gap-1 text-2xl mt-3">
               {title}
-            </ModalHeader>
+            </Modal.Header>
 
-            <ModalBody>
+            <Modal.Body>
               <div>{message}</div>
 
               <div className="flex flex-row mt-3 mb-4 space-x-3 justify-evenly">
                 <button
                   onClick={() => {
-                    onClose();
+                    onOpenChange(false);
                     onConfirm();
                   }}
                   className="w-full py-2.5 text-sm font-semibold text-center text-white transition-all bg-red-600 border border-red-600 rounded-lg hover:bg-red-500 active:scale-95"
@@ -39,16 +34,16 @@ const ConfirmModal = ({
                 </button>
 
                 <button
-                  onClick={onClose}
-                  className="w-full py-2.5 text-sm font-semibold text-center text-gray-700 transition-all bg-white border border-gray-200 rounded-lg hover:bg-gray-100 active:scale-95"
-                >
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  className="w-full py-2.5 text-sm font-semibold text-center text-gray-700 transition-all bg-white border border-gray-200 rounded-lg hover:bg-gray-100 active:scale-95 cursor-pointer">
                   {cancelText}
                 </button>
               </div>
-            </ModalBody>
-          </>
-        )}
-      </ModalContent>
+            </Modal.Body>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   );
 };

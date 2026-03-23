@@ -72,7 +72,7 @@ const SellForm = (props) => {
 
       <RadioGroup
         value={props.data.is_wholesale}
-        onValueChange={(value) =>
+        onChange={(value) =>
           props.handleFieldChange("is_wholesale", value)
         }>
         <div className='w-full grid grid-cols-2 gap-3.5'>

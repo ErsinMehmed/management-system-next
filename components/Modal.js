@@ -1,12 +1,5 @@
 "use client";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-} from "@heroui/react";
+import { Modal, Button } from "@heroui/react";
 
 const ModalComponent = ({
   isOpen,
@@ -22,55 +15,47 @@ const ModalComponent = ({
   children,
 }) => {
   return (
-    <Modal
-      placement="center"
-      isOpen={isOpen}
-      scrollBehavior="inside"
-      size={size}
-      classNames={{
-        body: "px-3.5",
-        base: "mx-5 sm:mx-0",
-        header: showHeader
-          ? "border-b border-gray-300 px-4"
-          : "border-0",
-      }}
-      onOpenChange={onOpenChange}
-    >
-      <ModalContent>
-        {(onClose) => (
-          <>
+    <Modal>
+      <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange} isDismissable>
+        <Modal.Container
+          placement="center"
+          scroll="inside"
+          size={size}
+        >
+          <Modal.Dialog>
             {showHeader && (
-              <ModalHeader className="flex flex-col gap-1">
-                {title}
-              </ModalHeader>
+              <Modal.Header>
+                <Modal.Heading>{title}</Modal.Heading>
+              </Modal.Header>
             )}
 
-            <ModalBody>{children}</ModalBody>
+            <Modal.Body className="px-3.5">{children}</Modal.Body>
 
             {showFooter && (
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+              <Modal.Footer>
+                <Button
+                  variant="ghost"
+                  onPress={() => onOpenChange(false)}
+                >
                   {secondaryBtnText}
                 </Button>
 
                 <Button
-                  color="primary"
-                  isLoading={isLoading}
+                  isDisabled={isLoading}
                   onPress={async () => {
                     const success = await onSave();
-
                     if (success) {
-                      onClose();
+                      onOpenChange(false);
                     }
                   }}
                 >
                   {primaryBtnText}
                 </Button>
-              </ModalFooter>
+              </Modal.Footer>
             )}
-          </>
-        )}
-      </ModalContent>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   );
 };

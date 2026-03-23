@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { Button } from "@heroui/react";
 import { FiLock, FiEye, FiEyeOff, FiCheck, FiCamera, FiUser, FiMail, FiShield } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
-import { addToast } from "@heroui/toast";
+import { toast } from "@heroui/react";
 
 const CLOUDINARY_CLOUD = "dhp0zcdke";
 const CLOUDINARY_PRESET = "ep0eopza";
@@ -92,9 +92,9 @@ export default function ProfilePage() {
       await update({ profile_image: data.secure_url });
       setPreviewUrl(data.secure_url);
 
-      addToast({ title: "Снимката е обновена", color: "success", timeout: 3000 });
+      toast.success("Снимката е обновена", { timeout: 3000 });
     } catch {
-      addToast({ title: "Грешка при качване", color: "danger", timeout: 3000 });
+      toast.danger("Грешка при качване", { timeout: 3000 });
       setPreviewUrl(null);
     } finally {
       setIsUploading(false);
@@ -107,11 +107,11 @@ export default function ProfilePage() {
     e?.preventDefault();
 
     if (next !== confirm) {
-      addToast({ title: "Грешка", description: "Новите пароли не съвпадат.", color: "danger", timeout: 4000 });
+      toast.danger("Грешка", { description: "Новите пароли не съвпадат.", timeout: 4000 });
       return;
     }
     if (next.length < 8) {
-      addToast({ title: "Грешка", description: "Паролата трябва да е поне 8 символа.", color: "danger", timeout: 4000 });
+      toast.danger("Грешка", { description: "Паролата трябва да е поне 8 символа.", timeout: 4000 });
       return;
     }
 
@@ -124,10 +124,10 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (res.ok) {
-        addToast({ title: "Паролата е сменена", color: "success", timeout: 4000 });
+        toast.success("Паролата е сменена", { timeout: 4000 });
         setCurrent(""); setNext(""); setConfirm("");
       } else {
-        addToast({ title: "Грешка", description: data.message, color: "danger", timeout: 4000 });
+        toast.danger("Грешка", { description: data.message, timeout: 4000 });
       }
     } finally {
       setIsSaving(false);

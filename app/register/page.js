@@ -111,11 +111,11 @@ export default function RegisterPage() {
                 </button>
 
                 <Button
-                  isLoading={isLoading}
+                  isDisabled={isLoading}
                   className="w-full font-semibold"
-                  color="primary"
-                  onClick={handleSubmit}>
-                  Регистрация
+                  variant="primary"
+                  onPress={handleSubmit}>
+                  {isLoading ? "Зареждане..." : "Регистрация"}
                 </Button>
 
                 <p className="text-sm font-light text-gray-500 text-center">

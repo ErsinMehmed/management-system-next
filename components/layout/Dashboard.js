@@ -26,6 +26,7 @@ const DashboardLayout = (props) => {
   return (
     <I18nProvider locale='bg-BG'>
       <PushNotificationInit />
+
       <Alert />
 
       <div className='flex items-center w-full bg-[#f5f5f7]'>

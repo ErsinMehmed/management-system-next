@@ -1,8 +1,6 @@
 import {
   Tooltip,
   Popover,
-  PopoverTrigger,
-  PopoverContent,
 } from "@heroui/react";
 import { formatCurrency } from "@/utils";
 
@@ -45,27 +43,24 @@ const TabSection = (props) => {
                 index > 0 && "border-t border-slate-200"
               } py-2.5 px-3 text-sm`}>
               <dt className='text-gray-500 font-semibold'>
-                <Tooltip
-                  content={formatCurrency(
-                    item[props.totalKey] / item.quantity,
-                    2
-                  )}
-                  placement='bottom'>
+                <Tooltip placement='bottom'>
                   <button className='hidden sm:block'>
                     {getProductName(item)}
                   </button>
+
+                  <Tooltip.Content>
+                    {formatCurrency(item[props.totalKey] / item.quantity, 2)}
+                  </Tooltip.Content>
                 </Tooltip>
 
                 <Popover placement='bottom'>
-                  <PopoverTrigger>
-                    <button className='sm:hidden'>
-                      {getProductName(item)}
-                    </button>
-                  </PopoverTrigger>
+                  <button className='sm:hidden'>
+                    {getProductName(item)}
+                  </button>
 
-                  <PopoverContent>
+                  <Popover.Content>
                     {formatCurrency(item[props.totalKey] / item.quantity, 2)}
-                  </PopoverContent>
+                  </Popover.Content>
                 </Popover>
               </dt>
 

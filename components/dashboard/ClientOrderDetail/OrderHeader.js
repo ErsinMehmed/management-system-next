@@ -46,10 +46,12 @@ export default function OrderHeader({ order, currentStatus, statusChangedAt, isS
           {order.orderNumber > 0 && (
             <span className="text-sm font-bold text-slate-400">#{order.orderNumber}</span>
           )}
-          <Tooltip content="Копирано" color="default" isOpen={copied}>
-            <Button isIconOnly size="sm" variant="light" onPress={handleCopy} className="text-slate-400 hover:text-slate-600">
+          <Tooltip isOpen={copied}>
+            <Button isIconOnly size="sm" variant="ghost" onPress={handleCopy} className="text-slate-400 hover:text-slate-600">
               {copied ? <FiCheck className="w-4 h-4 text-green-500" /> : <FiCopy className="w-4 h-4" />}
             </Button>
+
+            <Tooltip.Content>Копирано</Tooltip.Content>
           </Tooltip>
           {order.contactMethod === "Viber" && (
             <button

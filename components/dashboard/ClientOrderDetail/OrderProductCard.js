@@ -58,12 +58,10 @@ export default function OrderProductCard({
         {canEdit && (
           <Button
             size="sm"
-            variant="solid"
-            color="primary"
-            radius="lg"
-            startContent={<FiEdit2 className="w-3.5 h-3.5" />}
+            variant="outline"
             onPress={onEdit}
-            className="font-semibold shrink-0 bg-white text-[#0071f5] border border-blue-100 shadow-sm">
+            className="font-semibold shrink-0 rounded-lg bg-white text-[#0071f5] border border-blue-100 shadow-sm">
+            <FiEdit2 className="w-3.5 h-3.5" />
             Редактирай
           </Button>
         )}

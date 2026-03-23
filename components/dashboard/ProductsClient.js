@@ -6,7 +6,7 @@ import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
 import Box from "@/components/product/Box";
 import { commonStore, productStore } from "@/stores/useStore";
-import { Switch, Chip, useDisclosure } from "@heroui/react";
+import { Switch, Chip } from "@heroui/react";
 import { productTitle } from "@/utils";
 import ProductForm from "@/components/forms/Product";
 import productAction from "@/actions/productAction";
@@ -22,8 +22,12 @@ const ProductsClient = () => {
   } = productStore;
   const { errorFields } = commonStore;
   const [selectedProductId, setSelectedProductId] = useState(null);
-  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
-  const { isOpen: isVisibilityOpen, onOpen: onVisibilityOpen, onOpenChange: onVisibilityOpenChange } = useDisclosure();
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const onEditOpen = () => setIsEditOpen(true);
+  const onEditOpenChange = (open) => setIsEditOpen(open);
+  const [isVisibilityOpen, setIsVisibilityOpen] = useState(false);
+  const onVisibilityOpen = () => setIsVisibilityOpen(true);
+  const onVisibilityOpenChange = (open) => setIsVisibilityOpen(open);
   const { data: session } = useSession();
   const isUserAdmin = session?.user?.role === "Super Admin";
 
@@ -118,18 +122,18 @@ const ProductsClient = () => {
               </div>
 
               <Chip
-                classNames={{
-                  base: !product.hidden
-                    ? "bg-green-400 text-white"
-                    : "bg-red-400 text-white",
-                }}>
+                className={!product.hidden ? "bg-green-400 text-white" : "bg-red-400 text-white"}>
                 {!product.hidden ? "Видим" : "Скрит"}
               </Chip>
 
               <Switch
-                isSelected={!product.hidden}
-                onValueChange={() => updateProductAndReload(product)}
-              />
+                checked={!product.hidden}
+                onChange={() => updateProductAndReload(product)}
+              >
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch>
             </div>
           ))}
         </div>

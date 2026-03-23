@@ -97,9 +97,9 @@ const UserInformation = (props) => {
 
               <TableCell>
                 <Button
-                  onClick={() => handleUpdateUserInfo(user._id)}
+                  onPress={() => handleUpdateUserInfo(user._id)}
                   isIconOnly
-                  color="primary"
+                  variant="primary"
                   aria-label="Save"
                   isDisabled={loadingUsers[user._id]}
                 >

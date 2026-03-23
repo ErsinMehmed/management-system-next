@@ -75,8 +75,7 @@ const ClientOrdersSummaryTab = ({
             key={key}
             size="sm"
             radius="full"
-            variant={summaryPreset === key ? "solid" : "flat"}
-            color={summaryPreset === key ? "primary" : "default"}
+            variant={summaryPreset === key ? "primary" : "secondary"}
             onPress={() => {
               setSummaryPreset(key);
               if (key !== "custom") {
@@ -120,9 +119,8 @@ const ClientOrdersSummaryTab = ({
           />
           <Button
             size="sm"
-            color="primary"
-            radius="lg"
-            className="font-semibold"
+            variant="primary"
+            className="font-semibold rounded-lg"
             onPress={() => applyFilter("custom", customFrom, customTo)}>
             Приложи
           </Button>
@@ -151,12 +149,11 @@ const ClientOrdersSummaryTab = ({
         ) : (
           <Button
             size="sm"
-            variant="flat"
-            radius="lg"
-            isLoading={isAnalyzing}
+            variant="secondary"
+            isDisabled={isAnalyzing}
             onPress={handleAiAnalysis}
-            startContent={!isAnalyzing && <FiZap className="w-3.5 h-3.5" />}
-            className="font-semibold text-[#0071f5] bg-[#0071f5]/8">
+            className="font-semibold rounded-lg text-[#0071f5] bg-[#0071f5]/8">
+            {!isAnalyzing && <FiZap className="w-3.5 h-3.5" />}
             {isAnalyzing ? "Анализирам..." : "AI Обобщение"}
           </Button>
         )}
@@ -268,12 +265,10 @@ const ClientOrdersSummaryTab = ({
                 {isSuperAdmin && seller._id && seller.sellerUnpaidCount > 0 && (
                   <Button
                     size="sm"
-                    color="warning"
-                    variant="solid"
-                    radius="full"
-                    startContent={<FiCheckCircle className="w-3.5 h-3.5" />}
+                    variant="primary"
                     onPress={() => onPayoutTrigger(seller)}
-                    className="text-white font-semibold text-xs">
+                    className="rounded-full text-white font-semibold text-xs bg-amber-500 hover:bg-amber-600">
+                    <FiCheckCircle className="w-3.5 h-3.5" />
                     Изплати
                   </Button>
                 )}

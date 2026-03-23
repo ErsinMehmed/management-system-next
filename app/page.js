@@ -62,8 +62,8 @@ const Login = () => {
               <Button
                 isDisabled={isLoading}
                 className='w-full font-semibold'
-                color='primary'
-                onClick={login}>
+                variant='primary'
+                onPress={login}>
                 Вход
               </Button>
 

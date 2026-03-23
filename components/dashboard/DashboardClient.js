@@ -12,7 +12,7 @@ import {
 } from "@/stores/useStore";
 import { MdAttachMoney } from "react-icons/md";
 import { TbMoneybag } from "react-icons/tb";
-import { Tabs, Tab, useDisclosure } from "@heroui/react";
+import { Tabs } from "@heroui/react";
 import Modal from "@/components/Modal";
 import PieChart from "@/components/charts/PieChart";
 import TabSection from "@/components/dashboard/TabSection";
@@ -40,8 +40,12 @@ const DashboardClient = ({ initialData }) => {
       setSelectedCategory(categories[0]);
     }
   }, [categories, selectedCategory]);
-  const { isOpen: isIncomesOpen, onOpen: onIncomesOpen, onOpenChange: onIncomesOpenChange } = useDisclosure();
-  const { isOpen: isExpensesOpen, onOpen: onExpensesOpen, onOpenChange: onExpensesOpenChange } = useDisclosure();
+  const [isIncomesOpen, setIsIncomesOpen] = useState(false);
+  const onIncomesOpen = () => setIsIncomesOpen(true);
+  const onIncomesOpenChange = (open) => setIsIncomesOpen(open);
+  const [isExpensesOpen, setIsExpensesOpen] = useState(false);
+  const onExpensesOpen = () => setIsExpensesOpen(true);
+  const onExpensesOpenChange = (open) => setIsExpensesOpen(open);
 
   useEffect(() => {
     if (initialData) {
@@ -227,21 +231,28 @@ const DashboardClient = ({ initialData }) => {
           aria-label='Options'
           selectedKey={selectedCategory}
           onSelectionChange={setSelectedCategory}>
+          <Tabs.List>
+            {categories.map((category) => (
+              <Tabs.Tab key={category} id={category}>{category}</Tabs.Tab>
+            ))}
+            {isUserAdmin && additionalIncomes?.incomes > 0 && (
+              <Tabs.Tab id='Други'>Други</Tabs.Tab>
+            )}
+          </Tabs.List>
+
           {categories.map((category) => (
-            <Tab
-              key={category}
-              title={category}>
+            <Tabs.Panel key={category} id={category}>
               <TabSection
                 data={incomes}
                 kind='incomes'
                 category={category}
                 totalKey='total_incomes'
               />
-            </Tab>
+            </Tabs.Panel>
           ))}
 
           {isUserAdmin && additionalIncomes?.incomes > 0 && (
-            <Tab title='Други'>
+            <Tabs.Panel id='Други'>
               <div className='bg-gray-50 rounded-lg'>
                 <dl className='flex-container py-2.5 px-3 text-sm'>
                   <dt className='text-gray-500 font-semibold'>
@@ -253,7 +264,7 @@ const DashboardClient = ({ initialData }) => {
                   </dd>
                 </dl>
               </div>
-            </Tab>
+            </Tabs.Panel>
           )}
         </Tabs>
       </Modal>
@@ -267,25 +278,32 @@ const DashboardClient = ({ initialData }) => {
           aria-label='Options'
           selectedKey={selectedCategory}
           onSelectionChange={setSelectedCategory}>
+          <Tabs.List>
+            {categories.map((category) => (
+              <Tabs.Tab key={category} id={category}>{category}</Tabs.Tab>
+            ))}
+            {(expenses.total_fuel_expenses > 0 ||
+              expenses.total_additional_expenses > 0 ||
+              expenses.total_ad_expenses > 0) && (
+              <Tabs.Tab id='Други'>Други</Tabs.Tab>
+            )}
+          </Tabs.List>
+
           {categories.map((category) => (
-            <Tab
-              key={category}
-              title={category}>
+            <Tabs.Panel key={category} id={category}>
               <TabSection
                 data={expenses}
                 kind='expenses'
                 category={category}
                 totalKey='total_expenses'
               />
-            </Tab>
+            </Tabs.Panel>
           ))}
 
           {(expenses.total_fuel_expenses > 0 ||
             expenses.total_additional_expenses > 0 ||
             expenses.total_ad_expenses > 0) && (
-            <Tab
-              key='Други'
-              title='Други'>
+            <Tabs.Panel id='Други'>
               <div className='bg-gray-50 rounded-lg'>
                 {expenses.total_fuel_expenses > 0 && (
                   <dl className='flex-container py-2.5 px-3 text-sm'>
@@ -331,7 +349,7 @@ const DashboardClient = ({ initialData }) => {
                   (expenses.total_fuel_expenses > 0 &&
                     expenses.total_ad_expenses > 0)) && (
                   <dl className='flex items-center justify-end py-2.5 px-3 text-sm border-t border-slate-200'>
-                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-semibold'>
+                    <dd className='bg-gray-100 text-gray-700 inline-flex items-center px-2.5 py-1 rounded-md font-medium font-semibold'>
                       {formatCurrency(
                         expenses.total_fuel_expenses +
                           expenses.total_additional_expenses +
@@ -342,7 +360,7 @@ const DashboardClient = ({ initialData }) => {
                   </dl>
                 )}
               </div>
-            </Tab>
+            </Tabs.Panel>
           )}
         </Tabs>
       </Modal>

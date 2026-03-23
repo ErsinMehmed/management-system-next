@@ -1,10 +1,12 @@
-import React from "react";
-import { useDisclosure } from "@heroui/react";
+"use client";
+import React, { useState } from "react";
 import Modal from "@/components/Modal";
 import UserAviabilityForm from "@/components/forms/UserAviability";
 
 const UserAviability = (props) => {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => setIsOpen(true);
+  const onOpenChange = (open) => setIsOpen(open);
 
   return (
     <>

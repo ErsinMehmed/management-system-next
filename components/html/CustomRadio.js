@@ -1,35 +1,18 @@
-import { useRadio, VisuallyHidden, cn } from "@heroui/react";
+import { Radio } from "@heroui/react";
+import { cn } from "@heroui/react";
 
-const CustomRadio = (props) => {
-  const {
-    Component,
-    children,
-    getBaseProps,
-    getWrapperProps,
-    getInputProps,
-    getLabelProps,
-    getLabelWrapperProps,
-    getControlProps,
-  } = useRadio(props);
-
+const CustomRadio = ({ value, children }) => {
   return (
-    <Component
-      {...getBaseProps()}
+    <Radio
+      value={String(value)}
       className={cn(
-        "group inline-flex items-center hover:opacity-70 active:opacity-50 justify-between flex-row-reverse tap-highlight-transparent",
+        "group inline-flex items-center hover:opacity-70 active:opacity-50 justify-between flex-row-reverse",
         "w-full cursor-pointer border-2 border-default rounded-lg gap-3 p-3",
-        "data-[selected=true]:border-primary font-semibold"
-      )}>
-      <VisuallyHidden>
-        <input {...getInputProps()} />
-      </VisuallyHidden>
-      <span {...getWrapperProps()}>
-        <span {...getControlProps()} />
-      </span>
-      <div {...getLabelWrapperProps()}>
-        {children && <span {...getLabelProps()}>{children}</span>}
-      </div>
-    </Component>
+        "data-[selected]:border-primary font-semibold"
+      )}
+    >
+      {children}
+    </Radio>
   );
 };
 

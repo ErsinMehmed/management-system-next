@@ -1,15 +1,15 @@
 "use client";
-import {HeroUIProvider} from "@heroui/react";
-import {ToastProvider} from "@heroui/toast";
+import {RouterProvider, Toast} from "@heroui/react";
 import {useRouter} from 'next/navigation'
+import React from "react";
 
 export default function Providers({children}) {
     const router = useRouter()
 
     return (
-        <HeroUIProvider navigate={router.push}>
-            <ToastProvider placement="top-center" toastOffset={25}/>
+        <RouterProvider navigate={router.push}>
+            <Toast.Provider placement="top" />
             {children}
-        </HeroUIProvider>
+        </RouterProvider>
     )
 }

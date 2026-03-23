@@ -2,13 +2,7 @@
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Avatar,
-} from "@heroui/react";
+import { Dropdown, Avatar } from "@heroui/react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 
 const AccountDropdown = () => {
@@ -29,15 +23,15 @@ const AccountDropdown = () => {
   return (
     <div className="flex items-center gap-4">
       <Dropdown placement="bottom-start">
-        <DropdownTrigger>
+        <Dropdown.Trigger>
           <div className="center-element cursor-pointer">
             <Avatar
-              isBordered
               size="sm"
-              as="button"
-              className="transition-transform mr-2 sm:mr-0"
-              src={session?.user.profile_image}
-            />
+              className="transition-transform mr-2 sm:mr-0 ring-2 ring-white ring-offset-1"
+            >
+              <Avatar.Image src={session?.user.profile_image} alt={getUserFirstName()} />
+              <Avatar.Fallback>{getUserFirstName()?.charAt(0)?.toUpperCase()}</Avatar.Fallback>
+            </Avatar>
 
             <span className="ml-3.5 font-semibold hidden md:block">
               {getUserFirstName()}
@@ -45,14 +39,18 @@ const AccountDropdown = () => {
 
             <MdKeyboardArrowDown className="hidden md:block mt-0.5 text-gray-400 w-6 h-6" />
           </div>
-        </DropdownTrigger>
+        </Dropdown.Trigger>
 
-        <DropdownMenu aria-label="User Actions" variant="flat">
-          <DropdownItem key="my_data" onPress={() => router.push("/dashboard/profile")}>Моите данни</DropdownItem>
-          <DropdownItem onPress={() => signOut()} key="logout" color="danger">
-            Изход
-          </DropdownItem>
-        </DropdownMenu>
+        <Dropdown.Popover>
+          <Dropdown.Menu aria-label="User Actions">
+            <Dropdown.Item key="my_data" id="my_data" textValue="Моите данни" onPress={() => router.push("/dashboard/profile")}>
+              Моите данни
+            </Dropdown.Item>
+            <Dropdown.Item key="logout" id="logout" textValue="Изход" variant="danger" onPress={() => signOut()}>
+              Изход
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
       </Dropdown>
     </div>
   );

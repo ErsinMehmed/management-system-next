@@ -1,11 +1,8 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { MdDelete } from "react-icons/md";
 import {
-  useDisclosure,
   Tooltip,
   Popover,
-  PopoverTrigger,
-  PopoverContent,
 } from "@heroui/react";
 import moment from "moment";
 import "moment/locale/bg";
@@ -73,7 +70,9 @@ const Table = (props) => {
     [props]
   );
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => setIsOpen(true);
+  const onOpenChange = (open) => setIsOpen(open);
 
   const renderCellValue = useMemo(
     () => (key, value) => {
@@ -217,47 +216,50 @@ const Table = (props) => {
 
                               {row.message && key === "product" && (
                                 <>
-                                  <Tooltip content={row.message}>
-                                    <button className='text-slate-600 ml-1.5 invisible sm:visible'>
-                                      <FaCircleInfo />
-                                    </button>
+                                  <Tooltip>
+                                    <Tooltip.Trigger asChild>
+                                      <button className='text-slate-600 ml-1.5 invisible sm:visible'>
+                                        <FaCircleInfo />
+                                      </button>
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Content>{row.message}</Tooltip.Content>
                                   </Tooltip>
 
                                   <Popover placement='right'>
-                                    <PopoverTrigger>
+                                    <Popover.Trigger>
                                       <button className='text-slate-600 -ml-3 sm:hidden'>
                                         <FaCircleInfo />
                                       </button>
-                                    </PopoverTrigger>
+                                    </Popover.Trigger>
 
-                                    <PopoverContent>
+                                    <Popover.Content>
                                       {row.message}
-                                    </PopoverContent>
+                                    </Popover.Content>
                                   </Popover>
                                 </>
                               )}
 
                               {key === "date" && (
                                 <>
-                                  <Tooltip
-                                    content={moment(value).format(
-                                      "DD.MM.YYYY H:mm"
-                                    )}>
-                                    <button className='text-slate-600 ml-1.5 invisible sm:visible'>
-                                      {moment(value).fromNow()}
-                                    </button>
+                                  <Tooltip>
+                                    <Tooltip.Trigger asChild>
+                                      <button className='text-slate-600 ml-1.5 invisible sm:visible'>
+                                        {moment(value).fromNow()}
+                                      </button>
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Content>{moment(value).format("DD.MM.YYYY H:mm")}</Tooltip.Content>
                                   </Tooltip>
 
                                   <Popover placement='right'>
-                                    <PopoverTrigger>
+                                    <Popover.Trigger>
                                       <button className='text-slate-600 -ml-3 sm:hidden'>
                                         {moment(value).fromNow()}
                                       </button>
-                                    </PopoverTrigger>
+                                    </Popover.Trigger>
 
-                                    <PopoverContent>
+                                    <Popover.Content>
                                       {moment(value).format("DD.MM.YYYY H:mm")}
-                                    </PopoverContent>
+                                    </Popover.Content>
                                   </Popover>
                                 </>
                               )}

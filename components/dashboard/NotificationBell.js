@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { Popover, PopoverTrigger, PopoverContent } from "@heroui/react";
+import { Popover } from "@heroui/react";
 import { FiBell, FiPlus, FiEdit2, FiTrash2, FiRefreshCw } from "react-icons/fi";
 import PusherClient from "pusher-js";
 
@@ -226,18 +226,16 @@ const NotificationBell = () => {
 
   return (
     <Popover isOpen={isOpen} onOpenChange={handleOpenChange} placement="bottom-end">
-      <PopoverTrigger>
-        <button className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors">
-          <FiBell className="w-5 h-5 text-slate-500" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 leading-none">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          )}
-        </button>
-      </PopoverTrigger>
+      <button className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors">
+        <FiBell className="w-5 h-5 text-slate-500" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 leading-none">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
+      </button>
 
-      <PopoverContent className="p-0 w-80 overflow-hidden">
+      <Popover.Content className="p-0 w-80 overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
           <span className="font-semibold text-slate-700 text-sm">Известия</span>
           {unreadCount > 0 && (
@@ -277,7 +275,7 @@ const NotificationBell = () => {
             )}
           </div>
         </div>
-      </PopoverContent>
+      </Popover.Content>
     </Popover>
   );
 };

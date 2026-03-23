@@ -1,12 +1,11 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
 import Table from "@/components/table/Table";
 import OrderForm from "@/components/forms/Order";
 import Pagination from "@/components/table/Pagination";
-import { useDisclosure } from "@heroui/react";
 import { FiPlus } from "react-icons/fi";
 import { productTitle } from "@/utils";
 import { commonStore, orderStore, productStore } from "@/stores/useStore";
@@ -39,7 +38,9 @@ const OrdersClient = ({ initialData }) => {
   } = orderStore;
   const { products } = productStore;
   const { errorFields } = commonStore;
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => setIsOpen(true);
+  const onOpenChange = (open) => setIsOpen(open);
 
   useEffect(() => {
     if (initialData) {

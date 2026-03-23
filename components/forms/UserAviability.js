@@ -149,9 +149,9 @@ const UserAviability = (props) => {
 
               <TableCell>
                 <Button
-                  onClick={() => handleUpdateUserStocks(product.id)}
+                  onPress={() => handleUpdateUserStocks(product.id)}
                   isIconOnly
-                  color="primary"
+                  variant="primary"
                   aria-label="Save"
                   isDisabled={isUpdateLoaded[product.id]}
                 >
@@ -187,9 +187,9 @@ const UserAviability = (props) => {
 
               <TableCell>
                 <Button
-                  onClick={handleAddNewStock}
+                  onPress={handleAddNewStock}
                   isIconOnly
-                  color="primary"
+                  variant="primary"
                   aria-label="Save"
                 >
                   <FiPlus className="size-5" />
@@ -205,10 +205,9 @@ const UserAviability = (props) => {
               <TableCell className="text-center pt-3">
                 <Button
                   isIconOnly
-                  color="default"
-                  radius="full"
-                  variant="bordered"
-                  onClick={() => setIsAddingNewStock(true)}
+                  variant="outline"
+                  onPress={() => setIsAddingNewStock(true)}
+                  className="rounded-full"
                 >
                   <FiPlus className="size-5" />
                 </Button>

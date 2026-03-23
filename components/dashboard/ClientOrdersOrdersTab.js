@@ -140,13 +140,11 @@ const ClientOrdersOrdersTab = ({
     <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
       {(isAdmin || session?.user?.role === "Seller") && (
         <Button
-          variant="solid"
-          color="primary"
-          radius="full"
+          variant="primary"
           size="md"
-          startContent={<FiPlus className="w-4 h-4" />}
           onPress={onOpen}
-          className="w-full sm:w-auto font-semibold">
+          className="w-full sm:w-auto font-semibold rounded-full">
+          <FiPlus className="w-4 h-4" />
           Добави
         </Button>
       )}
@@ -264,8 +262,8 @@ const ClientOrdersOrdersTab = ({
                     baseClass="w-36"
                     classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${clientOrderStatusConfig[order.status]?.badge} ${isLocked ? "opacity-60 pointer-events-none" : ""}`}
                   />
-                  <Button isIconOnly variant="light" color="danger" size="sm"
-                    isLoading={deletingId === order._id}
+                  <Button isIconOnly variant="danger-soft" size="sm"
+                    isDisabled={deletingId === order._id}
                     onPress={() => handleDelete(order._id)}>
                     <FiTrash2 className="w-4 h-4" />
                   </Button>

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSession } from "next-auth/react";
-import { Tabs, Tab, useDisclosure } from "@heroui/react";
+import { Tabs } from "@heroui/react";
 import { FiPackage, FiBarChart2, FiClock } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
 import { clientOrderStore } from "@/stores/useStore";
@@ -25,9 +25,15 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
   const { orders, isLoading, handlePageChange, handlePageClick, summary, isSummaryLoading, history, isHistoryLoading } = clientOrderStore;
 
-  const { isOpen: isCreateOpen, onOpen: onCreateOpen, onOpenChange: onCreateOpenChange } = useDisclosure();
-  const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
-  const { isOpen: isPayoutOpen, onOpen: onPayoutOpen, onOpenChange: onPayoutOpenChange } = useDisclosure();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const onCreateOpen = () => setIsCreateOpen(true);
+  const onCreateOpenChange = (open) => setIsCreateOpen(open);
+  const [isRejectionOpen, setIsRejectionOpen] = useState(false);
+  const onRejectionOpen = () => setIsRejectionOpen(true);
+  const onRejectionOpenChange = (open) => setIsRejectionOpen(open);
+  const [isPayoutOpen, setIsPayoutOpen] = useState(false);
+  const onPayoutOpen = () => setIsPayoutOpen(true);
+  const onPayoutOpenChange = (open) => setIsPayoutOpen(open);
 
   const [deletingId, setDeletingId] = useState(null);
   const [pendingRejectionOrderId, setPendingRejectionOrderId] = useState(null);
@@ -78,10 +84,12 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             aria-label="Заявки табове"
             selectedKey={activeTab}
             onSelectionChange={handleTabChange}
-            classNames={{ tabList: "mb-4" }}>
-            <Tab key="orders" title="Заявки" />
-            <Tab key="summary" title="Обобщение" />
-            {showHistory && <Tab key="history" title="История" />}
+            className="mb-4">
+            <Tabs.List>
+              <Tabs.Tab id="orders">Заявки</Tabs.Tab>
+              <Tabs.Tab id="summary">Обобщение</Tabs.Tab>
+              {showHistory && <Tabs.Tab id="history">История</Tabs.Tab>}
+            </Tabs.List>
           </Tabs>
         </div>
 

@@ -131,10 +131,14 @@ const ClientOrderForm = ({data, errorFields, products, sellers = [], handleField
                             </div>
                             <Switch
                                 size="sm"
-                                isSelected={isSelected}
-                                isDisabled={isDisabled}
-                                onValueChange={(val) => handleFieldChange("contactMethod", val ? method : "")}
-                            />
+                                checked={isSelected}
+                                disabled={isDisabled}
+                                onChange={(val) => handleFieldChange("contactMethod", val ? method : "")}
+                            >
+                                <Switch.Control>
+                                    <Switch.Thumb />
+                                </Switch.Control>
+                            </Switch>
                         </div>
                     );
                 })}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MdAttachMoney } from "react-icons/md";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
@@ -8,7 +8,6 @@ import Input from "@/components/html/Input";
 import Table from "@/components/table/Table";
 import Pagination from "@/components/table/Pagination";
 import SellForm from "@/components/forms/Sell";
-import { useDisclosure } from "@heroui/react";
 import { FiPlus } from "react-icons/fi";
 import { productTitle } from "@/utils";
 import { commonStore, sellStore, productStore } from "@/stores/useStore";
@@ -47,8 +46,12 @@ const SalesClient = ({ initialData }) => {
   } = sellStore;
   const { products } = productStore;
   const { errorFields, successMessage, errorMessage } = commonStore;
-  const { isOpen: isAddOpen, onOpen: onAddOpen, onOpenChange: onAddOpenChange } = useDisclosure();
-  const { isOpen: isValuesOpen, onOpen: onValuesOpen, onOpenChange: onValuesOpenChange } = useDisclosure();
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const onAddOpen = () => setIsAddOpen(true);
+  const onAddOpenChange = (open) => setIsAddOpen(open);
+  const [isValuesOpen, setIsValuesOpen] = useState(false);
+  const onValuesOpen = () => setIsValuesOpen(true);
+  const onValuesOpenChange = (open) => setIsValuesOpen(open);
 
   useEffect(() => {
     if (initialData) {
@@ -216,8 +219,6 @@ const SalesClient = ({ initialData }) => {
           });
         }}>
         <div className='border-b border-slate-200 pb-6'>
-          <div className='text-slate-700 font-semibold mb-2'>Константи</div>
-
           <div className='space-y-3.5'>
             <Input
               type='text'

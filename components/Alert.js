@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
 import {commonStore} from "@/stores/useStore";
-import {addToast} from "@heroui/react";
+import {toast} from "@heroui/react";
 
 const Alert = () => {
     const {setErrorMessage, setSuccessMessage, errorMessage, successMessage} =
@@ -8,22 +8,12 @@ const Alert = () => {
 
     useEffect(() => {
         if (errorMessage) {
-            addToast({
-                description: errorMessage,
-                color: "danger",
-                hideIcon: false,
-            });
-
+            toast.danger(errorMessage);
             setErrorMessage("");
         }
 
         if (successMessage) {
-            addToast({
-                description: successMessage,
-                color: "success",
-                hideIcon: false,
-            });
-
+            toast.success(successMessage);
             setSuccessMessage("");
         }
     }, [errorMessage, successMessage, setErrorMessage, setSuccessMessage]);

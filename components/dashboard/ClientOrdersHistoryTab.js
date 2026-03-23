@@ -1,7 +1,7 @@
 "use client";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { Button, Accordion, AccordionItem } from "@heroui/react";
+import { Button, Accordion } from "@heroui/react";
 import { FiDollarSign, FiTrendingUp, FiCheckCircle, FiPackage } from "react-icons/fi";
 import { formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
@@ -29,7 +29,6 @@ const RevenueConfirmBadge = ({ payment, sellerId, isSuperAdmin }) => {
 };
 
 const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => {
-  const isSeller = history.isSeller;
   const [visiblePayments, setVisiblePayments] = useState({});
   const getVisibleCount = (si) => visiblePayments[si] ?? PAYMENTS_PAGE;
   const loadMorePayments = (si) => setVisiblePayments((prev) => ({ ...prev, [si]: (prev[si] ?? PAYMENTS_PAGE) + PAYMENTS_PAGE }));
@@ -128,44 +127,41 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
         </div>
       </div>
 
-      <Accordion
-        variant="splitted"
-        className="gap-3 px-0"
-        itemClasses={{
-          base: "bg-white rounded-2xl shadow-sm border border-gray-100 !px-0 hover:border-[#0071f5]/20 hover:shadow-md data-[open=true]:shadow-lg data-[open=true]:border-[#0071f5]/30 transition-all cursor-pointer",
-          heading: "px-4 py-0 overflow-hidden rounded-2xl",
-          title: "text-sm w-full",
-          trigger: "py-4 cursor-pointer data-[hover=true]:bg-transparent",
-          content: "pt-0 pb-0 overflow-x-auto",
-        }}>
+      <Accordion className="flex flex-col gap-3 px-0">
         {history.sellers.map((seller, si) => {
           const unconfirmedRevenue = seller.payments
             .filter((p) => !p.revenueConfirmed)
             .reduce((sum, p) => sum + ((p.totalRevenue ?? 0) - (p.totalPayout ?? 0)), 0);
           return (
-          <AccordionItem
+          <Accordion.Item
             key={si}
-            title={
-              <div className="flex items-center justify-between w-full sm:pr-2 gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-[#0071f5] flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    {seller.sellerName?.charAt(0)?.toUpperCase() ?? "?"}
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:border-[#0071f5]/20 hover:shadow-md data-[expanded]:shadow-lg data-[expanded]:border-[#0071f5]/30 transition-all">
+            <Accordion.Heading className="px-4 py-0 overflow-hidden rounded-2xl">
+              <Accordion.Trigger className="py-4 w-full flex items-center justify-between cursor-pointer hover:bg-transparent">
+                <div className="flex items-center justify-between w-full sm:pr-2 gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#0071f5] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      {seller.sellerName?.charAt(0)?.toUpperCase() ?? "?"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-800">{seller.sellerName}</p>
+                      <p className="text-xs text-slate-400">{seller.payments.length} плащания · {seller.orderCount} поръчки</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-800">{seller.sellerName}</p>
-                    <p className="text-xs text-slate-400">{seller.payments.length} плащания · {seller.orderCount} поръчки</p>
+                  <div className="flex flex-col items-end shrink-0 gap-0.5">
+                    {isSuperAdmin && unconfirmedRevenue > 0 && (
+                      <span className="text-sm font-bold text-red-500 tabular-nums">{formatCurrency(unconfirmedRevenue, 2)} дължи</span>
+                    )}
+                    {isSuperAdmin && <span className="text-xs font-semibold text-green-600 tabular-nums">{formatCurrency(seller.totalPayout, 2)} изпл.</span>}
+                    {isSuperAdmin && seller.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(seller.totalDelivery, 2)} доставки</span>}
+                    <span className="text-xs text-slate-400 tabular-nums">{formatCurrency(seller.totalRevenue, 2)} оборот</span>
                   </div>
                 </div>
-                <div className="flex flex-col items-end shrink-0 gap-0.5">
-                  {isSuperAdmin && unconfirmedRevenue > 0 && (
-                    <span className="text-sm font-bold text-red-500 tabular-nums">{formatCurrency(unconfirmedRevenue, 2)} дължи</span>
-                  )}
-                  {isSuperAdmin && <span className="text-xs font-semibold text-green-600 tabular-nums">{formatCurrency(seller.totalPayout, 2)} изпл.</span>}
-                  {isSuperAdmin && seller.totalDelivery > 0 && <span className="text-xs font-semibold text-[#0071f5] tabular-nums">{formatCurrency(seller.totalDelivery, 2)} доставки</span>}
-                  <span className="text-xs text-slate-400 tabular-nums">{formatCurrency(seller.totalRevenue, 2)} оборот</span>
-                </div>
-              </div>
-            }>
+                <Accordion.Indicator className="shrink-0 ml-2" />
+              </Accordion.Trigger>
+            </Accordion.Heading>
+            <Accordion.Panel>
+              <Accordion.Body className="pt-0 pb-0 overflow-x-auto">
             <div className="border-t border-gray-100 divide-y divide-gray-50">
               {seller.payments.slice(0, getVisibleCount(si)).map((payment, pi) => {
                 const grouped = Object.values(
@@ -235,17 +231,17 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
                 <div className="px-4 py-3 flex justify-center border-t border-gray-50">
                   <Button
                     size="sm"
-                    variant="flat"
-                    color="default"
-                    radius="full"
+                    variant="ghost"
                     onPress={() => loadMorePayments(si)}
-                    className="text-xs font-semibold text-slate-500">
+                    className="text-xs font-semibold text-slate-500 rounded-full">
                     Зареди още ({seller.payments.length - getVisibleCount(si)} останали)
                   </Button>
                 </div>
               )}
             </div>
-          </AccordionItem>
+            </Accordion.Body>
+            </Accordion.Panel>
+          </Accordion.Item>
           );
         })}
       </Accordion>
