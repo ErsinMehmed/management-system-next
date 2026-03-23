@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
-import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX, FiClock } from "react-icons/fi";
+import moment from "moment";
+import "moment/locale/bg";
+
+moment.locale("bg");
 import Pagination from "@/components/table/Pagination";
 import Select from "@/components/html/Select";
 import { productTitle, formatCurrency } from "@/utils";
@@ -247,6 +251,10 @@ const ClientOrdersOrdersTab = ({
                     )}
                   </div>
                 )}
+                <div className="flex items-center gap-1.5 text-xs text-slate-300 pt-1">
+                  <FiClock className="w-3 h-3 shrink-0" />
+                  <span>{moment(order.createdAt).format("DD.MM.YYYY HH:mm")}</span>
+                </div>
               </Link>
 
               {/* Desktop admin footer — hidden on mobile (swipe handles it) */}

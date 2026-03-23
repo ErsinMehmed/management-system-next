@@ -186,7 +186,7 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
 
                 return (
                   <div key={pi}>
-                    <div className="flex items-center justify-between px-4 py-3 bg-slate-50/60 gap-2">
+                    <div className="flex items-center justify-between px-4 py-3 bg-slate-50/60 gap-2" style={{ minWidth: isSuperAdmin ? 480 : 320 }}>
                       <div className="flex items-center gap-2 min-w-0">
                         <FiCheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
                         <span className="text-xs font-semibold text-slate-600 truncate">
