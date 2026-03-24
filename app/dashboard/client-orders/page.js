@@ -22,8 +22,11 @@ export default async function ClientOrdersPage() {
   // Filter orders: admins see all, sellers see only their own
   const filter = isAdmin ? {} : { assignedTo: session.user.id };
 
-  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const dailyFilter = { status: "доставена", createdAt: { $gte: since24h } };
+  const now = new Date();
+  const dayStart = new Date(now);
+  dayStart.setHours(7, 0, 0, 0);
+  if (now < dayStart) dayStart.setDate(dayStart.getDate() - 1);
+  const dailyFilter = { status: "доставена", createdAt: { $gte: dayStart } };
   if (!isAdmin) dailyFilter.assignedTo = session.user.id;
 
   const [totalItems, items, sellers, dailyCount] = await Promise.all([
