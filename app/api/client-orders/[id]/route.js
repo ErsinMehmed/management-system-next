@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { notifyOrderClients } from "@/libs/pusher";
 import { saveNotification } from "@/libs/saveNotification";
+import { notifyAllSuperAdmins } from "@/services/pushNotification";
 
 export async function PUT(request, { params }) {
   const session = await getServerSession(authOptions);
@@ -93,6 +94,15 @@ export async function PUT(request, { params }) {
   const statusEvent = { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: existing?.assignedTo ? String(existing.assignedTo) : null, status, change: "status" };
   notifyOrderClients(statusEvent);
   saveNotification(statusEvent).catch(console.error);
+
+  if (finalStatuses.includes(status) && !isSuperAdmin) {
+    const statusLabel = status === "доставена" ? "✅ Доставена" : "❌ Отказана";
+    notifyAllSuperAdmins({
+      title: `${statusLabel} поръчка #${existing?.orderNumber}`,
+      body: `${session.user.name} промени статуса на поръчка #${existing?.orderNumber} на "${status}"`,
+      data: { url: `/dashboard/client-orders/${id}` },
+    }).catch(console.error);
+  }
 
   return NextResponse.json({ message: "Статусът е обновен", status: true });
 }

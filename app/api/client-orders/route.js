@@ -129,9 +129,10 @@ export async function POST(request) {
     body: `${clientType} · ${data.phone}\n${order.product?.name} × ${data.quantity} бр. — ${data.price} лв.`,
     data: { url: `/dashboard/client-orders/${order._id}` },
   };
-  if (data.assignedTo) {
+  const createdByAssignee = String(data.assignedTo) === String(session.user.id);
+  if (data.assignedTo && !createdByAssignee) {
     notifyUser(data.assignedTo, notifPayload).catch(console.error);
-  } else {
+  } else if (!data.assignedTo) {
     notifyAllEmployees(notifPayload).catch(console.error);
   }
 
