@@ -91,7 +91,6 @@ import { connectToDatabase } from "@/libs/mongodb"
 | Sell | quantity, price, message, date, mileage, additional_costs, fuel_consumption, diesel_price, product (ref), user (ref) |
 | Ad | platform, amount, date |
 | Notification | type, orderId, orderNumber, changedBy, assignedTo, change, status, readBy[] |
-| UserStock | user (ref), product (ref), stock |
 | Value | fuel_consumption, diesel_price |
 
 MongoDB connection: `libs/mongodb.js` — global singleton, caches across serverless invocations.

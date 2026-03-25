@@ -12,7 +12,6 @@ import {
 } from "@heroui/react";
 import { observer } from "mobx-react-lite";
 import {
-  BsBox,
   BsCart2,
   BsCashCoin,
   BsGraphUp,
@@ -22,7 +21,6 @@ import { FaCircleInfo } from "react-icons/fa6";
 import { userStore, expenseStore, incomeStore } from "@/stores/useStore";
 import UserInfo from "@/components/pages/users/UserInfo";
 import SalesTable from "@/components/pages/users/tables/SalesTable";
-import StockTable from "@/components/pages/users/tables/StockTable";
 import ExpensesTable from "@/components/pages/users/tables/ExpensesTable";
 import ProfitTable from "@/components/pages/users/tables/ProfitTable";
 
@@ -76,16 +74,7 @@ const UserCard = () => {
     });
   };
 
-  const calculateTotalStock = (userStocks) => {
-    return userStocks.reduce((acc, product) => acc + product.stock, 0);
-  };
-
-  const userSalesWithTotals = calculateTotals(userSales.sales || []).map(
-    (data) => ({
-      ...data,
-      totalStock: calculateTotalStock(data.user_stocks),
-    })
-  );
+  const userSalesWithTotals = calculateTotals(userSales.sales || []);
 
   const calculateTargetPercentage = (target, sold) => {
     if (target === 0) return 0;
@@ -215,26 +204,6 @@ const UserCard = () => {
                 totalQuantity={data.totalQuantity}
                 totalPrice={data.totalPrice}
                 totalExpenses={data.totalExpenses}
-              />
-            </AccordionItem>
-
-            <AccordionItem
-              key="3"
-              aria-label="Наличности"
-              startContent={<BsBox className="size-7" />}
-              subtitle={
-                <p className="flex">
-                  Налични бутилки
-                  <span className="font-semibold ml-1">
-                    {data.totalStock} бр.
-                  </span>
-                </p>
-              }
-              title="Наличности"
-            >
-              <StockTable
-                stocks={data.user_stocks}
-                totalStock={data.totalStock}
               />
             </AccordionItem>
 

@@ -1,7 +1,6 @@
 import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
-import UserStock from "@/models/userStock";
 import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
 
@@ -141,39 +140,8 @@ export async function GET(request) {
       },
     ]);
 
-    const userIds = sales.map((sale) => sale.user_id);
-
-    const userStocks = await UserStock.find({
-      user: { $in: userIds },
-    })
-      .populate("product", "_id name weight count")
-      .select("user product stock");
-
-    const stocksMap = userStocks.reduce((acc, stock) => {
-      if (!acc[stock.user]) {
-        acc[stock.user] = [];
-      }
-
-      const productName =
-        stock.product.name === "Балони"
-          ? `${stock.product.name} ${stock.product.count}бр.`
-          : `${stock.product.name} ${stock.product.weight}гр.`;
-
-      acc[stock.user].push({
-        product_name: productName,
-        stock: stock.stock,
-      });
-
-      return acc;
-    }, {});
-
-    const transformedSales = sales.map((sale) => ({
-      ...sale,
-      user_stocks: stocksMap[sale.user_id] || [],
-    }));
-
     return NextResponse.json({
-      sales: transformedSales,
+      sales,
       status: true,
     });
   } catch (error) {
