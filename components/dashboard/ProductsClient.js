@@ -10,6 +10,7 @@ import { Switch, Chip, useDisclosure } from "@heroui/react";
 import { productTitle } from "@/utils";
 import ProductForm from "@/components/forms/Product";
 import productAction from "@/actions/productAction";
+import CreateProductModal from "@/components/dashboard/CreateProductModal";
 
 const ProductsClient = () => {
   const {
@@ -24,6 +25,7 @@ const ProductsClient = () => {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
   const { isOpen: isVisibilityOpen, onOpen: onVisibilityOpen, onOpenChange: onVisibilityOpenChange } = useDisclosure();
+  const { isOpen: isCreateOpen, onOpen: onCreateOpen, onOpenChange: onCreateOpenChange } = useDisclosure();
   const { data: session } = useSession();
   const isUserAdmin = session?.user?.role === "Super Admin";
 
@@ -72,11 +74,18 @@ const ProductsClient = () => {
   return (
     <Layout title='Наличности'>
       {isUserAdmin && (
-        <button
-          onClick={onVisibilityOpen}
-          className='text-white absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
-          Видимост
-        </button>
+        <div className='absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 flex items-center gap-2'>
+          <button
+            onClick={onCreateOpen}
+            className='text-white bg-green-500 hover:bg-green-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
+            Добави
+          </button>
+          <button
+            onClick={onVisibilityOpen}
+            className='text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
+            Видимост
+          </button>
+        </div>
       )}
 
       <div className='grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:p-8'>
@@ -134,6 +143,8 @@ const ProductsClient = () => {
           ))}
         </div>
       </Modal>
+
+      <CreateProductModal isOpen={isCreateOpen} onOpenChange={onCreateOpenChange} />
 
       {isUserAdmin && (
         <Modal

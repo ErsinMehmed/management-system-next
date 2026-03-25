@@ -22,6 +22,7 @@ import Box from "@/components/dashboard/Box";
 import Layout from "@/components/layout/Dashboard";
 import { formatCurrency } from "@/utils";
 import LineChart from "@/components/charts/LineChart";
+import UploadTest from "../UploadTest";
 
 const DashboardClient = ({ initialData }) => {
   const { data: session } = useSession();
@@ -346,6 +347,7 @@ const DashboardClient = ({ initialData }) => {
           )}
         </Tabs>
       </Modal>
+        <UploadTest/>
     </Layout>
   );
 };
