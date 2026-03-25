@@ -8,6 +8,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { notifyOrderClients } from "@/libs/pusher";
 import { saveNotification } from "@/libs/saveNotification";
 import { notifyAllSuperAdmins } from "@/services/pushNotification";
+import SellerStock from "@/models/sellerStock";
 
 export async function PUT(request, { params }) {
   const session = await getServerSession(authOptions);
@@ -91,6 +92,28 @@ export async function PUT(request, { params }) {
     statusChangedAt: finalStatuses.includes(status) ? new Date() : null,
   };
   await ClientOrder.findByIdAndUpdate(id, update);
+
+  // При доставена — намаляваме наличността на доставчика
+  if (status === "доставена" && existing?.status !== "доставена" && existing?.assignedTo) {
+    const deductStock = async (productId, qty) => {
+      if (!productId || !qty) return;
+      await SellerStock.findOneAndUpdate(
+        { seller: existing.assignedTo, product: productId },
+        { $inc: { stock: -qty } },
+        { upsert: true, new: true }
+      );
+      // Не позволяваме отрицателни стойности
+      await SellerStock.updateOne(
+        { seller: existing.assignedTo, product: productId, stock: { $lt: 0 } },
+        { $set: { stock: 0 } }
+      );
+    };
+    await deductStock(existing.product, existing.quantity);
+    if (existing.secondProduct?.product && existing.secondProduct?.quantity > 0) {
+      await deductStock(existing.secondProduct.product, existing.secondProduct.quantity);
+    }
+  }
+
   const statusEvent = { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: existing?.assignedTo ? String(existing.assignedTo) : null, status, change: "status" };
   notifyOrderClients(statusEvent);
   saveNotification(statusEvent).catch(console.error);

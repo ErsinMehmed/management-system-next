@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSession } from "next-auth/react";
 import { Tabs, Tab, useDisclosure } from "@heroui/react";
-import { FiPackage, FiBarChart2, FiClock } from "react-icons/fi";
+import { FiPackage, FiBarChart2, FiClock, FiLayers } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
 import { clientOrderStore } from "@/stores/useStore";
 import { usePusherClientOrders } from "./ClientOrders/usePusherClientOrders";
@@ -14,6 +14,7 @@ import RejectionModal from "./ClientOrders/RejectionModal";
 import ClientOrdersOrdersTab from "@/components/dashboard/ClientOrdersOrdersTab";
 import ClientOrdersSummaryTab from "@/components/dashboard/ClientOrdersSummaryTab";
 import ClientOrdersHistoryTab from "@/components/dashboard/ClientOrdersHistoryTab";
+import ClientOrdersStockTab from "@/components/dashboard/ClientOrders/ClientOrdersStockTab";
 
 const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { data: session } = useSession();
@@ -60,12 +61,14 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
     setActiveTab(key);
     if (key === "summary") applyFilter(summaryPreset);
     if (key === "history") clientOrderStore.loadHistory();
+    if (key === "stock") clientOrderStore.loadStock();
   };
 
   const mobileTabs = [
     { key: "orders", label: "Заявки", Icon: FiPackage },
     { key: "summary", label: "Обобщение", Icon: FiBarChart2 },
     ...(showHistory ? [{ key: "history", label: "История", Icon: FiClock }] : []),
+    { key: "stock", label: "Наличности", Icon: FiLayers },
   ];
 
   return (
@@ -82,6 +85,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             <Tab key="orders" title="Заявки" />
             <Tab key="summary" title="Обобщение" />
             {showHistory && <Tab key="history" title="История" />}
+            <Tab key="stock" title="Наличности" />
           </Tabs>
         </div>
 
@@ -123,6 +127,9 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
               isHistoryLoading={isHistoryLoading}
               isSuperAdmin={isSuperAdmin}
             />
+          )}
+          {activeTab === "stock" && (
+            <ClientOrdersStockTab isSuperAdmin={isSuperAdmin} />
           )}
         </div>
       </div>
