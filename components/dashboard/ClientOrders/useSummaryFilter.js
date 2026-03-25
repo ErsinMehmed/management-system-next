@@ -9,7 +9,7 @@ function computeRange(preset, customFrom, customTo) {
       return { from: new Date(now - 24 * 60 * 60 * 1000).toISOString(), to: now.toISOString() };
     case "today": {
       const s = new Date(now);
-      s.setHours(0, 0, 0, 0);
+      s.setHours(8, 0, 0, 0);
       return { from: s.toISOString(), to: now.toISOString() };
     }
     case "yesterday": {
