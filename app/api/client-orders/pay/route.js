@@ -2,6 +2,7 @@ import { requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import Sell from "@/models/sell";
+import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
@@ -63,6 +64,15 @@ export async function POST(request) {
       date: paidAt,
     }));
     await Sell.insertMany(sellRecords);
+
+    await Product.bulkWrite(
+      [...productMap.values()].map(({ product, quantity }) => ({
+        updateOne: {
+          filter: { _id: product },
+          update: { $inc: { availability: -quantity } },
+        },
+      }))
+    );
   }
 
   const result = await ClientOrder.updateMany(
