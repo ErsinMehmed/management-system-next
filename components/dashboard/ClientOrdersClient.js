@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSession } from "next-auth/react";
 import { Tabs, Tab, useDisclosure } from "@heroui/react";
-import { FiPackage, FiBarChart2, FiClock, FiLayers } from "react-icons/fi";
+import { FiPackage, FiBarChart2, FiClock, FiLayers, FiUsers } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
 import { clientOrderStore } from "@/stores/useStore";
 import { usePusherClientOrders } from "./ClientOrders/usePusherClientOrders";
@@ -15,6 +15,7 @@ import ClientOrdersOrdersTab from "@/components/dashboard/ClientOrdersOrdersTab"
 import ClientOrdersSummaryTab from "@/components/dashboard/ClientOrdersSummaryTab";
 import ClientOrdersHistoryTab from "@/components/dashboard/ClientOrdersHistoryTab";
 import ClientOrdersStockTab from "@/components/dashboard/ClientOrders/ClientOrdersStockTab";
+import ClientOrdersClientsTab from "@/components/dashboard/ClientOrders/ClientOrdersClientsTab";
 
 const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { data: session } = useSession();
@@ -69,6 +70,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
     { key: "summary", label: "Обобщение", Icon: FiBarChart2 },
     ...(showHistory ? [{ key: "history", label: "История", Icon: FiClock }] : []),
     { key: "stock", label: "Наличности", Icon: FiLayers },
+    ...(isSuperAdmin ? [{ key: "clients", label: "Клиенти", Icon: FiUsers }] : []),
   ];
 
   return (
@@ -86,6 +88,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             <Tab key="summary" title="Обобщение" />
             {showHistory && <Tab key="history" title="История" />}
             <Tab key="stock" title="Наличности" />
+            {isSuperAdmin && <Tab key="clients" title="Клиенти" />}
           </Tabs>
         </div>
 
@@ -130,6 +133,9 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
           )}
           {activeTab === "stock" && (
             <ClientOrdersStockTab isSuperAdmin={isSuperAdmin} />
+          )}
+          {activeTab === "clients" && isSuperAdmin && (
+            <ClientOrdersClientsTab />
           )}
         </div>
       </div>
