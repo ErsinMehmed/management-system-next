@@ -31,6 +31,7 @@ export default function EditOrderModal({ isOpen, onOpenChange, order, availableP
   const [editQuantity, setEditQuantity] = useState(order.quantity ?? 1);
   const [editPrice, setEditPrice] = useState(order.price ?? "");
   const [editPayout, setEditPayout] = useState(order.payout ?? 0);
+  const [editDistributorPayout, setEditDistributorPayout] = useState(order.distributorPayout ?? 0);
   const [editProduct2, setEditProduct2] = useState(order.secondProduct?.product?._id ?? "");
   const [editQuantity2, setEditQuantity2] = useState(order.secondProduct?.quantity ?? "");
   const [editPrice2, setEditPrice2] = useState(order.secondProduct?.price ?? "");
@@ -85,7 +86,8 @@ export default function EditOrderModal({ isOpen, onOpenChange, order, availableP
       Number(editQuantity),
       Number(editPrice),
       isSuperAdmin ? Number(editPayout) : undefined,
-      secondProductPayload
+      secondProductPayload,
+      isSuperAdmin ? Number(editDistributorPayout) : undefined
     );
 
     if (success) {
@@ -129,6 +131,17 @@ export default function EditOrderModal({ isOpen, onOpenChange, order, availableP
             <NumberInput
               value={editPayout}
               onChange={(e) => setEditPayout(e.target.value)}
+              borderClass="border-orange-200"
+              focusClass="focus:ring-orange-400"
+            />
+          </FormField>
+        )}
+
+        {isSuperAdmin && (
+          <FormField label="Хонорар дистрибутор" accent="orange">
+            <NumberInput
+              value={editDistributorPayout}
+              onChange={(e) => setEditDistributorPayout(e.target.value)}
               borderClass="border-orange-200"
               focusClass="focus:ring-orange-400"
             />

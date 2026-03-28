@@ -2,6 +2,8 @@ import { requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import Sell from "@/models/sell";
+import SellerStock from "@/models/sellerStock";
+import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
@@ -19,7 +21,7 @@ export async function POST(request) {
 
   const orders = await ClientOrder.find(
     { assignedTo: sellerObjectId, status: "доставена", isPaid: { $ne: true } },
-    { product: 1, quantity: 1, price: 1, payout: 1, secondProduct: 1 }
+    { product: 1, quantity: 1, price: 1, payout: 1, secondProduct: 1, distributorPayout: 1 }
   ).lean();
 
   // Групиране по продукт — акумулираме бройки и нето стойност
@@ -29,7 +31,8 @@ export async function POST(request) {
     const sp = order.secondProduct;
     const spPayout = sp?.payout ?? 0;
     const mainPayout = order.payout - spPayout;
-    const mainNet = order.price - mainPayout;
+    const distPayout = order.distributorPayout ?? 0;
+    const mainNet = order.price - mainPayout - distPayout;
     const mainKey = String(order.product);
 
     if (productMap.has(mainKey)) {
@@ -63,6 +66,23 @@ export async function POST(request) {
       date: paidAt,
     }));
     await Sell.insertMany(sellRecords);
+
+    // Изваждаме от наличността на доставчика и от общата наличност на продукта
+    const deductOps = [...productMap.values()].map(({ product, quantity }) => [
+      SellerStock.findOneAndUpdate(
+        { seller: sellerObjectId, product },
+        { $inc: { stock: -quantity } },
+        { upsert: true, new: true }
+      ).then(() =>
+        SellerStock.updateOne(
+          { seller: sellerObjectId, product, stock: { $lt: 0 } },
+          { $set: { stock: 0 } }
+        )
+      ),
+      Product.findByIdAndUpdate(product, { $inc: { availability: -quantity } }),
+    ]).flat();
+
+    await Promise.all(deductOps);
   }
 
   const result = await ClientOrder.updateMany(

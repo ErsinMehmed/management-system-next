@@ -8,7 +8,6 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { notifyOrderClients } from "@/libs/pusher";
 import { saveNotification } from "@/libs/saveNotification";
 import { notifyAllSuperAdmins } from "@/services/pushNotification";
-import SellerStock from "@/models/sellerStock";
 
 export async function PUT(request, { params }) {
   const session = await getServerSession(authOptions);
@@ -21,8 +20,8 @@ export async function PUT(request, { params }) {
 
   const existing = await ClientOrder.findById(id).select("status product quantity assignedTo orderNumber secondProduct").lean();
 
-  // Редактиране на продукт, цена, бройка и хонорар
-  if (body.product !== undefined || body.price !== undefined || body.payout !== undefined || body.secondProduct !== undefined) {
+  // Редактиране на продукт, цена, бройка, хонорар и хонорар на дистрибутор
+  if (body.product !== undefined || body.price !== undefined || body.payout !== undefined || body.secondProduct !== undefined || body.distributorPayout !== undefined) {
     if (existing?.status !== "нова" && session.user.role !== "Super Admin") {
       return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
     }
@@ -33,6 +32,10 @@ export async function PUT(request, { params }) {
 
     // Хонорар: ако е подаден ръчно (само Super Admin), използва се той
     // иначе се авто-изчислява при смяна на продукт или бройка
+    if (body.distributorPayout !== undefined && session.user.role === "Super Admin") {
+      update.distributorPayout = Number(body.distributorPayout) || 0;
+    }
+
     if (body.payout !== undefined && session.user.role === "Super Admin") {
       update.payout = body.payout;
     } else if (body.product !== undefined || body.quantity !== undefined || body.secondProduct !== undefined) {
@@ -92,27 +95,6 @@ export async function PUT(request, { params }) {
     statusChangedAt: finalStatuses.includes(status) ? new Date() : null,
   };
   await ClientOrder.findByIdAndUpdate(id, update);
-
-  // При доставена — намаляваме наличността на доставчика
-  if (status === "доставена" && existing?.status !== "доставена" && existing?.assignedTo) {
-    const deductStock = async (productId, qty) => {
-      if (!productId || !qty) return;
-      await SellerStock.findOneAndUpdate(
-        { seller: existing.assignedTo, product: productId },
-        { $inc: { stock: -qty } },
-        { upsert: true, new: true }
-      );
-      // Не позволяваме отрицателни стойности
-      await SellerStock.updateOne(
-        { seller: existing.assignedTo, product: productId, stock: { $lt: 0 } },
-        { $set: { stock: 0 } }
-      );
-    };
-    await deductStock(existing.product, existing.quantity);
-    if (existing.secondProduct?.product && existing.secondProduct?.quantity > 0) {
-      await deductStock(existing.secondProduct.product, existing.secondProduct.quantity);
-    }
-  }
 
   const statusEvent = { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: existing?.assignedTo ? String(existing.assignedTo) : null, status, change: "status" };
   notifyOrderClients(statusEvent);

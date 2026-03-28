@@ -104,6 +104,13 @@ export async function POST(request) {
   delete data.price2;
   data.payout = totalPayout;
 
+  // Хонорар дистрибутор — само Super Admin
+  if (session.user.role !== "Super Admin" || !data.distributorPayout) {
+    data.distributorPayout = 0;
+  } else {
+    data.distributorPayout = Number(data.distributorPayout) || 0;
+  }
+
   // Атомарен автоинкремент на номера на поръчката
   const counter = await mongoose.connection.db
     .collection("counters")

@@ -156,7 +156,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
         </div>
       </nav>
 
-      <CreateOrderModal isOpen={isCreateOpen} onOpenChange={onCreateOpenChange} sellers={sellers} />
+      <CreateOrderModal isOpen={isCreateOpen} onOpenChange={onCreateOpenChange} sellers={sellers} isSuperAdmin={isSuperAdmin} />
       <PayoutModal isOpen={isPayoutOpen} onOpenChange={onPayoutOpenChange} pendingPayout={pendingPayout} />
       <RejectionModal isOpen={isRejectionOpen} onOpenChange={onRejectionOpenChange} orderId={pendingRejectionOrderId} />
     </Layout>

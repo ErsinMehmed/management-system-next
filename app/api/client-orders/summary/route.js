@@ -12,13 +12,14 @@ const expandProducts = [
       _entries: {
         $concatArrays: [
           [{
-            product:      "$product",
-            quantity:     "$quantity",
-            price:        "$price",
-            deliveryCost: { $ifNull: ["$deliveryCost", 0] },
-            payout:       { $subtract: [{ $ifNull: ["$payout", 0] }, { $ifNull: ["$secondProduct.payout", 0] }] },
-            isPaid:       "$isPaid",
-            isMain:       true,
+            product:          "$product",
+            quantity:         "$quantity",
+            price:            "$price",
+            deliveryCost:     { $ifNull: ["$deliveryCost", 0] },
+            payout:           { $subtract: [{ $ifNull: ["$payout", 0] }, { $ifNull: ["$secondProduct.payout", 0] }] },
+            distributorPayout: { $ifNull: ["$distributorPayout", 0] },
+            isPaid:           "$isPaid",
+            isMain:           true,
           }],
           {
             $cond: [
@@ -27,13 +28,14 @@ const expandProducts = [
                 { $gt: [{ $ifNull: ["$secondProduct.quantity", 0] }, 0] },
               ]},
               [{
-                product:      "$secondProduct.product",
-                quantity:     "$secondProduct.quantity",
-                price:        { $ifNull: ["$secondProduct.price", 0] },
-                deliveryCost: { $literal: 0 },
-                payout:       { $ifNull: ["$secondProduct.payout", 0] },
-                isPaid:       "$isPaid",
-                isMain:       false,
+                product:          "$secondProduct.product",
+                quantity:         "$secondProduct.quantity",
+                price:            { $ifNull: ["$secondProduct.price", 0] },
+                deliveryCost:     { $literal: 0 },
+                payout:           { $ifNull: ["$secondProduct.payout", 0] },
+                distributorPayout: { $literal: 0 },
+                isPaid:           "$isPaid",
+                isMain:           false,
               }],
               [],
             ],
@@ -45,13 +47,14 @@ const expandProducts = [
   { $unwind: "$_entries" },
   {
     $addFields: {
-      product:      "$_entries.product",
-      quantity:     "$_entries.quantity",
-      price:        "$_entries.price",
-      deliveryCost: "$_entries.deliveryCost",
-      payout:       "$_entries.payout",
-      isPaid:       "$_entries.isPaid",
-      _isMain:      "$_entries.isMain",
+      product:          "$_entries.product",
+      quantity:         "$_entries.quantity",
+      price:            "$_entries.price",
+      deliveryCost:     "$_entries.deliveryCost",
+      payout:           "$_entries.payout",
+      distributorPayout: "$_entries.distributorPayout",
+      isPaid:           "$_entries.isPaid",
+      _isMain:          "$_entries.isMain",
     },
   },
 ];
@@ -140,13 +143,14 @@ export async function GET(request) {
     {
       $group: {
         _id: { seller: "$assignedTo", product: "$product" },
-        totalQuantity: { $sum: "$quantity" },
-        totalRevenue:  { $sum: "$price" },
-        totalPayout:   { $sum: "$orderPayout" },
-        totalDelivery: { $sum: "$deliveryCost" },
-        unpaidPayout:  { $sum: { $cond: [{ $ne: ["$isPaid", true] }, "$orderPayout", 0] } },
-        unpaidCount:   { $sum: { $cond: [{ $ne: ["$isPaid", true] }, 1, 0] } },
-        product:       { $first: "$productDoc" },
+        totalQuantity:         { $sum: "$quantity" },
+        totalRevenue:          { $sum: "$price" },
+        totalPayout:           { $sum: "$orderPayout" },
+        totalDelivery:         { $sum: "$deliveryCost" },
+        totalDistributorPayout: { $sum: "$distributorPayout" },
+        unpaidPayout:          { $sum: { $cond: [{ $ne: ["$isPaid", true] }, "$orderPayout", 0] } },
+        unpaidCount:           { $sum: { $cond: [{ $ne: ["$isPaid", true] }, 1, 0] } },
+        product:               { $first: "$productDoc" },
       },
     },
     {
@@ -164,27 +168,30 @@ export async function GET(request) {
         sellerName:        { $first: { $ifNull: ["$seller.name", "Неасайнати"] } },
         items: {
           $push: {
-            product:      "$product",
-            totalQuantity: "$totalQuantity",
-            totalRevenue:  "$totalRevenue",
-            totalPayout:   "$totalPayout",
-            totalDelivery: "$totalDelivery",
-            unpaidPayout:  "$unpaidPayout",
-            unpaidCount:   "$unpaidCount",
+            product:               "$product",
+            totalQuantity:         "$totalQuantity",
+            totalRevenue:          "$totalRevenue",
+            totalPayout:           "$totalPayout",
+            totalDelivery:         "$totalDelivery",
+            totalDistributorPayout: "$totalDistributorPayout",
+            unpaidPayout:          "$unpaidPayout",
+            unpaidCount:           "$unpaidCount",
           },
         },
-        sellerTotal:        { $sum: "$totalRevenue" },
-        sellerPayout:       { $sum: "$totalPayout" },
-        sellerDelivery:     { $sum: "$totalDelivery" },
-        sellerUnpaidPayout: { $sum: "$unpaidPayout" },
-        sellerUnpaidCount:  { $sum: "$unpaidCount" },
+        sellerTotal:               { $sum: "$totalRevenue" },
+        sellerPayout:              { $sum: "$totalPayout" },
+        sellerDelivery:            { $sum: "$totalDelivery" },
+        sellerDistributorPayout:   { $sum: "$totalDistributorPayout" },
+        sellerUnpaidPayout:        { $sum: "$unpaidPayout" },
+        sellerUnpaidCount:         { $sum: "$unpaidCount" },
       },
     },
     { $sort: { sellerTotal: -1 } },
   ]);
 
-  const grandTotal      = sellers.reduce((sum, s) => sum + s.sellerTotal, 0);
-  const grandPayout     = sellers.reduce((sum, s) => sum + s.sellerPayout, 0);
-  const grandPaidPayout = sellers.reduce((sum, s) => sum + (s.sellerPayout - s.sellerUnpaidPayout), 0);
-  return NextResponse.json({ bySeller: true, sellers, grandTotal, grandPayout, grandPaidPayout });
+  const grandTotal               = sellers.reduce((sum, s) => sum + s.sellerTotal, 0);
+  const grandPayout              = sellers.reduce((sum, s) => sum + s.sellerPayout, 0);
+  const grandPaidPayout          = sellers.reduce((sum, s) => sum + (s.sellerPayout - s.sellerUnpaidPayout), 0);
+  const grandDistributorPayout   = sellers.reduce((sum, s) => sum + (s.sellerDistributorPayout ?? 0), 0);
+  return NextResponse.json({ bySeller: true, sellers, grandTotal, grandPayout, grandPaidPayout, grandDistributorPayout });
 }
