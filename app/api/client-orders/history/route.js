@@ -52,7 +52,7 @@ const expandProducts = [
   },
 ];
 
-export async function GET() {
+export async function GET(request) {
   const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
