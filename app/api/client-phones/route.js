@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 // GET — уникални телефони от поръчките с пагинация, обогатени с имена
 export async function GET(request) {
-  const { error } = await requireSuperAdmin();
+  const { error } = await requireSuperAdmin(request);
   if (error) return error;
 
   await connectMongoDB();
@@ -49,7 +49,7 @@ export async function GET(request) {
 
 // PUT — запазване на име за телефонен номер
 export async function PUT(request) {
-  const { error } = await requireSuperAdmin();
+  const { error } = await requireSuperAdmin(request);
   if (error) return error;
 
   const { phone, name } = await request.json();

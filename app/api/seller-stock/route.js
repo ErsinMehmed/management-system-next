@@ -1,15 +1,14 @@
 import { requireAdmin, requireSuperAdmin } from "@/helpers/requireRole";
+import { getAuth } from "@/helpers/getAuth";
 import connectMongoDB from "@/libs/mongodb";
 import SellerStock from "@/models/sellerStock";
 import User from "@/models/user";
 import Role from "@/models/role";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import mongoose from "mongoose";
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
+export async function GET(request) {
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   await connectMongoDB();
@@ -43,7 +42,7 @@ export async function GET() {
   }
 
   // Admin / Super Admin — всички доставчици без Super Admin
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
   if (error) return error;
 
   const superAdminRole = await Role.findOne({ name: "Super Admin" }, { _id: 1 }).lean();
