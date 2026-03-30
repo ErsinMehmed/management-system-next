@@ -1,12 +1,11 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import { NextResponse } from "next/server";
 import connectMongoDB from "@/libs/mongodb";
 import User from "@/models/user";
 
 // Записва FCM token към текущия потребител
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
 
   if (!session) {
     return NextResponse.json({ status: false }, { status: 401 });
@@ -30,7 +29,7 @@ export async function POST(request) {
 
 // Изтрива FCM token (при logout)
 export async function DELETE(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
 
   if (!session) {
     return NextResponse.json({ status: false }, { status: 401 });

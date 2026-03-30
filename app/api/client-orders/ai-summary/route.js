@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import { NextResponse } from "next/server";
 import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
@@ -73,7 +72,7 @@ ${lines.join("\n")}`;
 
 export async function POST(request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getAuth(request);
     if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
     const role = session.user.role;

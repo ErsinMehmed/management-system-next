@@ -3,11 +3,10 @@ import Sell from "@/models/sell";
 import Product from "@/models/product";
 import RequestHandler from "@/helpers/RequestHandler";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
 
   if (!session) {
     return NextResponse.json(

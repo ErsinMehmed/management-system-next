@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import { sseClients } from "@/libs/sseClients";
 
 export const dynamic = "force-dynamic";
@@ -7,7 +6,7 @@ export const dynamic = "force-dynamic";
 const encoder = new TextEncoder();
 
 export async function GET(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
 
   if (!session) return new Response("Unauthorized", { status: 401 });
 

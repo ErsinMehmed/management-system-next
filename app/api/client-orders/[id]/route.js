@@ -3,14 +3,13 @@ import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import { notifyOrderClients } from "@/libs/pusher";
 import { saveNotification } from "@/libs/saveNotification";
 import { notifyAllSuperAdmins } from "@/services/pushNotification";
 
 export async function PUT(request, { params }) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const { id } = await params;
@@ -113,7 +112,7 @@ export async function PUT(request, { params }) {
 }
 
 export async function PATCH(request, { params }) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const { id } = await params;
