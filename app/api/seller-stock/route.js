@@ -27,6 +27,8 @@ export async function GET(request) {
       productName: s.product?.name ?? "Непознат продукт",
       productWeight: s.product?.weight,
       productFlavor: s.product?.flavor,
+      productPuffs: s.product?.puffs,
+      productCount: s.product?.count,
       stock: s.stock,
     }));
 
