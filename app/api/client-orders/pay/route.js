@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
 export async function POST(request) {
-  const { error } = await requireSuperAdmin();
+  const { error } = await requireSuperAdmin(request);
   if (error) return error;
 
   const { sellerId } = await request.json();

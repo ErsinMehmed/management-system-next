@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
 
 export async function GET(request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
   if (error) return error;
 
   await connectMongoDB();

@@ -88,7 +88,7 @@ export async function GET(request) {
 
 // Bulk upsert — записва всички продукти за даден доставчик наведнъж
 export async function POST(request) {
-  const { error } = await requireSuperAdmin();
+  const { error } = await requireSuperAdmin(request);
   if (error) return error;
 
   const { sellerId, products } = await request.json();
@@ -112,7 +112,7 @@ export async function POST(request) {
 }
 
 export async function PUT(request) {
-  const { error } = await requireSuperAdmin();
+  const { error } = await requireSuperAdmin(request);
   if (error) return error;
 
   const { stockId, stock } = await request.json();

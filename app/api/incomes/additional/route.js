@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 import { getDateCondition } from "@/utils";
 
 export async function POST(request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
 
   if (error) return error;
 
@@ -60,7 +60,7 @@ export async function GET(request) {
 }
 
 export async function DELETE(request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
   if (error) return error;
 
   const id = request.nextUrl.searchParams.get("id");

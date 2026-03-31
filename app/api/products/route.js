@@ -4,7 +4,7 @@ import Product from "@/models/product";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
-  const { error } = await requireSuperAdmin();
+  const { error } = await requireSuperAdmin(request);
   if (error) return error;
 
   const data = await request.json();
