@@ -8,6 +8,24 @@ import { notifyOrderClients } from "@/libs/pusher";
 import { saveNotification } from "@/libs/saveNotification";
 import { notifyAllSuperAdmins } from "@/services/pushNotification";
 
+export async function GET(request, { params }) {
+  const session = await getAuth(request);
+  if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
+
+  const { id } = await params;
+  await connectMongoDB();
+
+  const order = await ClientOrder.findById(id)
+    .populate("product", "name flavor weight puffs count image_url")
+    .populate("secondProduct.product", "name flavor weight puffs count image_url")
+    .populate("assignedTo", "name")
+    .lean();
+
+  if (!order) return NextResponse.json({ message: "Не е намерена." }, { status: 404 });
+
+  return NextResponse.json(order);
+}
+
 export async function PUT(request, { params }) {
   const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
