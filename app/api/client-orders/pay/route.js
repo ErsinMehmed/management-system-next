@@ -2,7 +2,6 @@ import { requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import Sell from "@/models/sell";
-import SellerStock from "@/models/sellerStock";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
@@ -67,20 +66,11 @@ export async function POST(request) {
     }));
     await Sell.insertMany(sellRecords);
 
-    // Изваждаме от наличността на доставчика и от общата наличност на продукта
-    const deductOps = [...productMap.values()].map(({ product, quantity }) => [
-      SellerStock.findOneAndUpdate(
-        { seller: sellerObjectId, product },
-        { $inc: { stock: -quantity } },
-        { upsert: true, new: true }
-      ).then(() =>
-        SellerStock.updateOne(
-          { seller: sellerObjectId, product, stock: { $lt: 0 } },
-          { $set: { stock: 0 } }
-        )
-      ),
-      Product.findByIdAndUpdate(product, { $inc: { availability: -quantity } }),
-    ]).flat();
+    // Наличността на доставчика вече се намалява при смяна на статус на "доставена"
+    // Тук само намаляваме общата наличност на продукта
+    const deductOps = [...productMap.values()].map(({ product, quantity }) =>
+      Product.findByIdAndUpdate(product, { $inc: { availability: -quantity } })
+    );
 
     await Promise.all(deductOps);
   }

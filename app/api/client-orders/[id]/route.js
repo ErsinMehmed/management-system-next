@@ -2,6 +2,7 @@ import { requireAdmin, requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
+import SellerStock from "@/models/sellerStock";
 import { NextResponse } from "next/server";
 import { getAuth } from "@/helpers/getAuth";
 import { notifyOrderClients } from "@/libs/pusher";
@@ -112,6 +113,53 @@ export async function PUT(request, { params }) {
     statusChangedAt: finalStatuses.includes(status) ? new Date() : null,
   };
   await ClientOrder.findByIdAndUpdate(id, update);
+
+  // Промяна на наличността на доставчика при смяна на статус
+  const sellerId = existing?.assignedTo;
+  const wasDelivered = existing?.status === "доставена";
+  const isNowDelivered = status === "доставена";
+
+  if (sellerId && wasDelivered !== isNowDelivered) {
+    const delta = isNowDelivered ? -1 : 1;
+    const stockOps = [];
+
+    if (existing.product && existing.quantity > 0) {
+      stockOps.push(
+        SellerStock.findOneAndUpdate(
+          { seller: sellerId, product: existing.product },
+          { $inc: { stock: delta * existing.quantity } },
+          { upsert: true, new: true }
+        ).then(() =>
+          delta < 0
+            ? SellerStock.updateOne(
+                { seller: sellerId, product: existing.product, stock: { $lt: 0 } },
+                { $set: { stock: 0 } }
+              )
+            : null
+        )
+      );
+    }
+
+    const sp = existing.secondProduct;
+    if (sp?.product && sp?.quantity > 0) {
+      stockOps.push(
+        SellerStock.findOneAndUpdate(
+          { seller: sellerId, product: sp.product },
+          { $inc: { stock: delta * sp.quantity } },
+          { upsert: true, new: true }
+        ).then(() =>
+          delta < 0
+            ? SellerStock.updateOne(
+                { seller: sellerId, product: sp.product, stock: { $lt: 0 } },
+                { $set: { stock: 0 } }
+              )
+            : null
+        )
+      );
+    }
+
+    await Promise.all(stockOps);
+  }
 
   const statusEvent = { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: existing?.assignedTo ? String(existing.assignedTo) : null, status, change: "status" };
   notifyOrderClients(statusEvent);
