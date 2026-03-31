@@ -4,7 +4,7 @@ import Product from "@/models/product";
 import { NextResponse } from "next/server";
 
 export async function PUT(request, { params }) {
-  const { error: authError } = await requireSuperAdmin();
+  const { error: authError } = await requireSuperAdmin(request);
 
   if (authError) return authError;
 
