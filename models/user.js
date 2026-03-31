@@ -26,6 +26,7 @@ const userSchema = new Schema(
     target: Number,
     role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
     fcmTokens: { type: [String], default: [] },
+    expoPushTokens: { type: [String], default: [] },
   },
   {
     timestamps: true,

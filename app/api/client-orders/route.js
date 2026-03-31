@@ -6,6 +6,7 @@ import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { notifyAllEmployees, notifyUser } from "@/services/pushNotification";
+import { notifyUserExpo } from "@/services/expoNotification";
 import { notifyOrderClients } from "@/libs/pusher";
 import { saveNotification } from "@/libs/saveNotification";
 
@@ -138,6 +139,7 @@ export async function POST(request) {
   const createdByAssignee = String(data.assignedTo) === String(session.user.id);
   if (data.assignedTo && !createdByAssignee) {
     notifyUser(data.assignedTo, notifPayload).catch(console.error);
+    notifyUserExpo(data.assignedTo, notifPayload).catch(console.error);
   } else if (!data.assignedTo) {
     notifyAllEmployees(notifPayload).catch(console.error);
   }
