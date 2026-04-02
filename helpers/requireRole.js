@@ -1,53 +1,38 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import { NextResponse } from "next/server";
 
 const ADMIN_ROLES = ["Admin", "Super Admin"];
 const SUPER_ADMIN_ROLES = ["Super Admin"];
 
-export async function requireAdmin() {
-  const session = await getServerSession(authOptions);
+/**
+ * @param {Request|null} request - Pass the Next.js request for mobile Bearer token support.
+ */
+export async function requireAdmin(request = null) {
+  const session = await getAuth(request);
 
   if (!session) {
-    return {
-      error: NextResponse.json(
-        { message: "Не сте оторизирани." },
-        { status: 401 }
-      ),
-    };
+    return { error: NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 }) };
   }
 
   if (!ADMIN_ROLES.includes(session.user.role)) {
-    return {
-      error: NextResponse.json(
-        { message: "Нямате достъп до тази операция." },
-        { status: 403 }
-      ),
-    };
+    return { error: NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 }) };
   }
 
   return { session };
 }
 
-export async function requireSuperAdmin() {
-  const session = await getServerSession(authOptions);
+/**
+ * @param {Request|null} request - Pass the Next.js request for mobile Bearer token support.
+ */
+export async function requireSuperAdmin(request = null) {
+  const session = await getAuth(request);
 
   if (!session) {
-    return {
-      error: NextResponse.json(
-        { message: "Не сте оторизирани." },
-        { status: 401 }
-      ),
-    };
+    return { error: NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 }) };
   }
 
   if (!SUPER_ADMIN_ROLES.includes(session.user.role)) {
-    return {
-      error: NextResponse.json(
-        { message: "Нямате достъп до тази операция." },
-        { status: 403 }
-      ),
-    };
+    return { error: NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 }) };
   }
 
   return { session };

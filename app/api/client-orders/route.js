@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import mongoose from "mongoose";
@@ -7,11 +6,12 @@ import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { notifyAllEmployees, notifyUser } from "@/services/pushNotification";
+import { notifyUserExpo } from "@/services/expoNotification";
 import { notifyOrderClients } from "@/libs/pusher";
 import { saveNotification } from "@/libs/saveNotification";
 
 export async function GET(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
 
   if (!session) {
     return NextResponse.json({ status: false }, { status: 401 });
@@ -29,7 +29,14 @@ export async function GET(request) {
   if (status) filter.status = status;
   if (!isAdmin) filter.assignedTo = session.user.id;
 
-  const [totalItems, items] = await Promise.all([
+  const now = new Date();
+  const dayStart = new Date(now);
+  dayStart.setHours(7, 0, 0, 0);
+  if (now < dayStart) dayStart.setDate(dayStart.getDate() - 1);
+  const dailyFilter = { status: "доставена", createdAt: { $gte: dayStart } };
+  if (!isAdmin) dailyFilter.assignedTo = session.user.id;
+
+  const [totalItems, items, dailyCount] = await Promise.all([
     ClientOrder.countDocuments(filter),
     ClientOrder.find(filter)
       .sort({ _id: -1 })
@@ -39,6 +46,7 @@ export async function GET(request) {
       .populate({ path: "secondProduct.product", select: "name weight flavor puffs count category", populate: { path: "category", select: "name" } })
       .populate({ path: "assignedTo", select: "name" })
       .lean(),
+    ClientOrder.countDocuments(dailyFilter),
   ]);
 
   return NextResponse.json({
@@ -49,11 +57,12 @@ export async function GET(request) {
       total_results: totalItems,
       per_page: perPage,
     },
+    dailyCount,
   });
 }
 
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const isAdmin = ["Admin", "Super Admin"].includes(session.user.role);
@@ -95,6 +104,13 @@ export async function POST(request) {
   delete data.price2;
   data.payout = totalPayout;
 
+  // Хонорар дистрибутор — само Super Admin
+  if (session.user.role !== "Super Admin" || !data.distributorPayout) {
+    data.distributorPayout = 0;
+  } else {
+    data.distributorPayout = Number(data.distributorPayout) || 0;
+  }
+
   // Атомарен автоинкремент на номера на поръчката
   const counter = await mongoose.connection.db
     .collection("counters")
@@ -118,11 +134,13 @@ export async function POST(request) {
   const notifPayload = {
     title: "📦 Нова поръчка",
     body: `${clientType} · ${data.phone}\n${order.product?.name} × ${data.quantity} бр. — ${data.price} лв.`,
-    data: { url: `/dashboard/client-orders/${order._id}` },
+    data: { url: `/dashboard/client-orders/${order._id}`, orderId: String(order._id) },
   };
-  if (data.assignedTo) {
+  const createdByAssignee = String(data.assignedTo) === String(session.user.id);
+  if (data.assignedTo && !createdByAssignee) {
     notifyUser(data.assignedTo, notifPayload).catch(console.error);
-  } else {
+    notifyUserExpo(data.assignedTo, notifPayload).catch(console.error);
+  } else if (!data.assignedTo) {
     notifyAllEmployees(notifPayload).catch(console.error);
   }
 

@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 import { notifyAllEmployees } from "@/services/pushNotification";
 
 export async function POST(request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
   if (error) return error;
 
   const data = await request.json();
@@ -58,7 +58,7 @@ export async function GET(request) {
 }
 
 export async function DELETE(request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
   if (error) return error;
 
   const id = request.nextUrl.searchParams.get("id");

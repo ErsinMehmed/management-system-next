@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import connectMongoDB from "@/libs/mongodb";
 import Notification from "@/models/notification";
 import { NextResponse } from "next/server";
@@ -13,7 +12,7 @@ function buildFilter(userId, role) {
 }
 
 export async function GET(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ status: false }, { status: 401 });
 
   await connectMongoDB();
@@ -46,7 +45,7 @@ export async function GET(request) {
 
 // Маркира всички като прочетени
 export async function PATCH() {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ status: false }, { status: 401 });
 
   await connectMongoDB();

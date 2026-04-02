@@ -1,25 +1,18 @@
 import mongoose from "mongoose";
 
-let isConnected = false;
+const cached = global._mongoose ?? (global._mongoose = { conn: null, promise: null });
 
 const connectMongoDB = async () => {
-    if (isConnected) {
-        return;
-    }
+  if (cached.conn) return cached.conn;
 
-    if (mongoose.connection.readyState === 1) {
-        isConnected = true;
-        return;
-    }
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(process.env.MONGODB_URI, {
+      bufferCommands: false,
+    });
+  }
 
-    try {
-        await mongoose.connect(process.env.MONGODB_URI);
-
-        isConnected = true;
-        console.log("Connected to MongoDB.");
-    } catch (error) {
-        console.error("MongoDB connection error:", error);
-    }
+  cached.conn = await cached.promise;
+  return cached.conn;
 };
 
 export default connectMongoDB;

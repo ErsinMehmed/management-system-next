@@ -1,12 +1,11 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import connectMongoDB from "@/libs/mongodb";
 import User from "@/models/user";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const { currentPassword, newPassword } = await request.json();

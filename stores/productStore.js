@@ -9,6 +9,7 @@ class Product {
   productData = {};
   isLoading = true;
   isProductUpdated = false;
+  isCreating = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -40,6 +41,22 @@ class Product {
   hydrate = (products) => {
     this.products = products;
     this.isLoading = false;
+  };
+
+  createProduct = async (data) => {
+    this.isCreating = true;
+    try {
+      const response = await productAction.createProduct(data);
+      if (response.status !== false) {
+        commonStore.setSuccessMessage("Продуктът е добавен успешно");
+        this.loadProducts();
+        return true;
+      }
+      commonStore.setErrorMessage(response.message || "Грешка при добавяне");
+      return false;
+    } finally {
+      this.isCreating = false;
+    }
   };
 
   updateProduct = async (id, data) => {

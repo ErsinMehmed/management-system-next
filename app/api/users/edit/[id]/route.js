@@ -4,7 +4,7 @@ import User from "@/models/user";
 import { NextResponse } from "next/server";
 
 export async function PUT(request, { params }) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
 
   if (error) return error;
 

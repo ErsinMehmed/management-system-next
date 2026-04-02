@@ -4,7 +4,7 @@ import Ad from "@/models/ad";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
   if (error) return error;
 
   const data = await request.json();
@@ -28,7 +28,7 @@ export async function GET() {
 }
 
 export async function DELETE(request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
   if (error) return error;
 
   const id = request.nextUrl.searchParams.get("id");

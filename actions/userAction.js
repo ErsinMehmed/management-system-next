@@ -13,17 +13,6 @@ class User {
     }
   };
 
-  getUserStocks = async (userId) => {
-    try {
-      const url = userId ? `/api/users/stock?userId=${userId}` : "/api/users/stock";
-      const response = await fetch(url);
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
-  };
-
   getUsers = async () => {
     try {
       const response = await fetch("/api/users/list");
@@ -39,38 +28,6 @@ class User {
       const response = await fetch("/api/distributors");
 
       return await response.json();
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  updateUserStocks = async (data) => {
-    try {
-      const response = await fetch(`/api/users/stock`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      return response.json();
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  addUserStock = async (data) => {
-    try {
-      const response = await fetch(`/api/user/stock`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      return response.json();
     } catch (error) {
       throw error;
     }

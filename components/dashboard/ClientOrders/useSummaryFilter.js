@@ -9,16 +9,19 @@ function computeRange(preset, customFrom, customTo) {
       return { from: new Date(now - 24 * 60 * 60 * 1000).toISOString(), to: now.toISOString() };
     case "today": {
       const s = new Date(now);
-      s.setHours(0, 0, 0, 0);
-      return { from: s.toISOString(), to: now.toISOString() };
+      s.setHours(7, 0, 0, 0);
+      if (now < s) s.setDate(s.getDate() - 1);
+      const e = new Date(s);
+      e.setDate(e.getDate() + 1);
+      return { from: s.toISOString(), to: e.toISOString() };
     }
     case "yesterday": {
       const s = new Date(now);
+      s.setHours(7, 0, 0, 0);
+      if (now < s) s.setDate(s.getDate() - 1);
       s.setDate(s.getDate() - 1);
-      s.setHours(0, 0, 0, 0);
-      const e = new Date(now);
-      e.setDate(e.getDate() - 1);
-      e.setHours(23, 59, 59, 999);
+      const e = new Date(s);
+      e.setDate(e.getDate() + 1);
       return { from: s.toISOString(), to: e.toISOString() };
     }
     case "week": {

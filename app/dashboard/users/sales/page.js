@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
-import UserAviability from "@/components/pages/users/UserAviability";
 import UserInformation from "@/components/pages/users/UserInformation";
 import DateRangePicker from "@/components/html/DateRangePicker";
 import SkeletonLoader from "@/components/pages/users/SkeletonCardLoader";

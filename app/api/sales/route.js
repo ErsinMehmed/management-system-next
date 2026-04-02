@@ -1,14 +1,12 @@
 import connectMongoDB from "@/libs/mongodb";
 import Sell from "@/models/sell";
 import Product from "@/models/product";
-import UserStock from "@/models/userStock";
 import RequestHandler from "@/helpers/RequestHandler";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
 
   if (!session) {
     return NextResponse.json(
@@ -45,24 +43,6 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-
-    // const userStock = await UserStock.findOne({
-    //   user: userId,
-    //   product: data.product,
-    // });
-
-    // if (!userStock || userStock.stock < data.quantity) {
-    //   return NextResponse.json(
-    //     {
-    //       message: "Недостатъчна наличност от продукта за този потребител",
-    //       status: false,
-    //     },
-    //     { status: 400 }
-    //   );
-    // }
-
-    // userStock.stock -= data.quantity;
-    // await userStock.save();
 
     product.availability -= data.quantity;
     await product.save();
@@ -119,24 +99,6 @@ export async function DELETE(request) {
         { status: 404 }
       );
     }
-
-    // const userStock = await UserStock.findOne({
-    //   user: sellToDelete.creator,
-    //   product: sellToDelete.product,
-    // });
-
-    // if (userStock) {
-    //   userStock.stock += sellToDelete.quantity;
-    //   await userStock.save();
-    // } else {
-    //   return NextResponse.json(
-    //     {
-    //       message: "Не бяха намерени наличности за този потребител и продукт",
-    //       status: false,
-    //     },
-    //     { status: 404 }
-    //   );
-    // }
 
     product.availability += sellToDelete.quantity;
 

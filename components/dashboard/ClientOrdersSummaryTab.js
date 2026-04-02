@@ -47,7 +47,8 @@ const ClientOrdersSummaryTab = ({
   const grandCost = summary?.bySeller && summary?.sellers
     ? summary.sellers.reduce((s, sel) => s + sel.items.reduce((si, item) => si + (item.product?.price ?? 0) * item.totalQuantity, 0), 0)
     : 0;
-  const grandNetRevenue = (summary?.grandTotal ?? 0) - (summary?.grandPayout ?? 0);
+  const grandDistributorPayout = summary?.grandDistributorPayout ?? 0;
+  const grandNetRevenue = (summary?.grandTotal ?? 0) - (summary?.grandPayout ?? 0) - grandDistributorPayout;
   const grandProfit = grandNetRevenue - grandCost;
 
   return (
@@ -281,13 +282,14 @@ const ClientOrdersSummaryTab = ({
               </div>
 
               <div className="overflow-x-auto">
-                <div className={isSuperAdmin ? "min-w-[760px]" : "min-w-[400px]"}>
-                  <div className={`grid px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-7" : "grid-cols-4"}`}>
+                <div className={isSuperAdmin ? "min-w-[900px]" : "min-w-[400px]"}>
+                  <div className={`grid px-4 py-2 border-b border-gray-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest ${isSuperAdmin ? "grid-cols-8" : "grid-cols-4"}`}>
                     <span>Продукт</span>
                     <span className="text-center">Бройки</span>
                     <span className="text-right">Оборот</span>
                     <span className="text-right">Доставка</span>
                     {isSuperAdmin && <span className="text-right">За изплащане</span>}
+                    {isSuperAdmin && <span className="text-right text-orange-400">Дистрибутор</span>}
                     {isSuperAdmin && <span className="text-right">Нето</span>}
                     {isSuperAdmin && <span className="text-right">Печалба</span>}
                   </div>
@@ -295,31 +297,38 @@ const ClientOrdersSummaryTab = ({
                   {seller.items
                     .slice()
                     .sort((a, b) => b.totalRevenue - a.totalRevenue)
-                    .map((item, i) => (
-                      <div key={i} className={`grid px-4 py-3 border-b border-gray-50 last:border-0 items-center group hover:bg-blue-50/30 transition-colors ${isSuperAdmin ? "grid-cols-7" : "grid-cols-4"}`}>
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-sm font-medium text-slate-700 truncate">{productTitle(item.product)}</span>
-                          <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${item.unpaidCount === 0 ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
-                            {item.unpaidCount === 0 ? "✓" : "○"}
-                          </span>
+                    .map((item, i) => {
+                      const distPayout = item.totalDistributorPayout ?? 0;
+                      const neto = item.totalRevenue - item.totalPayout - distPayout;
+                      const profit = neto - (item.product?.price ?? 0) * item.totalQuantity;
+                      return (
+                        <div key={i} className={`grid px-4 py-3 border-b border-gray-50 last:border-0 items-center group hover:bg-blue-50/30 transition-colors ${isSuperAdmin ? "grid-cols-8" : "grid-cols-4"}`}>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-sm font-medium text-slate-700 truncate">{productTitle(item.product)}</span>
+                            <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${item.unpaidCount === 0 ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
+                              {item.unpaidCount === 0 ? "✓" : "○"}
+                            </span>
+                          </div>
+                          <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
+                          <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
+                          <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
+                          {isSuperAdmin && <span className={`text-sm font-semibold text-right tabular-nums ${item.unpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(item.totalPayout, 2)}</span>}
+                          {isSuperAdmin && <span className="text-sm font-semibold text-orange-400 text-right tabular-nums">{distPayout > 0 ? formatCurrency(distPayout, 2) : "—"}</span>}
+                          {isSuperAdmin && <span className="text-sm font-semibold text-purple-600 text-right tabular-nums">{formatCurrency(neto, 2)}</span>}
+                          {isSuperAdmin && <span className="text-sm font-semibold text-emerald-600 text-right tabular-nums">{formatCurrency(profit, 2)}</span>}
                         </div>
-                        <span className="text-sm text-slate-500 text-center tabular-nums">{item.totalQuantity} бр.</span>
-                        <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{formatCurrency(item.totalRevenue, 2)}</span>
-                        <span className="text-sm font-semibold text-slate-700 text-right tabular-nums">{item.totalDelivery > 0 ? formatCurrency(item.totalDelivery, 2) : "—"}</span>
-                        {isSuperAdmin && <span className={`text-sm font-semibold text-right tabular-nums ${item.unpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(item.totalPayout, 2)}</span>}
-                        {isSuperAdmin && <span className="text-sm font-semibold text-purple-600 text-right tabular-nums">{formatCurrency(item.totalRevenue - item.totalPayout, 2)}</span>}
-                        {isSuperAdmin && <span className="text-sm font-semibold text-emerald-600 text-right tabular-nums">{formatCurrency(item.totalRevenue - item.totalPayout - (item.product?.price ?? 0) * item.totalQuantity, 2)}</span>}
-                      </div>
-                    ))}
+                      );
+                    })}
 
-                  <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-7" : "grid-cols-4"}`}>
+                  <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-8" : "grid-cols-4"}`}>
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
                     <span />
                     <span className="text-sm font-bold text-slate-800 text-right tabular-nums">{formatCurrency(seller.sellerTotal, 2)}</span>
                     <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{seller.sellerDelivery > 0 ? formatCurrency(seller.sellerDelivery, 2) : "—"}</span>
                     {isSuperAdmin && <span className={`text-sm font-bold text-right tabular-nums ${seller.sellerUnpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(seller.sellerPayout, 2)}</span>}
-                    {isSuperAdmin && <span className="text-sm font-bold text-purple-600 text-right tabular-nums">{formatCurrency(seller.sellerTotal - seller.sellerPayout, 2)}</span>}
-                    {isSuperAdmin && <span className="text-sm font-bold text-emerald-600 text-right tabular-nums">{formatCurrency(seller.sellerTotal - seller.sellerPayout - seller.items.reduce((s, i) => s + (i.product?.price ?? 0) * i.totalQuantity, 0), 2)}</span>}
+                    {isSuperAdmin && <span className="text-sm font-bold text-orange-400 text-right tabular-nums">{(seller.sellerDistributorPayout ?? 0) > 0 ? formatCurrency(seller.sellerDistributorPayout, 2) : "—"}</span>}
+                    {isSuperAdmin && <span className="text-sm font-bold text-purple-600 text-right tabular-nums">{formatCurrency(seller.sellerTotal - seller.sellerPayout - (seller.sellerDistributorPayout ?? 0), 2)}</span>}
+                    {isSuperAdmin && <span className="text-sm font-bold text-emerald-600 text-right tabular-nums">{formatCurrency(seller.sellerTotal - seller.sellerPayout - (seller.sellerDistributorPayout ?? 0) - seller.items.reduce((s, i) => s + (i.product?.price ?? 0) * i.totalQuantity, 0), 2)}</span>}
                   </div>
                 </div>
               </div>

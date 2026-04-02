@@ -14,6 +14,7 @@ const initialOrderData = {
   product2: "",
   quantity2: "",
   price2: "",
+  distributorPayout: "",
 };
 
 const STATUS_COLORS = {
@@ -33,6 +34,8 @@ class ClientOrderStore {
   isSummaryLoading = false;
   history = { sellers: [], isSeller: false, grandTotal: 0, grandPayout: 0 };
   isHistoryLoading = false;
+  stock = { sellers: [] };
+  isStockLoading = false;
   isLoadingMore = false;
 
   constructor() {
@@ -148,11 +151,11 @@ class ClientOrderStore {
     }
   };
 
-  updateProductPrice = async (id, product, quantity, price, payout, secondProduct = undefined) => {
+  updateProductPrice = async (id, product, quantity, price, payout, secondProduct = undefined, distributorPayout = undefined) => {
     const res = await fetch(`/api/client-orders/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ product, quantity, price, payout, secondProduct }),
+      body: JSON.stringify({ product, quantity, price, payout, secondProduct, distributorPayout }),
     });
     const data = await res.json();
     if (data.status) commonStore.setSuccessMessage(data.message);
@@ -215,6 +218,39 @@ class ClientOrderStore {
       commonStore.setSuccessMessage(data.message);
       this.loadOrders();
     }
+  };
+
+  loadStock = async () => {
+    this.isStockLoading = true;
+    try {
+      const res = await fetch("/api/seller-stock");
+      const data = await res.json();
+      this.stock = data;
+    } finally {
+      this.isStockLoading = false;
+    }
+  };
+
+  saveSellerStock = async (sellerId, products) => {
+    const res = await fetch("/api/seller-stock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sellerId, products }),
+    });
+    const data = await res.json();
+    if (data.status) await this.loadStock();
+    return data.status;
+  };
+
+  updateStock = async (stockId, stock) => {
+    const res = await fetch("/api/seller-stock", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stockId, stock }),
+    });
+    const data = await res.json();
+    if (data.status) await this.loadStock();
+    return data.status;
   };
 
   handlePageChange = (direction) => {

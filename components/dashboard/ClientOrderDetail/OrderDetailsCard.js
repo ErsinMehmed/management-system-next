@@ -1,4 +1,4 @@
-import { FiMapPin, FiFileText, FiUser, FiAlertCircle, FiTruck, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiMapPin, FiFileText, FiUser, FiAlertCircle, FiTruck, FiEye, FiEyeOff, FiDollarSign } from "react-icons/fi";
 import { formatCurrency } from "@/utils";
 
 function DetailRow({ icon, label, value }) {
@@ -66,6 +66,19 @@ export default function OrderDetailsCard({ order, currentRejectionReason, viewed
             <p className="text-xs text-red-400 font-medium mb-0.5">Причина за отказ</p>
             <p className="text-sm font-medium text-slate-700">{currentRejectionReason}</p>
           </div>
+        </div>
+      )}
+
+      {isSuperAdmin && order.distributorPayout > 0 && (
+        <div className="flex items-center justify-between px-5 py-3.5">
+          <div className="flex items-center gap-3">
+            <FiDollarSign className="w-4 h-4 text-orange-400 shrink-0" />
+            <div>
+              <p className="text-xs text-orange-400 font-medium mb-0.5">Хонорар дистрибутор</p>
+              <p className="text-sm font-medium text-slate-700">За изплащане на дистрибутор</p>
+            </div>
+          </div>
+          <span className="text-sm font-bold text-orange-500">{formatCurrency(order.distributorPayout, 2)}</span>
         </div>
       )}
 

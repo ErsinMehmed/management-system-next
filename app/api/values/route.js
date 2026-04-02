@@ -15,7 +15,7 @@ export async function GET() {
 }
 
 export async function PUT(request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(request);
   if (error) return error;
 
   const data = await request.json();

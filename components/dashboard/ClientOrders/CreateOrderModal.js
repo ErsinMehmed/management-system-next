@@ -6,7 +6,7 @@ import ClientOrderForm from "@/components/forms/ClientOrder";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
 import { productTitle } from "@/utils";
 
-const CreateOrderModal = observer(({ isOpen, onOpenChange, sellers }) => {
+const CreateOrderModal = observer(({ isOpen, onOpenChange, sellers, isSuperAdmin }) => {
   const { orderData, isCreating } = clientOrderStore;
   const { errorFields } = commonStore;
   const [localErrors, setLocalErrors] = useState({});
@@ -71,6 +71,7 @@ const CreateOrderModal = observer(({ isOpen, onOpenChange, sellers }) => {
         products={availableProducts}
         sellers={sellers}
         handleFieldChange={handleFieldChange}
+        isSuperAdmin={isSuperAdmin}
       />
     </Modal>
   );

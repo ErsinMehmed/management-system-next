@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
-import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX, FiClock, FiRefreshCw } from "react-icons/fi";
+import moment from "moment";
+import "moment/locale/bg";
+
+moment.locale("bg");
 import Pagination from "@/components/table/Pagination";
 import Select from "@/components/html/Select";
 import { productTitle, formatCurrency } from "@/utils";
@@ -137,17 +141,39 @@ const ClientOrdersOrdersTab = ({
 
   return (
   <>
-    <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
-      {(isAdmin || session?.user?.role === "Seller") && (
+    <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-50 border border-green-100">
+        <FiCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
+        <span className="text-sm font-semibold text-green-700">Поръчки днес:</span>
+        <span className="text-sm font-bold text-green-600 tabular-nums">
+          {isLoading ? "—" : (orders?.dailyCount ?? 0)}
+        </span>
+      </div>
+      <div className="flex flex-col sm:flex-row items-center gap-2 sm:ml-auto w-full sm:w-auto">
         <Button
-          variant="primary"
+          variant="solid"
+          color="primary"
+          radius="full"
           size="md"
-          onPress={onOpen}
-          className="w-full sm:w-auto font-semibold rounded-full">
-          <FiPlus className="w-4 h-4" />
-          Добави
+          isLoading={isLoading}
+          startContent={!isLoading && <FiRefreshCw className="w-4 h-4" />}
+          onPress={() => clientOrderStore.loadOrders()}
+          className="w-full sm:w-auto font-semibold">
+          Обнови
         </Button>
-      )}
+        {(isAdmin || session?.user?.role === "Seller") && (
+          <Button
+            variant="solid"
+            color="primary"
+            radius="full"
+            size="md"
+            startContent={<FiPlus className="w-4 h-4" />}
+            onPress={onOpen}
+            className="w-full sm:w-auto font-semibold">
+            Добави
+          </Button>
+        )}
+      </div>
     </div>
 
     {isLoading ? (
@@ -172,15 +198,15 @@ const ClientOrdersOrdersTab = ({
 
               <Link href={`/dashboard/client-orders/${order._id}`} className="px-4 pt-3.5 pb-3 flex flex-col gap-3 flex-1">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-slate-100">
                       {(() => { const Icon = clientOrderStatusConfig[order.status]?.icon ?? FiPhone; return <Icon className="w-3.5 h-3.5 text-slate-400" />; })()}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-slate-800 text-base leading-tight">{order.phone}</p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <p className="font-bold text-slate-800 text-base leading-tight truncate">{order.phone}</p>
                         {order.orderNumber > 0 && (
-                          <span className="text-xs font-bold text-slate-400">#{order.orderNumber}</span>
+                          <span className="text-xs font-bold text-slate-400 shrink-0">#{order.orderNumber}</span>
                         )}
                       </div>
                       <span className={`text-xs font-semibold ${order.isNewClient ? "text-green-600" : "text-slate-400"}`}>
@@ -245,6 +271,10 @@ const ClientOrdersOrdersTab = ({
                     )}
                   </div>
                 )}
+                <div className="flex items-center gap-1.5 text-xs text-slate-300 pt-1">
+                  <FiClock className="w-3 h-3 shrink-0" />
+                  <span>{moment(order.createdAt).format("DD.MM.YYYY HH:mm")}</span>
+                </div>
               </Link>
 
               {/* Desktop admin footer — hidden on mobile (swipe handles it) */}
@@ -262,8 +292,8 @@ const ClientOrdersOrdersTab = ({
                     baseClass="w-36"
                     classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${clientOrderStatusConfig[order.status]?.badge} ${isLocked ? "opacity-60 pointer-events-none" : ""}`}
                   />
-                  <Button isIconOnly variant="danger-soft" size="sm"
-                    isDisabled={deletingId === order._id}
+                  <Button isIconOnly variant="light" color="danger" size="sm"
+                    isLoading={deletingId === order._id}
                     onPress={() => handleDelete(order._id)}>
                     <FiTrash2 className="w-4 h-4" />
                   </Button>

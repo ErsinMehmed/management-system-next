@@ -23,6 +23,7 @@ export function useOrderState(order) {
   const [currentSecondProduct, setCurrentSecondProduct] = useState(order.secondProduct?.product ?? null);
   const [currentQuantity2, setCurrentQuantity2] = useState(order.secondProduct?.quantity ?? 0);
   const [currentPrice2, setCurrentPrice2] = useState(order.secondProduct?.price ?? 0);
+  const [currentDistributorPayout, setCurrentDistributorPayout] = useState(order.distributorPayout ?? 0);
 
   // Sync on server refresh
   useEffect(() => {
@@ -52,6 +53,7 @@ export function useOrderState(order) {
     setCurrentProductName,
     currentQuantity2, setCurrentQuantity2,
     currentPrice2, setCurrentPrice2,
+    currentDistributorPayout, setCurrentDistributorPayout,
     availableProducts,
   };
 }

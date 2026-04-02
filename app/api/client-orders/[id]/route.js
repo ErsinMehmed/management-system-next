@@ -2,14 +2,33 @@ import { requireAdmin, requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
+import SellerStock from "@/models/sellerStock";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import { notifyOrderClients } from "@/libs/pusher";
 import { saveNotification } from "@/libs/saveNotification";
+import { notifyAllSuperAdmins } from "@/services/pushNotification";
+
+export async function GET(request, { params }) {
+  const session = await getAuth(request);
+  if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
+
+  const { id } = await params;
+  await connectMongoDB();
+
+  const order = await ClientOrder.findById(id)
+    .populate("product", "name flavor weight puffs count image_url")
+    .populate("secondProduct.product", "name flavor weight puffs count image_url")
+    .populate("assignedTo", "name")
+    .lean();
+
+  if (!order) return NextResponse.json({ message: "Не е намерена." }, { status: 404 });
+
+  return NextResponse.json(order);
+}
 
 export async function PUT(request, { params }) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const { id } = await params;
@@ -19,8 +38,8 @@ export async function PUT(request, { params }) {
 
   const existing = await ClientOrder.findById(id).select("status product quantity assignedTo orderNumber secondProduct").lean();
 
-  // Редактиране на продукт, цена, бройка и хонорар
-  if (body.product !== undefined || body.price !== undefined || body.payout !== undefined || body.secondProduct !== undefined) {
+  // Редактиране на продукт, цена, бройка, хонорар и хонорар на дистрибутор
+  if (body.product !== undefined || body.price !== undefined || body.payout !== undefined || body.secondProduct !== undefined || body.distributorPayout !== undefined) {
     if (existing?.status !== "нова" && session.user.role !== "Super Admin") {
       return NextResponse.json({ message: "Нямате достъп до тази операция." }, { status: 403 });
     }
@@ -31,6 +50,10 @@ export async function PUT(request, { params }) {
 
     // Хонорар: ако е подаден ръчно (само Super Admin), използва се той
     // иначе се авто-изчислява при смяна на продукт или бройка
+    if (body.distributorPayout !== undefined && session.user.role === "Super Admin") {
+      update.distributorPayout = Number(body.distributorPayout) || 0;
+    }
+
     if (body.payout !== undefined && session.user.role === "Super Admin") {
       update.payout = body.payout;
     } else if (body.product !== undefined || body.quantity !== undefined || body.secondProduct !== undefined) {
@@ -90,15 +113,72 @@ export async function PUT(request, { params }) {
     statusChangedAt: finalStatuses.includes(status) ? new Date() : null,
   };
   await ClientOrder.findByIdAndUpdate(id, update);
+
+  // Промяна на наличността на доставчика при смяна на статус
+  const sellerId = existing?.assignedTo;
+  const wasDelivered = existing?.status === "доставена";
+  const isNowDelivered = status === "доставена";
+
+  if (sellerId && wasDelivered !== isNowDelivered) {
+    const delta = isNowDelivered ? -1 : 1;
+    const stockOps = [];
+
+    if (existing.product && existing.quantity > 0) {
+      stockOps.push(
+        SellerStock.findOneAndUpdate(
+          { seller: sellerId, product: existing.product },
+          { $inc: { stock: delta * existing.quantity } },
+          { upsert: true, new: true }
+        ).then(() =>
+          delta < 0
+            ? SellerStock.updateOne(
+                { seller: sellerId, product: existing.product, stock: { $lt: 0 } },
+                { $set: { stock: 0 } }
+              )
+            : null
+        )
+      );
+    }
+
+    const sp = existing.secondProduct;
+    if (sp?.product && sp?.quantity > 0) {
+      stockOps.push(
+        SellerStock.findOneAndUpdate(
+          { seller: sellerId, product: sp.product },
+          { $inc: { stock: delta * sp.quantity } },
+          { upsert: true, new: true }
+        ).then(() =>
+          delta < 0
+            ? SellerStock.updateOne(
+                { seller: sellerId, product: sp.product, stock: { $lt: 0 } },
+                { $set: { stock: 0 } }
+              )
+            : null
+        )
+      );
+    }
+
+    await Promise.all(stockOps);
+  }
+
   const statusEvent = { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: existing?.assignedTo ? String(existing.assignedTo) : null, status, change: "status" };
   notifyOrderClients(statusEvent);
   saveNotification(statusEvent).catch(console.error);
+
+  if (finalStatuses.includes(status) && !isSuperAdmin) {
+    const statusLabel = status === "доставена" ? "✅ Доставена" : "❌ Отказана";
+    notifyAllSuperAdmins({
+      title: `${statusLabel} поръчка #${existing?.orderNumber}`,
+      body: `${session.user.name} промени статуса на поръчка #${existing?.orderNumber} на "${status}"`,
+      data: { url: `/dashboard/client-orders/${id}` },
+    }).catch(console.error);
+  }
 
   return NextResponse.json({ message: "Статусът е обновен", status: true });
 }
 
 export async function PATCH(request, { params }) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   const { id } = await params;
@@ -120,7 +200,7 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const { error, session } = await requireAdmin();
+  const { error, session } = await requireAdmin(request);
   if (error) return error;
 
   const { id } = await params;

@@ -3,13 +3,12 @@ import Sell from "@/models/sell";
 import User from "@/models/user";
 import Order from "@/models/order";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import { getDateCondition } from "@/utils";
 import mongoose from "mongoose";
 
 export async function GET(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
 
   if (!session) {
     return NextResponse.json(

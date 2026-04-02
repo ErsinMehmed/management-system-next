@@ -2,8 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSession } from "next-auth/react";
-import { Tabs } from "@heroui/react";
-import { FiPackage, FiBarChart2, FiClock } from "react-icons/fi";
+import { Tabs, Tab, useDisclosure } from "@heroui/react";
+import { FiPackage, FiBarChart2, FiClock, FiLayers, FiUsers } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
 import { clientOrderStore } from "@/stores/useStore";
 import { usePusherClientOrders } from "./ClientOrders/usePusherClientOrders";
@@ -14,6 +14,8 @@ import RejectionModal from "./ClientOrders/RejectionModal";
 import ClientOrdersOrdersTab from "@/components/dashboard/ClientOrdersOrdersTab";
 import ClientOrdersSummaryTab from "@/components/dashboard/ClientOrdersSummaryTab";
 import ClientOrdersHistoryTab from "@/components/dashboard/ClientOrdersHistoryTab";
+import ClientOrdersStockTab from "@/components/dashboard/ClientOrders/ClientOrdersStockTab";
+import ClientOrdersClientsTab from "@/components/dashboard/ClientOrders/ClientOrdersClientsTab";
 
 const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { data: session } = useSession();
@@ -25,15 +27,9 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
   const { orders, isLoading, handlePageChange, handlePageClick, summary, isSummaryLoading, history, isHistoryLoading } = clientOrderStore;
 
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const onCreateOpen = () => setIsCreateOpen(true);
-  const onCreateOpenChange = (open) => setIsCreateOpen(open);
-  const [isRejectionOpen, setIsRejectionOpen] = useState(false);
-  const onRejectionOpen = () => setIsRejectionOpen(true);
-  const onRejectionOpenChange = (open) => setIsRejectionOpen(open);
-  const [isPayoutOpen, setIsPayoutOpen] = useState(false);
-  const onPayoutOpen = () => setIsPayoutOpen(true);
-  const onPayoutOpenChange = (open) => setIsPayoutOpen(open);
+  const { isOpen: isCreateOpen, onOpen: onCreateOpen, onOpenChange: onCreateOpenChange } = useDisclosure();
+  const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
+  const { isOpen: isPayoutOpen, onOpen: onPayoutOpen, onOpenChange: onPayoutOpenChange } = useDisclosure();
 
   const [deletingId, setDeletingId] = useState(null);
   const [pendingRejectionOrderId, setPendingRejectionOrderId] = useState(null);
@@ -66,12 +62,15 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
     setActiveTab(key);
     if (key === "summary") applyFilter(summaryPreset);
     if (key === "history") clientOrderStore.loadHistory();
+    if (key === "stock") clientOrderStore.loadStock();
   };
 
   const mobileTabs = [
     { key: "orders", label: "Заявки", Icon: FiPackage },
     { key: "summary", label: "Обобщение", Icon: FiBarChart2 },
     ...(showHistory ? [{ key: "history", label: "История", Icon: FiClock }] : []),
+    { key: "stock", label: "Наличности", Icon: FiLayers },
+    ...(isSuperAdmin ? [{ key: "clients", label: "Клиенти", Icon: FiUsers }] : []),
   ];
 
   return (
@@ -84,12 +83,12 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             aria-label="Заявки табове"
             selectedKey={activeTab}
             onSelectionChange={handleTabChange}
-            className="mb-4">
-            <Tabs.List>
-              <Tabs.Tab id="orders">Заявки</Tabs.Tab>
-              <Tabs.Tab id="summary">Обобщение</Tabs.Tab>
-              {showHistory && <Tabs.Tab id="history">История</Tabs.Tab>}
-            </Tabs.List>
+            classNames={{ tabList: "mb-4" }}>
+            <Tab key="orders" title="Заявки" />
+            <Tab key="summary" title="Обобщение" />
+            {showHistory && <Tab key="history" title="История" />}
+            <Tab key="stock" title="Наличности" />
+            {isSuperAdmin && <Tab key="clients" title="Клиенти" />}
           </Tabs>
         </div>
 
@@ -132,6 +131,12 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
               isSuperAdmin={isSuperAdmin}
             />
           )}
+          {activeTab === "stock" && (
+            <ClientOrdersStockTab isSuperAdmin={isSuperAdmin} />
+          )}
+          {activeTab === "clients" && isSuperAdmin && (
+            <ClientOrdersClientsTab />
+          )}
         </div>
       </div>
 
@@ -157,7 +162,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
         </div>
       </nav>
 
-      <CreateOrderModal isOpen={isCreateOpen} onOpenChange={onCreateOpenChange} sellers={sellers} />
+      <CreateOrderModal isOpen={isCreateOpen} onOpenChange={onCreateOpenChange} sellers={sellers} isSuperAdmin={isSuperAdmin} />
       <PayoutModal isOpen={isPayoutOpen} onOpenChange={onPayoutOpenChange} pendingPayout={pendingPayout} />
       <RejectionModal isOpen={isRejectionOpen} onOpenChange={onRejectionOpenChange} orderId={pendingRejectionOrderId} />
     </Layout>
