@@ -1,10 +1,10 @@
 @import "tailwindcss";
-@import "@heroui/styles";
 
 @theme {
   --color-primary: #2563eb;
   --color-secondary: #64748b;
   --color-tableHeader: #ebf4ff;
+  --font-sans: "Inter", sans-serif;
 }
 
 @layer components {
@@ -37,5 +37,6 @@
   }
 }
 
+@plugin '../hero.js';
 @source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
