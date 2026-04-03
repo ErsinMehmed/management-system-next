@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { Tabs, Tab, useDisclosure } from "@heroui/react";
 import { FiPackage, FiBarChart2, FiClock, FiLayers, FiUsers } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
+import LinearLoader from "@/components/LinearLoader";
 import { clientOrderStore } from "@/stores/useStore";
 import { usePusherClientOrders } from "./ClientOrders/usePusherClientOrders";
 import { useSummaryFilter } from "./ClientOrders/useSummaryFilter";
@@ -75,6 +76,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
   return (
     <Layout title="Заявки">
+      <LinearLoader show={isLoading} />
       <div className="min-h-screen 2xl:px-10">
 
         {/* Desktop tabs — скрити на мобилен */}
