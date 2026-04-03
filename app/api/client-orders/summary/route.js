@@ -134,11 +134,12 @@ export async function GET(request) {
     return NextResponse.json({ bySeller: false, items, grandTotal, grandDelivery, grandPaidPayout });
   }
 
-  // Admin / Super Admin — всички доставени, групирани по доставчик → продукт
+  // Admin / Super Admin — групиране по seller+product, после по seller, user lookup САМО веднъж на seller
   const sellers = await ClientOrder.aggregate([
     { $match: { status: "доставена", ...dateMatch } },
     ...expandProducts,
     ...productAndCategoryLookup,
+    // Първи group: по seller + product
     {
       $group: {
         _id: { seller: "$assignedTo", product: "$product" },
@@ -152,19 +153,10 @@ export async function GET(request) {
         product:               { $first: "$productDoc" },
       },
     },
-    {
-      $lookup: {
-        from: "users",
-        localField: "_id.seller",
-        foreignField: "_id",
-        as: "seller",
-      },
-    },
-    { $unwind: { path: "$seller", preserveNullAndEmptyArrays: true } },
+    // Втори group: по seller — събираме items масив
     {
       $group: {
         _id: "$_id.seller",
-        sellerName:        { $first: { $ifNull: ["$seller.name", "Неасайнати"] } },
         items: {
           $push: {
             product:               "$product",
@@ -185,6 +177,22 @@ export async function GET(request) {
         sellerUnpaidCount:         { $sum: "$unpaidCount" },
       },
     },
+    // User lookup СЛЕД grouping — веднъж на seller, не веднъж на seller+product
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "_id",
+        as: "seller",
+      },
+    },
+    { $unwind: { path: "$seller", preserveNullAndEmptyArrays: true } },
+    {
+      $addFields: {
+        sellerName: { $ifNull: ["$seller.name", "Неасайнати"] },
+      },
+    },
+    { $unset: "seller" },
     { $sort: { sellerTotal: -1 } },
   ]);
 
