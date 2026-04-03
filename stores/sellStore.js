@@ -5,7 +5,7 @@ import { sellRules as getSellRules } from "@/rules/sell";
 import { valueRules as getValueRules } from "@/rules/values";
 import commonStore from "@/stores/commonStore";
 import productStore from "@/stores/productStore";
-import { debounce } from "lodash";
+import { debounce } from "@/utils";
 
 const initialSellData = {
   quantity: null,
