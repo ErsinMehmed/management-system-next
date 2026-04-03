@@ -15,6 +15,10 @@ const notificationSchema = new Schema(
   { timestamps: true }
 );
 
+notificationSchema.index({ assignedTo: 1, createdAt: -1 });
+notificationSchema.index({ changedByUserId: 1, createdAt: -1 });
+notificationSchema.index({ createdAt: -1 });
+
 const Notification =
   mongoose.models.Notification ||
   mongoose.model("Notification", notificationSchema);

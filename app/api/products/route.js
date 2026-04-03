@@ -37,7 +37,7 @@ export async function GET() {
     })
     .select(
       "name weight flavor price availability sell_prices seller_prices count category puffs image_url hidden units_per_box"
-    );
+    ).lean();
 
   return NextResponse.json(products);
 }

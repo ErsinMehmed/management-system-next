@@ -11,6 +11,8 @@ const adSchema = new Schema(
   }
 );
 
+adSchema.index({ date: -1 });
+
 const Ad = mongoose.models.Ad || mongoose.model("Ad", adSchema);
 
 export default Ad;
