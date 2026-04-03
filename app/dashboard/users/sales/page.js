@@ -9,7 +9,7 @@ import SkeletonLoader from "@/components/pages/users/SkeletonCardLoader";
 import UserCard from "@/components/pages/users/Card";
 import { userStore, expenseStore, incomeStore } from "@/stores/useStore";
 import { parseDate } from "@internationalized/date";
-import moment from "moment";
+import { formatDate, daysAgo } from "@/utils";
 
 const UserSales = () => {
   const { isUserSalesLoad, loadUserSales, loadUsers } = userStore;
@@ -17,8 +17,8 @@ const UserSales = () => {
   const { loadProductExpenses, loadFuelExpenses, loadAdditionalExpenses } =
     expenseStore;
   const [dateRange, setDateRange] = useState({
-    start: parseDate(moment().subtract(7, "days").format("YYYY-MM-DD")),
-    end: parseDate(moment().format("YYYY-MM-DD")),
+    start: parseDate(formatDate(daysAgo(7), "YYYY-MM-DD")),
+    end: parseDate(formatDate(new Date(), "YYYY-MM-DD")),
   });
   const { data: session } = useSession();
   const isUserAdmin = session?.user?.role === "Admin" || session?.user?.role === "Super Admin";

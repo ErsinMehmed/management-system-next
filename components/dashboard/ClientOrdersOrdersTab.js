@@ -4,13 +4,9 @@ import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
 import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX, FiClock, FiRefreshCw } from "react-icons/fi";
-import moment from "moment";
-import "moment/locale/bg";
-
-moment.locale("bg");
 import Pagination from "@/components/table/Pagination";
 import Select from "@/components/html/Select";
-import { productTitle, formatCurrency } from "@/utils";
+import { productTitle, formatCurrency, formatDate } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
 import { clientOrderStatuses, clientOrderStatusConfig } from "@/data";
 
@@ -306,7 +302,7 @@ const ClientOrdersOrdersTab = ({
                 )}
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 pt-1">
                   <FiClock className="w-3 h-3 shrink-0" />
-                  <span>{moment(order.createdAt).format("DD.MM.YYYY HH:mm")}</span>
+                  <span>{formatDate(order.createdAt, "DD.MM.YYYY HH:mm")}</span>
                 </div>
               </Link>
 

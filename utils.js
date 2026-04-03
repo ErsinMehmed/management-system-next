@@ -113,6 +113,51 @@ export function objectIsEmpty(obj) {
   return true;
 }
 
+export function formatDate(date, format = "DD.MM.YYYY") {
+  const d = new Date(date);
+  if (isNaN(d)) return "—";
+  const pad = (n) => String(n).padStart(2, "0");
+  const day = pad(d.getDate());
+  const month = pad(d.getMonth() + 1);
+  const year = d.getFullYear();
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+
+  switch (format) {
+    case "DD.MM.YYYY HH:mm": return `${day}.${month}.${year} ${hours}:${minutes}`;
+    case "DD.MM.YYYY H:mm": return `${day}.${month}.${year} ${d.getHours()}:${minutes}`;
+    case "YYYY-MM-DD": return `${year}-${month}-${day}`;
+    default: return `${day}.${month}.${year}`;
+  }
+}
+
+const TIME_UNITS = [
+  { max: 60, divisor: 1, unit: "секунда", units: "секунди" },
+  { max: 3600, divisor: 60, unit: "минута", units: "минути" },
+  { max: 86400, divisor: 3600, unit: "час", units: "часа" },
+  { max: 2592000, divisor: 86400, unit: "ден", units: "дни" },
+  { max: 31536000, divisor: 2592000, unit: "месец", units: "месеца" },
+  { max: Infinity, divisor: 31536000, unit: "година", units: "години" },
+];
+
+export function timeAgo(date) {
+  const seconds = Math.floor((Date.now() - new Date(date)) / 1000);
+  if (seconds < 10) return "преди малко";
+
+  for (const { max, divisor, unit, units } of TIME_UNITS) {
+    if (seconds < max) {
+      const val = Math.floor(seconds / divisor);
+      return `преди ${val} ${val === 1 ? unit : units}`;
+    }
+  }
+}
+
+export function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d;
+}
+
 export function productTitle(product) {
   switch (product?.category?.name) {
     case "Бутилки":
