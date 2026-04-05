@@ -232,14 +232,24 @@ const DashboardClient = ({ initialData }) => {
           aria-label='Options'
           selectedKey={selectedCategory}
           onSelectionChange={setSelectedCategory}>
-          <Tabs.List>
-            {categories.map((category) => (
-              <Tabs.Tab key={category} id={category}>{category}</Tabs.Tab>
-            ))}
-            {isUserAdmin && additionalIncomes?.incomes > 0 && (
-              <Tabs.Tab id='Други'>Други</Tabs.Tab>
-            )}
-          </Tabs.List>
+          <Tabs.ListContainer>
+            <Tabs.List>
+              {categories.map((category, index) => (
+                <Tabs.Tab key={category} id={category}>
+                  {index > 0 && <Tabs.Separator />}
+                  <Tabs.Indicator />
+                  {category}
+                </Tabs.Tab>
+              ))}
+              {isUserAdmin && additionalIncomes?.incomes > 0 && (
+                <Tabs.Tab id='Други'>
+                  <Tabs.Separator />
+                  <Tabs.Indicator />
+                  Други
+                </Tabs.Tab>
+              )}
+            </Tabs.List>
+          </Tabs.ListContainer>
 
           {categories.map((category) => (
             <Tabs.Panel key={category} id={category}>
@@ -279,16 +289,26 @@ const DashboardClient = ({ initialData }) => {
           aria-label='Options'
           selectedKey={selectedCategory}
           onSelectionChange={setSelectedCategory}>
-          <Tabs.List>
-            {categories.map((category) => (
-              <Tabs.Tab key={category} id={category}>{category}</Tabs.Tab>
-            ))}
-            {(expenses.total_fuel_expenses > 0 ||
-              expenses.total_additional_expenses > 0 ||
-              expenses.total_ad_expenses > 0) && (
-              <Tabs.Tab id='Други'>Други</Tabs.Tab>
-            )}
-          </Tabs.List>
+          <Tabs.ListContainer>
+            <Tabs.List>
+              {categories.map((category, index) => (
+                <Tabs.Tab key={category} id={category}>
+                  {index > 0 && <Tabs.Separator />}
+                  <Tabs.Indicator />
+                  {category}
+                </Tabs.Tab>
+              ))}
+              {(expenses.total_fuel_expenses > 0 ||
+                expenses.total_additional_expenses > 0 ||
+                expenses.total_ad_expenses > 0) && (
+                <Tabs.Tab id='Други'>
+                  <Tabs.Separator />
+                  <Tabs.Indicator />
+                  Други
+                </Tabs.Tab>
+              )}
+            </Tabs.List>
+          </Tabs.ListContainer>
 
           {categories.map((category) => (
             <Tabs.Panel key={category} id={category}>

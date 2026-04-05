@@ -8,12 +8,6 @@ import {
   AccordionItem,
   Avatar,
   Chip,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
 } from "@heroui/react";
 import { FiPlus, FiMinus, FiSave, FiPackage, FiCheck } from "react-icons/fi";
 import { clientOrderStore, productStore } from "@/stores/useStore";
@@ -168,61 +162,59 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
     <div className='flex flex-col gap-4 pb-24'>
       {/* ── Десктоп: таблица (матрица) ── */}
       <div className='hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto'>
-        <Table
-          removeWrapper
-          aria-label='Наличности по доставчик'
-          classNames={{
-            th: "bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wide first:rounded-tl-2xl last:rounded-tr-2xl py-3",
-            td: "py-2.5 align-middle",
-          }}>
-          <TableHeader>
-            <TableColumn className='w-48 min-w-[160px]'>Продукт</TableColumn>
-            {sellers.map((s) => {
-              const initials = s.sellerName
-                .split(" ")
-                .map((w) => w[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase();
-              return (
-                <TableColumn
-                  key={String(s.sellerId)}
-                  className='text-center min-w-[140px]'>
-                  <div className='flex flex-col items-center gap-1'>
-                    <Avatar
-                      name={initials}
-                      src={s.profileImage ?? undefined}
-                      size='sm'
-                      className='bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-xs font-bold'
-                    />
-                    <span className='font-semibold text-slate-700 normal-case tracking-normal text-xs'>
-                      {s.sellerName.split(" ")[0]}
-                    </span>
-                  </div>
-                </TableColumn>
-              );
-            })}
-          </TableHeader>
-          <TableBody>
+        <table className='min-w-full' aria-label='Наличности по доставчик'>
+          <thead>
+            <tr>
+              <th className='w-48 min-w-[160px] bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wide py-3 px-4 text-left first:rounded-tl-2xl'>
+                Продукт
+              </th>
+              {sellers.map((s) => {
+                const initials = s.sellerName
+                  .split(" ")
+                  .map((w) => w[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase();
+                return (
+                  <th
+                    key={String(s.sellerId)}
+                    className='text-center min-w-[140px] bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wide py-3 px-4 last:rounded-tr-2xl'>
+                    <div className='flex flex-col items-center gap-1'>
+                      <Avatar
+                        name={initials}
+                        src={s.profileImage ?? undefined}
+                        size='sm'
+                        className='bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-xs font-bold'
+                      />
+                      <span className='font-semibold text-slate-700 normal-case tracking-normal text-xs'>
+                        {s.sellerName.split(" ")[0]}
+                      </span>
+                    </div>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
             {visibleProducts.map((product) => {
               const pid = String(product._id);
               return (
-                <TableRow
+                <tr
                   key={pid}
                   className='hover:bg-slate-50/60 transition-colors group'>
-                  <TableCell>
+                  <td className='py-2.5 px-4 align-middle'>
                     <p className='text-sm font-medium text-slate-700 leading-tight'>
                       {productTitle(product)}
                     </p>
-                  </TableCell>
+                  </td>
                   {sellers.map((seller) => {
                     const sid = String(seller.sellerId);
                     const val = values[sid]?.[pid] ?? 0;
                     const dirty = dirtyMap[sid]?.[pid] ?? false;
                     return (
-                      <TableCell
+                      <td
                         key={sid}
-                        className='text-center'>
+                        className='py-2.5 px-4 align-middle text-center'>
                         <div className='flex justify-center'>
                           <StockCell
                             value={val}
@@ -231,19 +223,19 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
                             isDirty={dirty}
                           />
                         </div>
-                      </TableCell>
+                      </td>
                     );
                   })}
-                </TableRow>
+                </tr>
               );
             })}
             {/* Ред с totals */}
-            <TableRow className='border-t-2 border-slate-100'>
-              <TableCell>
+            <tr className='border-t-2 border-slate-100'>
+              <td className='py-2.5 px-4 align-middle'>
                 <span className='text-xs font-bold text-slate-500 uppercase tracking-wide'>
                   Общо
                 </span>
-              </TableCell>
+              </td>
               {sellers.map((seller) => {
                 const sid = String(seller.sellerId);
                 const total = visibleProducts.reduce(
@@ -251,9 +243,9 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
                   0,
                 );
                 return (
-                  <TableCell
+                  <td
                     key={sid}
-                    className='text-center'>
+                    className='py-2.5 px-4 align-middle text-center'>
                     <Chip
                       size='sm'
                       variant='flat'
@@ -263,12 +255,12 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
                       }}>
                       {total}
                     </Chip>
-                  </TableCell>
+                  </td>
                 );
               })}
-            </TableRow>
-          </TableBody>
-        </Table>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* ── Мобилен: акордеон ── */}

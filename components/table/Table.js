@@ -213,7 +213,7 @@ const Table = (props) => {
                               {row.message && key === "product" && (
                                 <>
                                   <Tooltip>
-                                    <Tooltip.Trigger asChild>
+                                    <Tooltip.Trigger>
                                       <button className='text-slate-600 ml-1.5 invisible sm:visible'>
                                         <FaCircleInfo />
                                       </button>
@@ -238,7 +238,7 @@ const Table = (props) => {
                               {key === "date" && (
                                 <>
                                   <Tooltip>
-                                    <Tooltip.Trigger asChild>
+                                    <Tooltip.Trigger>
                                       <button className='text-slate-600 ml-1.5 invisible sm:visible'>
                                         {timeAgo(value)}
                                       </button>
