@@ -34,6 +34,9 @@ const productSchema = new Schema(
   }
 );
 
+productSchema.index({ category: 1 });
+productSchema.index({ hidden: 1, category: 1 });
+
 const Product =
   mongoose.models.Product || mongoose.model("Product", productSchema);
 

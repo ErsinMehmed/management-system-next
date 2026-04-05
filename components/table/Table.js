@@ -4,20 +4,16 @@ import {
   Tooltip,
   Popover,
 } from "@heroui/react";
-import moment from "moment";
-import "moment/locale/bg";
 import { FaCircleInfo } from "react-icons/fa6";
 import { IoMdArrowDropup } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { productTitle, formatCurrency } from "@/utils";
+import { productTitle, formatCurrency, formatDate, timeAgo } from "@/utils";
 import { perPageResult } from "@/data";
 import ConfirmModal from "@/components/ConfirmModal";
 import SearchBar from "./SearchBar";
 import Filter from "./Filter";
 import Select from "@/components/html/Select";
 import Loader from "./Loader";
-
-moment.locale("bg");
 
 const Table = (props) => {
   const [rowId, setRowId] = useState(null);
@@ -244,21 +240,21 @@ const Table = (props) => {
                                   <Tooltip>
                                     <Tooltip.Trigger asChild>
                                       <button className='text-slate-600 ml-1.5 invisible sm:visible'>
-                                        {moment(value).fromNow()}
+                                        {timeAgo(value)}
                                       </button>
                                     </Tooltip.Trigger>
-                                    <Tooltip.Content>{moment(value).format("DD.MM.YYYY H:mm")}</Tooltip.Content>
+                                    <Tooltip.Content>{formatDate(value, "DD.MM.YYYY H:mm")}</Tooltip.Content>
                                   </Tooltip>
 
                                   <Popover placement='right'>
                                     <Popover.Trigger>
                                       <button className='text-slate-600 -ml-3 sm:hidden'>
-                                        {moment(value).fromNow()}
+                                        {timeAgo(value)}
                                       </button>
                                     </Popover.Trigger>
 
                                     <Popover.Content>
-                                      {moment(value).format("DD.MM.YYYY H:mm")}
+                                      {formatDate(value, "DD.MM.YYYY H:mm")}
                                     </Popover.Content>
                                   </Popover>
                                 </>

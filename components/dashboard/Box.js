@@ -1,7 +1,6 @@
 "use client";
 import { memo } from "react";
-import moment from "moment";
-import { formatCurrency } from "@/utils";
+import { formatCurrency, formatDate } from "@/utils";
 
 const Box = (props) => {
   return (
@@ -23,13 +22,11 @@ const Box = (props) => {
 
             <div className='text-xs font-semibold text-slate-400 uppercase mb-3'>
               {props.period.dateFrom && props.period.dateTo
-                ? `${moment(props.period.dateFrom).format(
-                    "DD.MM.YYYY"
-                  )} - ${moment(props.period.dateTo).format("DD.MM.YYYY")}`
+                ? `${formatDate(props.period.dateFrom)} - ${formatDate(props.period.dateTo)}`
                 : props.period.dateFrom
-                ? `От ${moment(props.period.dateFrom).format("DD.MM.YYYY")}`
+                ? `От ${formatDate(props.period.dateFrom)}`
                 : props.period.dateTo
-                ? `До ${moment(props.period.dateTo).format("DD.MM.YYYY")}`
+                ? `До ${formatDate(props.period.dateTo)}`
                 : props.period.period}
             </div>
           </div>

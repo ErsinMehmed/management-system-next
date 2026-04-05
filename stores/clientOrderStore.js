@@ -86,6 +86,8 @@ class ClientOrderStore {
   };
 
   loadOrders = async (page = this.currentPage) => {
+    this.isLoading = true;
+
     try {
       const res = await fetch(
         `/api/client-orders?page=${page}&per_page=${this.perPage}`
@@ -113,9 +115,11 @@ class ClientOrderStore {
         commonStore.setSuccessMessage(data.message);
         this.clearOrderData();
         this.loadOrders();
+
         return true;
       } else {
         commonStore.setErrorMessage(data.message);
+
         return false;
       }
     } finally {
@@ -129,6 +133,7 @@ class ClientOrderStore {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status, rejectionReason }),
     });
+
     const data = await res.json();
 
     if (data.status) {
@@ -139,6 +144,7 @@ class ClientOrderStore {
 
   loadSummary = async (from = null, to = null) => {
     this.isSummaryLoading = true;
+
     try {
       const params = new URLSearchParams();
       if (from) params.set("from", from);

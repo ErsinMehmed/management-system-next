@@ -1,22 +1,18 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo, useCallback } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
 import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX, FiClock, FiRefreshCw } from "react-icons/fi";
-import moment from "moment";
-import "moment/locale/bg";
-
-moment.locale("bg");
 import Pagination from "@/components/table/Pagination";
 import Select from "@/components/html/Select";
-import { productTitle, formatCurrency } from "@/utils";
+import { productTitle, formatCurrency, formatDate } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
 import { clientOrderStatuses, clientOrderStatusConfig } from "@/data";
 
 const SWIPE_THRESHOLD = 72;
 
-const SwipeableCard = ({ children, onSwipeLeft, onSwipeRight, canSwipe, isSeller, deletingId }) => {
+const SwipeableCard = memo(({ children, onSwipeLeft, onSwipeRight, canSwipe, isSeller, deletingId }) => {
   const [dx, setDx] = useState(0);
   const [settling, setSettling] = useState(false);
   const startX = useRef(0);
@@ -117,7 +113,143 @@ const SwipeableCard = ({ children, onSwipeLeft, onSwipeRight, canSwipe, isSeller
       </div>
     </div>
   );
-};
+});
+
+const OrderCard = memo(({ order, isAdmin, isSuperAdmin, isSeller, deletingId, onRejectionTrigger, handleDelete, setStatusPickerOrder }) => {
+  const isLocked = ["отказана", "доставена"].includes(order.status) && !isSuperAdmin;
+  const cardInner = (
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col group hover:shadow-lg transition-shadow">
+      <div className={`h-1 w-full ${clientOrderStatusConfig[order.status]?.accent ?? "bg-slate-300"}`} />
+      <Link href={`/dashboard/client-orders/${order._id}`} className="px-4 pt-3.5 pb-3 flex flex-col gap-3 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-slate-100">
+              {(() => { const Icon = clientOrderStatusConfig[order.status]?.icon ?? FiPhone; return <Icon className="w-3.5 h-3.5 text-slate-400" />; })()}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <p className="font-bold text-slate-800 text-base leading-tight truncate">{order.phone}</p>
+                {order.orderNumber > 0 && (
+                  <span className="text-xs font-bold text-slate-400 shrink-0">#{order.orderNumber}</span>
+                )}
+              </div>
+              <span className={`text-xs font-semibold ${order.isNewClient ? "text-green-600" : "text-slate-400"}`}>
+                {order.isNewClient ? "✦ Нов клиент" : "Съществуващ"}
+              </span>
+            </div>
+          </div>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-lg shrink-0 ${clientOrderStatusConfig[order.status]?.badge}`}>
+            {order.status}
+          </span>
+        </div>
+
+        <div className="bg-slate-50 rounded-xl px-3 py-2.5 flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <FiPackage className="w-4 h-4 text-slate-400 shrink-0" />
+              <span className="text-sm font-semibold text-slate-700 truncate">{order.product ? productTitle(order.product) : "—"}</span>
+            </div>
+            <div className="flex items-center gap-2.5 shrink-0">
+              <span className="text-sm text-slate-400 tabular-nums">{order.quantity} бр.</span>
+              <span className="text-sm font-bold text-indigo-600 tabular-nums">
+                {formatCurrency(order.price + (order.secondProduct?.price ?? 0), 2)}
+              </span>
+            </div>
+          </div>
+          {order.secondProduct?.product && (
+            <div className="flex items-center gap-2 min-w-0 pl-6">
+              <span className="text-[10px] font-bold text-slate-400">+</span>
+              <span className="text-xs font-medium text-slate-500 truncate">{productTitle(order.secondProduct.product)}</span>
+              <span className="text-xs text-slate-400 tabular-nums shrink-0">× {order.secondProduct.quantity} бр.</span>
+            </div>
+          )}
+        </div>
+
+        {(order.address || order.note || order.assignedTo?.name) && (
+          <div className="flex flex-col gap-1.5 border-t border-gray-50 pt-2.5">
+            {order.address && (
+              <div className="flex items-center gap-1.5 text-sm text-slate-400">
+                <FiMapPin className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{order.address}</span>
+              </div>
+            )}
+            {order.note && (
+              <div className="flex items-center gap-1.5 text-sm text-slate-400">
+                <FiFileText className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{order.note}</span>
+              </div>
+            )}
+            {order.assignedTo?.name && (
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-sm text-slate-400">
+                  <FiUser className="w-3.5 h-3.5 shrink-0" />
+                  <span>{order.assignedTo.name}</span>
+                </div>
+                {isSuperAdmin && (
+                  <span className={`flex items-center gap-1 text-xs font-semibold ${order.viewedBySeller ? "text-green-500" : "text-gray-300"}`}>
+                    {order.viewedBySeller ? <FiEye className="w-3.5 h-3.5" /> : <FiEyeOff className="w-3.5 h-3.5" />}
+                    {order.viewedBySeller ? "Видяна" : "Не е видяна"}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="flex items-center gap-1.5 text-xs text-slate-300 pt-1">
+          <FiClock className="w-3 h-3 shrink-0" />
+          <span>{formatDate(order.createdAt, "DD.MM.YYYY HH:mm")}</span>
+        </div>
+      </Link>
+
+      {isAdmin && (
+        <div className="hidden sm:flex items-center justify-between px-4 py-2.5 border-t border-gray-50 gap-2">
+          <Select
+            controlled
+            value={order.status}
+            disabled={isLocked}
+            items={clientOrderStatuses.map((s) => ({ _id: s, value: s, name: s }))}
+            onChange={(val) => {
+              if (val === "отказана") onRejectionTrigger(order._id);
+              else clientOrderStore.updateStatus(order._id, val);
+            }}
+            baseClass="w-36"
+            classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${clientOrderStatusConfig[order.status]?.badge} ${isLocked ? "opacity-60 pointer-events-none" : ""}`}
+          />
+          <Button isIconOnly variant="light" color="danger" size="sm"
+            isLoading={deletingId === order._id}
+            onPress={() => handleDelete(order._id)}>
+            <FiTrash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="sm:hidden">
+        {isSeller ? (
+          <SwipeableCard
+            canSwipe={!isLocked}
+            isSeller
+            onSwipeRight={!isLocked ? () => clientOrderStore.updateStatus(order._id, "доставена") : null}
+            onSwipeLeft={!isLocked ? () => onRejectionTrigger(order._id) : null}>
+            {cardInner}
+          </SwipeableCard>
+        ) : (
+          <SwipeableCard
+            canSwipe={isAdmin}
+            deletingId={deletingId === order._id}
+            onSwipeLeft={() => handleDelete(order._id)}
+            onSwipeRight={!isLocked ? () => setStatusPickerOrder(order) : null}>
+            {cardInner}
+          </SwipeableCard>
+        )}
+      </div>
+      <div className="hidden sm:block">{cardInner}</div>
+    </div>
+  );
+});
 
 const ClientOrdersOrdersTab = ({
   orders, isLoading, isAdmin, isSuperAdmin, session,
@@ -177,9 +309,42 @@ const ClientOrdersOrdersTab = ({
     </div>
 
     {isLoading ? (
-      <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
-        <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {[...Array(9)].map((_, i) => (
+          <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm animate-pulse">
+            <div className="h-1 w-full bg-slate-200" />
+            <div className="px-4 pt-5 pb-5 flex flex-col gap-5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-32 bg-slate-100 rounded-lg" />
+                    <div className="h-3 w-20 bg-slate-100 rounded-lg" />
+                  </div>
+                </div>
+                <div className="h-6 w-18 bg-slate-100 rounded-lg" />
+              </div>
+              <div className="bg-slate-50 rounded-xl px-3.5 py-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-slate-200/70 rounded" />
+                    <div className="h-3.5 w-36 bg-slate-200/70 rounded-lg" />
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-3.5 w-12 bg-slate-200/70 rounded-lg" />
+                    <div className="h-3.5 w-16 bg-slate-200/70 rounded-lg" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 pt-1">
+                <div className="h-3.5 w-44 bg-slate-100 rounded-lg" />
+                <div className="h-3.5 w-28 bg-slate-100 rounded-lg" />
+                <div className="h-3.5 w-32 bg-slate-100 rounded-lg" />
+              </div>
+              <div className="h-3 w-28 bg-slate-50 rounded-lg" />
+            </div>
+          </div>
+        ))}
       </div>
     ) : orders?.items?.length === 0 ? (
       <div className="flex flex-col items-center justify-center py-16 gap-2">
@@ -190,145 +355,19 @@ const ClientOrdersOrdersTab = ({
       </div>
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {orders?.items?.map((order) => {
-          const isLocked = ["отказана", "доставена"].includes(order.status) && !isSuperAdmin;
-          const cardInner = (
-            <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col group hover:shadow-lg transition-shadow">
-              <div className={`h-1 w-full ${clientOrderStatusConfig[order.status]?.accent ?? "bg-slate-300"}`} />
-
-              <Link href={`/dashboard/client-orders/${order._id}`} className="px-4 pt-3.5 pb-3 flex flex-col gap-3 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-slate-100">
-                      {(() => { const Icon = clientOrderStatusConfig[order.status]?.icon ?? FiPhone; return <Icon className="w-3.5 h-3.5 text-slate-400" />; })()}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <p className="font-bold text-slate-800 text-base leading-tight truncate">{order.phone}</p>
-                        {order.orderNumber > 0 && (
-                          <span className="text-xs font-bold text-slate-400 shrink-0">#{order.orderNumber}</span>
-                        )}
-                      </div>
-                      <span className={`text-xs font-semibold ${order.isNewClient ? "text-green-600" : "text-slate-400"}`}>
-                        {order.isNewClient ? "✦ Нов клиент" : "Съществуващ"}
-                      </span>
-                    </div>
-                  </div>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-lg shrink-0 ${clientOrderStatusConfig[order.status]?.badge}`}>
-                    {order.status}
-                  </span>
-                </div>
-
-                <div className="bg-slate-50 rounded-xl px-3 py-2.5 flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FiPackage className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="text-sm font-semibold text-slate-700 truncate">{order.product ? productTitle(order.product) : "—"}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span className="text-sm text-slate-400 tabular-nums">{order.quantity} бр.</span>
-                      <span className="text-sm font-bold text-[#0071f5] tabular-nums">
-                        {formatCurrency(order.price + (order.secondProduct?.price ?? 0), 2)}
-                      </span>
-                    </div>
-                  </div>
-                  {order.secondProduct?.product && (
-                    <div className="flex items-center gap-2 min-w-0 pl-6">
-                      <span className="text-[10px] font-bold text-slate-400">+</span>
-                      <span className="text-xs font-medium text-slate-500 truncate">{productTitle(order.secondProduct.product)}</span>
-                      <span className="text-xs text-slate-400 tabular-nums shrink-0">× {order.secondProduct.quantity} бр.</span>
-                    </div>
-                  )}
-                </div>
-
-                {(order.address || order.note || order.assignedTo?.name) && (
-                  <div className="flex flex-col gap-1.5 border-t border-gray-50 pt-2.5">
-                    {order.address && (
-                      <div className="flex items-center gap-1.5 text-sm text-slate-400">
-                        <FiMapPin className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">{order.address}</span>
-                      </div>
-                    )}
-                    {order.note && (
-                      <div className="flex items-center gap-1.5 text-sm text-slate-400">
-                        <FiFileText className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">{order.note}</span>
-                      </div>
-                    )}
-                    {order.assignedTo?.name && (
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 text-sm text-slate-400">
-                          <FiUser className="w-3.5 h-3.5 shrink-0" />
-                          <span>{order.assignedTo.name}</span>
-                        </div>
-                        {isSuperAdmin && (
-                          <span className={`flex items-center gap-1 text-xs font-semibold ${order.viewedBySeller ? "text-green-500" : "text-gray-300"}`}>
-                            {order.viewedBySeller ? <FiEye className="w-3.5 h-3.5" /> : <FiEyeOff className="w-3.5 h-3.5" />}
-                            {order.viewedBySeller ? "Видяна" : "Не е видяна"}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="flex items-center gap-1.5 text-xs text-slate-300 pt-1">
-                  <FiClock className="w-3 h-3 shrink-0" />
-                  <span>{moment(order.createdAt).format("DD.MM.YYYY HH:mm")}</span>
-                </div>
-              </Link>
-
-              {/* Desktop admin footer — hidden on mobile (swipe handles it) */}
-              {isAdmin && (
-                <div className="hidden sm:flex items-center justify-between px-4 py-2.5 border-t border-gray-50 gap-2">
-                  <Select
-                    controlled
-                    value={order.status}
-                    disabled={isLocked}
-                    items={clientOrderStatuses.map((s) => ({ _id: s, value: s, name: s }))}
-                    onChange={(val) => {
-                      if (val === "отказана") onRejectionTrigger(order._id);
-                      else clientOrderStore.updateStatus(order._id, val);
-                    }}
-                    baseClass="w-36"
-                    classes={`text-xs font-semibold rounded-lg cursor-pointer w-auto min-w-0 ${clientOrderStatusConfig[order.status]?.badge} ${isLocked ? "opacity-60 pointer-events-none" : ""}`}
-                  />
-                  <Button isIconOnly variant="light" color="danger" size="sm"
-                    isLoading={deletingId === order._id}
-                    onPress={() => handleDelete(order._id)}>
-                    <FiTrash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          );
-
-          // Mobile: wrap in swipeable, desktop: plain card
-          const isSeller = session?.user?.role === "Seller";
-          return (
-            <div key={order._id}>
-              <div className="sm:hidden">
-                {isSeller ? (
-                  <SwipeableCard
-                    canSwipe={!isLocked}
-                    isSeller
-                    onSwipeRight={!isLocked ? () => clientOrderStore.updateStatus(order._id, "доставена") : null}
-                    onSwipeLeft={!isLocked ? () => onRejectionTrigger(order._id) : null}>
-                    {cardInner}
-                  </SwipeableCard>
-                ) : (
-                  <SwipeableCard
-                    canSwipe={isAdmin}
-                    deletingId={deletingId === order._id}
-                    onSwipeLeft={() => handleDelete(order._id)}
-                    onSwipeRight={!isLocked ? () => setStatusPickerOrder(order) : null}>
-                    {cardInner}
-                  </SwipeableCard>
-                )}
-              </div>
-              <div className="hidden sm:block">{cardInner}</div>
-            </div>
-          );
-        })}
+        {orders?.items?.map((order) => (
+          <OrderCard
+            key={order._id}
+            order={order}
+            isAdmin={isAdmin}
+            isSuperAdmin={isSuperAdmin}
+            isSeller={session?.user?.role === "Seller"}
+            deletingId={deletingId}
+            onRejectionTrigger={onRejectionTrigger}
+            handleDelete={handleDelete}
+            setStatusPickerOrder={setStatusPickerOrder}
+          />
+        ))}
       </div>
     )}
 

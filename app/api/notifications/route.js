@@ -44,7 +44,7 @@ export async function GET(request) {
 }
 
 // Маркира всички като прочетени
-export async function PATCH() {
+export async function PATCH(request) {
   const session = await getAuth(request);
   if (!session) return NextResponse.json({ status: false }, { status: 401 });
 

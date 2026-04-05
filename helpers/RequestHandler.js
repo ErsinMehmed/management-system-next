@@ -107,7 +107,7 @@ export default class RequestHandler {
       });
     }
 
-    const items = await queryBuilder.skip((page - 1) * perPage).limit(perPage);
+    const items = await queryBuilder.skip((page - 1) * perPage).limit(perPage).lean();
 
     const pagination = {
       current_page: parseInt(page),

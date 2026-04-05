@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import User from "@/models/user";
+import Role from "@/models/role";
 
 export const dynamic = "force-dynamic";
 import ClientOrdersClient from "@/components/dashboard/ClientOrdersClient";
@@ -40,11 +41,9 @@ export default async function ClientOrdersPage() {
       .limit(PER_PAGE)
       .lean(),
     isAdmin
-      ? User.find({})
-          .populate({ path: "role", select: "name" })
-          .select("name role")
-          .lean()
-          .then((users) => users.filter((u) => u.role?.name === "Seller"))
+      ? Role.findOne({ name: "Seller" }).lean().then((role) =>
+          role ? User.find({ role: role._id }).select("name").lean() : []
+        )
       : Promise.resolve([]),
     ClientOrder.countDocuments(dailyFilter),
   ]);

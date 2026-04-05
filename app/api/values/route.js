@@ -9,7 +9,7 @@ export async function GET() {
 
   await connectMongoDB();
 
-  const values = await Value.findOne({});
+  const values = await Value.findOne({}).lean();
 
   return NextResponse.json(values ? [values] : []);
 }

@@ -45,7 +45,7 @@ export async function GET(request, { params }) {
 
     const product = await Product.findById(id).select(
       "price availability sell_prices seller_prices"
-    );
+    ).lean();
 
     if (!product) {
       return NextResponse.json(

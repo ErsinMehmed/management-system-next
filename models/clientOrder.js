@@ -41,6 +41,12 @@ const clientOrderSchema = new Schema(
   { timestamps: true }
 );
 
+clientOrderSchema.index({ status: 1, createdAt: -1 });
+clientOrderSchema.index({ assignedTo: 1, status: 1 });
+clientOrderSchema.index({ phone: 1 });
+clientOrderSchema.index({ createdAt: -1 });
+clientOrderSchema.index({ isPaid: 1, status: 1, assignedTo: 1 });
+
 const ClientOrder =
   mongoose.models.ClientOrder ||
   mongoose.model("ClientOrder", clientOrderSchema);

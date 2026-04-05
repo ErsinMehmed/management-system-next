@@ -8,6 +8,11 @@ const connectMongoDB = async () => {
   if (!cached.promise) {
     cached.promise = mongoose.connect(process.env.MONGODB_URI, {
       bufferCommands: false,
+      maxPoolSize: 10,
+      minPoolSize: 2,
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      retryWrites: true,
     });
   }
 

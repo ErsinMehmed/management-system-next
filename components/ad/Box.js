@@ -1,11 +1,10 @@
 "use client";
 import { memo } from "react";
-import moment from "moment";
 import Image from "next/image";
 import InstagramImg from "@/public/images/instagram-logo.png";
 import FacebookImg from "@/public/images/facebook-logo.png";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { formatCurrency } from "@/utils";
+import { formatCurrency, formatDate } from "@/utils";
 
 const Box = (props) => {
   return (
@@ -25,7 +24,7 @@ const Box = (props) => {
           Сума: {formatCurrency(props.data.amount, 2)}
         </p>
         <p className="text-sm font-medium">
-          {moment(props.data.date).format("DD.MM.YYYY")}г.
+          {formatDate(props.data.date)}г.
         </p>
       </div>
 

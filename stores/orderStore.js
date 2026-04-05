@@ -4,7 +4,7 @@ import { validateFields } from "@/utils";
 import { orderRules as getOrderRules } from "@/rules/order";
 import commonStore from "@/stores/commonStore";
 import productStore from "@/stores/productStore";
-import { debounce } from "lodash";
+import { debounce } from "@/utils";
 
 const initialFilterData = {
   dateFrom: "",
