@@ -4,6 +4,7 @@ import connectMongoDB from "@/libs/mongodb";
 import mongoose from "mongoose";
 import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
+import SellerStock from "@/models/sellerStock";
 import { NextResponse } from "next/server";
 import { notifyAllEmployees, notifyUser } from "@/services/pushNotification";
 import { notifyUserExpo } from "@/services/expoNotification";
@@ -78,6 +79,30 @@ export async function POST(request) {
 
   // Seller винаги се асайнва на себе си
   if (isSeller) data.assignedTo = session.user.id;
+
+  // Проверка за наличност при доставчика
+  const sellerId = data.assignedTo;
+  if (sellerId) {
+    const sellerStock = await SellerStock.findOne({ seller: sellerId, product: data.product }).lean();
+    const available = sellerStock?.stock ?? 0;
+    if (available < Number(data.quantity)) {
+      return NextResponse.json(
+        { message: `Недостатъчна наличност. Налични: ${available} бр.`, status: false },
+        { status: 400 }
+      );
+    }
+
+    if (data.product2 && data.quantity2) {
+      const sellerStock2 = await SellerStock.findOne({ seller: sellerId, product: data.product2 }).lean();
+      const available2 = sellerStock2?.stock ?? 0;
+      if (available2 < Number(data.quantity2)) {
+        return NextResponse.json(
+          { message: `Недостатъчна наличност за втори продукт. Налични: ${available2} бр.`, status: false },
+          { status: 400 }
+        );
+      }
+    }
+  }
 
   // Определяме дали клиентът е нов по телефон
   const existingOrder = await ClientOrder.findOne({ phone: data.phone });

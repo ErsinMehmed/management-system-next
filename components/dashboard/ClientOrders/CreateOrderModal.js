@@ -58,13 +58,25 @@ const CreateOrderModal = observer(({ isOpen, onOpenChange, sellers, isSuperAdmin
     return Object.keys(errs).length === 0;
   };
 
+  const [apiError, setApiError] = useState("");
+
   const handleSave = async () => {
+    setApiError("");
     if (!validate()) return false;
-    return clientOrderStore.createOrder();
+    const result = await clientOrderStore.createOrder();
+    if (!result) {
+      setApiError(commonStore.errorMessage || "Възникна грешка");
+    }
+    return result;
   };
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} title="Добави поръчка" isLoading={isCreating} onSave={handleSave}>
+      {apiError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <p className="text-sm font-semibold text-red-600">{apiError}</p>
+        </div>
+      )}
       <ClientOrderForm
         data={orderData}
         errorFields={{ ...localErrors, ...errorFields }}
