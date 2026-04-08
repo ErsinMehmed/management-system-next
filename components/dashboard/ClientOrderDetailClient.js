@@ -1,6 +1,6 @@
 "use client";
 import { observer } from "mobx-react-lite";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button, useDisclosure } from "@heroui/react";
@@ -55,6 +55,12 @@ const ClientOrderDetailClient = ({ order }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
+  const refreshTimer = useRef(null);
+  const debouncedRefresh = useCallback(() => {
+    clearTimeout(refreshTimer.current);
+    refreshTimer.current = setTimeout(() => router.refresh(), 500);
+  }, [router]);
+
   // Pusher — real-time order updates
   useEffect(() => {
     const pusher = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY, {
@@ -69,7 +75,7 @@ const ClientOrderDetailClient = ({ order }) => {
       const isMine = role === "Seller" ? (event.assignedTo && String(event.assignedTo) === String(userId)) : true;
 
       if (event.type === "updated" && event.orderId === order._id) {
-        router.refresh();
+        debouncedRefresh();
       }
 
       if (isOwn || !isMine) return;
