@@ -132,15 +132,16 @@ export default async function DashboardPage() {
       { $sort: { total_quantity: 1 } },
     ]),
 
-    // Приходи (само за текущия потребител)
+    // Приходи — Admin/Super Admin виждат всички, останалите само своите
     (async () => {
+      const incomeMatch = isAdmin ? {} : { creator: userObjectId };
       const [totalArr, byProductArr] = await Promise.all([
         Sell.aggregate([
-          { $match: { creator: userObjectId } },
+          { $match: incomeMatch },
           { $group: { _id: null, incomes: { $sum: "$price" } } },
         ]),
         Sell.aggregate([
-          { $match: { creator: userObjectId } },
+          { $match: incomeMatch },
           { $group: { _id: "$product", quantity: { $sum: "$quantity" }, total_incomes: { $sum: "$price" } } },
           { $lookup: { from: "products", localField: "_id", foreignField: "_id", as: "product" } },
           { $unwind: "$product" },
