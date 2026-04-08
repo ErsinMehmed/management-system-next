@@ -58,12 +58,12 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3.5 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
-              <FiTrendingUp className="w-4 h-4 text-[#0071f5]" />
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+              <FiTrendingUp className="w-4 h-4 text-indigo-600" />
             </div>
             <div>
               <p className="text-xs text-slate-400 font-medium">Общ оборот</p>
-              <p className="text-base font-bold text-[#0071f5]">{formatCurrency(history.grandTotal, 2)}</p>
+              <p className="text-base font-bold text-indigo-600">{formatCurrency(history.grandTotal, 2)}</p>
             </div>
           </div>
           <div className="bg-white rounded-2xl shadow-sm border border-green-100 px-4 py-3.5 flex items-center gap-3">
@@ -73,6 +73,15 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
             <div>
               <p className="text-xs text-green-500 font-medium">Общо изплатено</p>
               <p className="text-base font-bold text-green-600">{formatCurrency(history.grandPayout, 2)}</p>
+            </div>
+          </div>
+          <div className="col-span-2 sm:col-span-1 bg-white rounded-2xl shadow-sm border border-red-100 px-4 py-3.5 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+              <FiDollarSign className="w-4 h-4 text-red-500" />
+            </div>
+            <div>
+              <p className="text-xs text-red-400 font-medium">Общо дължимо</p>
+              <p className="text-base font-bold text-red-500">{formatCurrency(history.owedTotal ?? 0, 2)}</p>
             </div>
           </div>
         </div>
