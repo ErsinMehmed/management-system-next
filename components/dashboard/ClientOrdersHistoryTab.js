@@ -54,6 +54,10 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
   }
 
   if (history.isSeller) {
+    const unconfirmedOwed = (history.sellers[0]?.payments ?? [])
+      .filter((p) => !p.revenueConfirmed)
+      .reduce((sum, p) => sum + (p.totalRevenue - p.totalPayout), 0);
+
     return (
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -81,7 +85,7 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
             </div>
             <div>
               <p className="text-xs text-red-400 font-medium">Общо дължимо</p>
-              <p className="text-base font-bold text-red-500">{formatCurrency(history.owedTotal ?? 0, 2)}</p>
+              <p className="text-base font-bold text-red-500">{formatCurrency(unconfirmedOwed, 2)}</p>
             </div>
           </div>
         </div>

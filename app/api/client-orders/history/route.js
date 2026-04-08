@@ -174,16 +174,14 @@ export async function GET(request) {
             { $match: { isPaid: true } },
             ...paidHistoryPipeline,
           ],
-          // Всички доставени → дължимо (revenue - payout)
+          // Само неизплатени доставени → дължимо
           owed: [
+            { $match: { isPaid: { $ne: true } } },
             {
               $group: {
                 _id: "$assignedTo",
-                totalRevenue: {
+                totalOwed: {
                   $sum: { $add: ["$price", { $ifNull: ["$secondProduct.price", 0] }] },
-                },
-                totalPayout: {
-                  $sum: { $add: [{ $ifNull: ["$payout", 0] }, { $ifNull: ["$secondProduct.payout", 0] }] },
                 },
               },
             },
@@ -193,15 +191,11 @@ export async function GET(request) {
     ]);
 
     const sellers = result.paid;
-    const owedMap = {};
     let owedTotal = 0;
     for (const row of result.owed) {
-      const owed = row.totalRevenue - row.totalPayout;
-      owedMap[String(row._id)] = owed;
-      owedTotal += owed;
+      owedTotal += row.totalOwed ?? 0;
     }
     sellers.forEach((s) => {
-      s.owedAmount = owedMap[String(s.sellerId)] ?? 0;
       s.payments.sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt));
     });
 
