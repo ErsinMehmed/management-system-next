@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import commonStore from "@/stores/commonStore";
+import { debounce } from "@/utils";
 
 const initialOrderData = {
   phone: "",
@@ -85,7 +86,7 @@ class ClientOrderStore {
     }
   };
 
-  loadOrders = async (page = this.currentPage) => {
+  _fetchOrders = async (page = this.currentPage) => {
     this.isLoading = true;
 
     try {
@@ -98,6 +99,8 @@ class ClientOrderStore {
       this.isLoading = false;
     }
   };
+
+  loadOrders = debounce((page) => this._fetchOrders(page), 300);
 
   createOrder = async () => {
     this.isCreating = true;
