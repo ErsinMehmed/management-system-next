@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import Layout from "@/components/layout/Dashboard";
 import Modal from "@/components/Modal";
 import Table from "@/components/table/Table";
-import OrderForm from "@/components/forms/Order";
+import OrderWizard from "@/components/forms/OrderWizard";
 import Pagination from "@/components/table/Pagination";
 import { useDisclosure } from "@heroui/react";
 import { FiPlus } from "react-icons/fi";
@@ -156,13 +156,16 @@ const OrdersClient = ({ initialData }) => {
           isOpen={isOpen}
           onOpenChange={onOpenChange}
           title='Добави поръчка'
-          isLoading={isOrderCreated}
-          onSave={createOrder}>
-          <OrderForm
+          showFooter={false}>
+          <OrderWizard
             data={orderData}
             errorFields={errorFields}
             updatedProducts={updatedProducts}
             handleFieldChange={handleFieldChange}
+            setOrderData={setOrderData}
+            products={products}
+            onSave={createOrder}
+            isLoading={isOrderCreated}
           />
         </Modal>
       </div>
