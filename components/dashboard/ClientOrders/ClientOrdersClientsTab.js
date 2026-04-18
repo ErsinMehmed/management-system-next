@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Spinner } from "@heroui/react";
-import { FiUser, FiPhone, FiEdit2, FiCheck, FiX, FiSearch } from "react-icons/fi";
+import { FiUser, FiPhone, FiEdit2, FiCheck, FiX, FiSearch, FiChevronRight } from "react-icons/fi";
+import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
 
-function ClientRow({ item, onSave }) {
+function ClientRow({ item, onSave, onOpenProfile }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(item.name);
   const [saving, setSaving] = useState(false);
@@ -21,7 +22,8 @@ function ClientRow({ item, onSave }) {
   };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-slate-50/60 transition-colors group">
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-slate-50/60 transition-colors group cursor-pointer"
+      onClick={() => !editing && onOpenProfile?.(item.phone)}>
       <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
         <FiUser className="w-4 h-4 text-[#0071f5]" />
       </div>
@@ -29,12 +31,12 @@ function ClientRow({ item, onSave }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <FiPhone className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="text-sm font-semibold text-slate-700 tabular-nums">{item.phone}</span>
+          <span className="text-sm font-semibold text-slate-700 tabular-nums group-hover:text-[#0071f5] transition-colors">{item.phone}</span>
           <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">{item.orderCount} поръч.</span>
         </div>
 
         {editing ? (
-          <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex items-center gap-2 mt-1.5" onClick={(e) => e.stopPropagation()}>
             <input
               autoFocus
               type="text"
@@ -62,7 +64,7 @@ function ClientRow({ item, onSave }) {
               {item.name || "Няма въведено название"}
             </p>
             <button
-              onClick={() => setEditing(true)}
+              onClick={(e) => { e.stopPropagation(); setEditing(true); }}
               className="w-5 h-5 rounded-md bg-slate-100 hover:bg-[#0071f5]/10 flex items-center justify-center transition-colors">
               <FiEdit2 className="w-3 h-3 text-slate-400 hover:text-[#0071f5]" />
             </button>
@@ -76,6 +78,7 @@ function ClientRow({ item, onSave }) {
           {item.lastOrder ? new Date(item.lastOrder).toLocaleDateString("bg-BG") : "—"}
         </p>
       </div>
+      <FiChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#0071f5] shrink-0 transition-colors" />
     </div>
   );
 }
@@ -87,6 +90,7 @@ export default function ClientOrdersClientsTab() {
   const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
   const [searchInput, setSearchInput] = useState("");
+  const [profilePhone, setProfilePhone] = useState(null);
 
   // Refs за scroll listener — избягват stale closure
   const pageRef = useRef(1);
@@ -210,7 +214,7 @@ export default function ClientOrdersClientsTab() {
         ) : (
           <>
             {items.map((item) => (
-              <ClientRow key={item.phone} item={item} onSave={handleSave} />
+              <ClientRow key={item.phone} item={item} onSave={handleSave} onOpenProfile={setProfilePhone} />
             ))}
             {isLoadingMore && (
               <div className="flex items-center justify-center py-5">
@@ -225,6 +229,12 @@ export default function ClientOrdersClientsTab() {
           </>
         )}
       </div>
+
+      <ClientProfileModal
+        isOpen={!!profilePhone}
+        phone={profilePhone}
+        onClose={() => setProfilePhone(null)}
+      />
     </div>
   );
 }

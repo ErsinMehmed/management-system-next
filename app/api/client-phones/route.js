@@ -1,13 +1,15 @@
-import { requireSuperAdmin } from "@/helpers/requireRole";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import ClientPhone from "@/models/clientPhone";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 // GET — уникални телефони от поръчките с пагинация, обогатени с имена
 export async function GET(request) {
-  const { error } = await requireSuperAdmin(request);
-  if (error) return error;
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ message: "Няма достъп." }, { status: 401 });
 
   await connectMongoDB();
 
@@ -16,8 +18,13 @@ export async function GET(request) {
   const perPage = 12;
   const search = searchParams.get("search")?.trim() ?? "";
 
+  const matchStage = session.user.role === "Seller"
+    ? { $match: { assignedTo: new mongoose.Types.ObjectId(session.user.id) } }
+    : null;
+
   const [phones, names] = await Promise.all([
     ClientOrder.aggregate([
+      ...(matchStage ? [matchStage] : []),
       { $group: { _id: "$phone", lastOrder: { $max: "$createdAt" }, orderCount: { $sum: 1 } } },
       { $sort: { lastOrder: -1 } },
     ]),
@@ -49,8 +56,8 @@ export async function GET(request) {
 
 // PUT — запазване на име за телефонен номер
 export async function PUT(request) {
-  const { error } = await requireSuperAdmin(request);
-  if (error) return error;
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ message: "Няма достъп." }, { status: 401 });
 
   const { phone, name } = await request.json();
   if (!phone) return NextResponse.json({ message: "Липсва телефон." }, { status: 400 });

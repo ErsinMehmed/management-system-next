@@ -71,7 +71,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
     { key: "summary", label: "Обобщение", Icon: FiBarChart2 },
     ...(showHistory ? [{ key: "history", label: "История", Icon: FiClock }] : []),
     { key: "stock", label: "Наличности", Icon: FiLayers },
-    ...(isSuperAdmin ? [{ key: "clients", label: "Клиенти", Icon: FiUsers }] : []),
+    { key: "clients", label: "Клиенти", Icon: FiUsers },
   ];
 
   return (
@@ -90,7 +90,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             <Tab key="summary" title="Обобщение" />
             {showHistory && <Tab key="history" title="История" />}
             <Tab key="stock" title="Наличности" />
-            {isSuperAdmin && <Tab key="clients" title="Клиенти" />}
+            <Tab key="clients" title="Клиенти" />
           </Tabs>
         </div>
 

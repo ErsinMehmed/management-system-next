@@ -9,6 +9,7 @@ import Select from "@/components/html/Select";
 import { productTitle, formatCurrency, formatDate } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
 import { clientOrderStatuses, clientOrderStatusConfig } from "@/data";
+import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
 
 const SWIPE_THRESHOLD = 72;
 
@@ -131,7 +132,7 @@ const SwipeableCard = memo(({ children, onSwipeLeft, onSwipeRight, canSwipe, isS
   );
 });
 
-const OrderCard = memo(({ order, isAdmin, isSuperAdmin, isSeller, deletingId, onRejectionTrigger, handleDelete, setStatusPickerOrder }) => {
+const OrderCard = memo(({ order, isAdmin, isSuperAdmin, isSeller, deletingId, onRejectionTrigger, handleDelete, setStatusPickerOrder, onPhoneClick }) => {
   const isLocked = ["отказана", "доставена"].includes(order.status) && !isSuperAdmin;
   const cardInner = (
     <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col group hover:shadow-lg transition-shadow">
@@ -144,7 +145,12 @@ const OrderCard = memo(({ order, isAdmin, isSuperAdmin, isSeller, deletingId, on
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 min-w-0">
-                <p className="font-bold text-slate-800 text-base leading-tight truncate">{order.phone}</p>
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onPhoneClick?.(order.phone); }}
+                  className="font-bold text-slate-800 text-base leading-tight truncate hover:text-indigo-600 transition-colors text-left">
+                  {order.phone}
+                </button>
                 {order.orderNumber > 0 && (
                   <span className="text-xs font-bold text-slate-400 shrink-0">#{order.orderNumber}</span>
                 )}
@@ -275,6 +281,7 @@ const ClientOrdersOrdersTab = ({
 }) => {
   const sentinelRef = useRef(null);
   const [statusPickerOrder, setStatusPickerOrder] = useState(null);
+  const [profilePhone, setProfilePhone] = useState(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || window.innerWidth >= 640) return;
@@ -396,6 +403,7 @@ const ClientOrdersOrdersTab = ({
                 onRejectionTrigger={onRejectionTrigger}
                 handleDelete={handleDelete}
                 setStatusPickerOrder={setStatusPickerOrder}
+                onPhoneClick={setProfilePhone}
               />
             </React.Fragment>
           );
@@ -456,6 +464,13 @@ const ClientOrdersOrdersTab = ({
         <div className="w-6 h-6 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
       )}
     </div>
+
+    {/* Client profile modal */}
+    <ClientProfileModal
+      isOpen={!!profilePhone}
+      phone={profilePhone}
+      onClose={() => setProfilePhone(null)}
+    />
   </>
   );
 };

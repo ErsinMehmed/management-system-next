@@ -1,6 +1,7 @@
 "use client";
 import { observer } from "mobx-react-lite";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FiFileText } from "react-icons/fi";
 import Modal from "@/components/Modal";
 import ClientOrderForm from "@/components/forms/ClientOrder";
 import { clientOrderStore, commonStore, productStore } from "@/stores/useStore";
@@ -10,6 +11,24 @@ const CreateOrderModal = observer(({ isOpen, onOpenChange, sellers, isSuperAdmin
   const { orderData, isCreating } = clientOrderStore;
   const { errorFields } = commonStore;
   const [localErrors, setLocalErrors] = useState({});
+  const [clientNotes, setClientNotes] = useState([]);
+  const notesTimer = useRef(null);
+
+  useEffect(() => {
+    const phone = orderData.phone?.trim();
+    if (notesTimer.current) clearTimeout(notesTimer.current);
+    if (!phone || !/^\+?[0-9]{7,15}$/.test(phone)) { setClientNotes([]); return; }
+
+    notesTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/client-phones/${encodeURIComponent(phone)}`);
+        const json = await res.json();
+        setClientNotes(json?.notes || []);
+      } catch { setClientNotes([]); }
+    }, 400);
+
+    return () => notesTimer.current && clearTimeout(notesTimer.current);
+  }, [orderData.phone]);
 
   const availableProducts = useMemo(
     () => productStore.products.filter((p) => !p.hidden).map((p) => ({ ...p, name: productTitle(p) })),
@@ -75,6 +94,21 @@ const CreateOrderModal = observer(({ isOpen, onOpenChange, sellers, isSuperAdmin
       {apiError && (
         <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
           <p className="text-sm font-semibold text-red-600">{apiError}</p>
+        </div>
+      )}
+      {clientNotes.length > 0 && (
+        <div className="bg-amber-50/60 border border-amber-200/70 rounded-xl px-3 py-2.5 flex items-start gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+            <FiFileText className="w-3.5 h-3.5 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">Бележки за клиента</p>
+            <ul className="space-y-0.5">
+              {clientNotes.map((n) => (
+                <li key={n._id} className="text-xs text-slate-700 leading-snug">• {n.text}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
       <ClientOrderForm
