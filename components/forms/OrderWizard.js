@@ -9,7 +9,7 @@ import { formatCurrency } from "@/utils";
 
 const STEPS = ["Продукт", "Количество", "Потвърждение"];
 
-const OrderWizard = ({ data, errorFields, updatedProducts, handleFieldChange, setOrderData, products, onSave, isLoading }) => {
+const OrderWizard = ({ data, errorFields, updatedProducts, handleFieldChange, setOrderData, products, onSave, onClose, isLoading }) => {
   const [step, setStep] = useState(0);
   const [templates, setTemplates] = useState([]);
   const [templateName, setTemplateName] = useState("");
@@ -96,9 +96,12 @@ const OrderWizard = ({ data, errorFields, updatedProducts, handleFieldChange, se
     return true;
   };
 
-  const handleNext = () => {
-    if (step < 2 && canNext()) setStep(step + 1);
-    if (step === 2) return onSave();
+  const handleNext = async () => {
+    if (step < 2 && canNext()) { setStep(step + 1); return; }
+    if (step === 2) {
+      const ok = await onSave();
+      if (ok && onClose) { setStep(0); setBoxCount(""); onClose(); }
+    }
   };
 
   const cartons = data.quantity && unitsPerBox ? (Number(data.quantity) / unitsPerBox) : 0;
@@ -290,7 +293,7 @@ const OrderWizard = ({ data, errorFields, updatedProducts, handleFieldChange, se
           ) : (
             <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-3">
               <Input label="Име на шаблон" value={templateName} onChange={setTemplateName} />
-              <Button size="sm" radius="lg" color="primary" className="shrink-0 font-semibold bg-indigo-600"
+              <Button size="sm" radius="lg" color="primary" className="shrink-0 font-semibold"
                 isDisabled={!templateName.trim()}
                 onPress={handleSaveTemplate}>
                 Запази
@@ -310,7 +313,7 @@ const OrderWizard = ({ data, errorFields, updatedProducts, handleFieldChange, se
         </Button>
 
         <Button color="primary" radius="lg"
-          className="font-semibold bg-indigo-600 hover:bg-indigo-700 px-6"
+          className="font-semibold px-6"
           isDisabled={!canNext()}
           isLoading={step === 2 && isLoading}
           endContent={step < 2 ? <FiChevronRight className="w-4 h-4" /> : <FiCheck className="w-4 h-4" />}

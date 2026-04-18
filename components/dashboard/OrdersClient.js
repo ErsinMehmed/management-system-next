@@ -39,7 +39,7 @@ const OrdersClient = ({ initialData }) => {
   } = orderStore;
   const { products } = productStore;
   const { errorFields } = commonStore;
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
   useEffect(() => {
     if (initialData) {
@@ -165,6 +165,7 @@ const OrdersClient = ({ initialData }) => {
             setOrderData={setOrderData}
             products={products}
             onSave={createOrder}
+            onClose={onClose}
             isLoading={isOrderCreated}
           />
         </Modal>

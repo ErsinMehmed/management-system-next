@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, memo, useCallback } from "react";
+import React, { useEffect, useRef, useState, memo, useCallback } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
@@ -11,6 +11,22 @@ import { clientOrderStore } from "@/stores/useStore";
 import { clientOrderStatuses, clientOrderStatusConfig } from "@/data";
 
 const SWIPE_THRESHOLD = 72;
+
+// Работен ден: започва в 9:00 ч. Поръчка преди 9:00 → предишният работен ден
+const getBusinessDayKey = (date) => {
+  const d = new Date(date);
+  if (d.getHours() < 9) d.setDate(d.getDate() - 1);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+};
+
+const getDayLabel = (dayKey) => {
+  const today = getBusinessDayKey(new Date());
+  const yesterday = today - 86400000;
+  if (dayKey === today) return "Днес";
+  if (dayKey === yesterday) return "Вчера";
+  return new Date(dayKey).toLocaleDateString("bg-BG", { day: "2-digit", month: "long", year: "numeric" });
+};
 
 const SwipeableCard = memo(({ children, onSwipeLeft, onSwipeRight, canSwipe, isSeller, deletingId }) => {
   const [dx, setDx] = useState(0);
@@ -355,19 +371,33 @@ const ClientOrdersOrdersTab = ({
       </div>
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {orders?.items?.map((order) => (
-          <OrderCard
-            key={order._id}
-            order={order}
-            isAdmin={isAdmin}
-            isSuperAdmin={isSuperAdmin}
-            isSeller={session?.user?.role === "Seller"}
-            deletingId={deletingId}
-            onRejectionTrigger={onRejectionTrigger}
-            handleDelete={handleDelete}
-            setStatusPickerOrder={setStatusPickerOrder}
-          />
-        ))}
+        {orders?.items?.map((order, idx) => {
+          const dayKey = getBusinessDayKey(order.createdAt);
+          const prevDayKey = idx > 0 ? getBusinessDayKey(orders.items[idx - 1].createdAt) : null;
+          const showSeparator = dayKey !== prevDayKey;
+
+          return (
+            <React.Fragment key={order._id}>
+              {showSeparator && (
+                <div className="col-span-full md:hidden flex items-center gap-3 pt-2 first:pt-0">
+                  <div className="flex-1 h-px bg-slate-200/80" />
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{getDayLabel(dayKey)}</span>
+                  <div className="flex-1 h-px bg-slate-200/80" />
+                </div>
+              )}
+              <OrderCard
+                order={order}
+                isAdmin={isAdmin}
+                isSuperAdmin={isSuperAdmin}
+                isSeller={session?.user?.role === "Seller"}
+                deletingId={deletingId}
+                onRejectionTrigger={onRejectionTrigger}
+                handleDelete={handleDelete}
+                setStatusPickerOrder={setStatusPickerOrder}
+              />
+            </React.Fragment>
+          );
+        })}
       </div>
     )}
 
