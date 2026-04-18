@@ -16,7 +16,6 @@ export async function GET(request) {
   const isSeller = session.user.role === "Seller";
 
   if (isSeller) {
-    // Само собствената наличност
     const stocks = await SellerStock.find({ seller: new mongoose.Types.ObjectId(session.user.id) })
       .populate("product", "name weight flavor puffs count")
       .lean();
@@ -44,9 +43,6 @@ export async function GET(request) {
   }
 
   // Admin / Super Admin — всички доставчици без Super Admin
-  const { error } = await requireAdmin(request);
-  if (error) return error;
-
   const superAdminRole = await Role.findOne({ name: "Super Admin" }, { _id: 1 }).lean();
 
   const sellers = await User.find(

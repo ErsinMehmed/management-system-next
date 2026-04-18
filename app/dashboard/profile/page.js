@@ -1,8 +1,10 @@
 "use client";
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@heroui/react";
-import { FiLock, FiEye, FiEyeOff, FiCheck, FiCamera, FiUser, FiMail, FiShield } from "react-icons/fi";
+import { FiLock, FiEye, FiEyeOff, FiCheck, FiCamera, FiUser, FiMail, FiShield, FiArrowLeft } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
 import { addToast } from "@heroui/toast";
 
@@ -34,6 +36,8 @@ const PasswordField = ({ label, value, onChange, show, onToggle, placeholder }) 
 // ─── ProfilePage ─────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const { data: session, update } = useSession();
+  const router = useRouter();
+  const isSeller = session?.user?.role === "Seller";
   const fileRef = useRef(null);
 
   const [previewUrl, setPreviewUrl]   = useState(null);
@@ -138,6 +142,17 @@ export default function ProfilePage() {
     <Layout title="Моите данни">
       <div className="max-w-lg mx-auto flex flex-col gap-5">
 
+        {isSeller && (
+          <Button
+            variant="light"
+            size="sm"
+            startContent={<FiArrowLeft className="w-4 h-4" />}
+            onPress={() => router.push("/dashboard/client-orders")}
+            className="self-start text-slate-500 hover:text-[#0071f5] font-medium px-0 -mb-2">
+            Назад към заявките
+          </Button>
+        )}
+
         {/* ── Профил карта ── */}
         <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
           {/* Gradient header */}
@@ -150,7 +165,7 @@ export default function ProfilePage() {
               <div className="relative group w-28 h-28 shrink-0">
                 <div className="w-28 h-28 rounded-2xl border-4 border-white shadow-md overflow-hidden bg-blue-100 flex items-center justify-center">
                   {avatarSrc ? (
-                    <img src={avatarSrc} alt="profile" className="w-full h-full object-cover" />
+                    <Image src={avatarSrc} alt="profile" width={112} height={112} sizes="112px" className="w-full h-full object-cover" unoptimized />
                   ) : (
                     <span className="text-3xl font-bold text-[#0071f5]">{initials}</span>
                   )}

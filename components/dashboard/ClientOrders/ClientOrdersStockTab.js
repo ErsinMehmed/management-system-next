@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { observer } from "mobx-react-lite";
+import Image from "next/image";
 import {
   Button,
   Input,
@@ -18,6 +19,31 @@ import {
 import { FiPlus, FiMinus, FiSave, FiPackage, FiCheck } from "react-icons/fi";
 import { clientOrderStore, productStore } from "@/stores/useStore";
 import { productTitle } from "@/utils";
+
+// ─── Thumbnail за продукт (снимка или fallback икона) ─────────────────────
+
+const ProductThumb = ({ product, size = "md" }) => {
+  if (product?.image_url) {
+    return (
+      <div className="w-10 h-10 shadow rounded-lg overflow-hidden shrink-0 bg-slate-50 border border-slate-200">
+        <Image
+          src={product.image_url}
+          alt={product.name || ""}
+          width={38}
+          height={38}
+          sizes="38px"
+          className="w-full h-full object-cover"
+          unoptimized
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-indigo-100 flex items-center justify-center shrink-0 transition-colors">
+      <FiPackage className='w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500 transition-colors' />
+    </div>
+  );
+};
 
 // ─── Единична клетка за стойност ───────────────────────────────────────────
 
@@ -164,19 +190,89 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
     );
   }
 
+  // ── Seller: един плосък list (няма смисъл от акардион, няма и таблица с много колони) ──
+  if (!isSuperAdmin && sellers.length === 1) {
+    const seller = sellers[0];
+    const sid = String(seller.sellerId);
+    const sellerValues = values[sid] ?? {};
+    const totalStock = visibleProducts.reduce((s, p) => s + (sellerValues[String(p._id)] ?? 0), 0);
+
+    return (
+      <div className='flex flex-col gap-4 pb-10'>
+        <div className='bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden'>
+          <div className='px-5 py-4 bg-gradient-to-r from-indigo-50/40 via-white to-white border-b border-slate-100 flex items-center gap-3'>
+            <div className='w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20'>
+              <FiPackage className='w-4 h-4 text-white' />
+            </div>
+            <div>
+              <p className='text-sm font-bold text-slate-800'>Моята наличност</p>
+              <p className='text-[11px] text-slate-400'>{visibleProducts.length} продукта</p>
+            </div>
+            <Chip size='sm' variant='flat' color={totalStock === 0 ? "danger" : "primary"} className='ml-auto'>
+              Общо: {totalStock} бр.
+            </Chip>
+          </div>
+
+          <div className='divide-y divide-slate-50'>
+            {visibleProducts.map((product) => {
+              const pid = String(product._id);
+              const val = sellerValues[pid] ?? 0;
+              return (
+                <div key={pid} className='flex items-center gap-3 px-5 py-3 hover:bg-indigo-50/30 transition-colors group'>
+                  <ProductThumb product={product} />
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-sm font-medium text-slate-700 truncate'>{productTitle(product)}</p>
+                    {val === 0 && <span className='text-[11px] text-red-400 font-medium'>Изчерпано</span>}
+                    {val > 0 && val <= 3 && <span className='text-[11px] text-amber-500 font-medium'>Малко</span>}
+                  </div>
+                  <Chip size='sm' variant='flat'
+                    color={val === 0 ? "danger" : val <= 3 ? "warning" : "success"}
+                    classNames={{ base: "min-w-[48px] justify-center font-bold" }}>
+                    {val} бр.
+                  </Chip>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='flex flex-col gap-4 pb-24'>
       {/* ── Десктоп: таблица (матрица) ── */}
-      <div className='hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto'>
+      <div className='hidden sm:block bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden'>
+        {/* Header с градиент */}
+        <div className='px-5 py-4 bg-gradient-to-r from-indigo-50/40 via-white to-white border-b border-slate-100 flex items-center gap-3'>
+          <div className='w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20'>
+            <FiPackage className='w-4 h-4 text-white' />
+          </div>
+          <div>
+            <p className='text-sm font-bold text-slate-800'>Наличности на доставчици</p>
+            <p className='text-[11px] text-slate-400'>Преглед на текущите бройки по продукт</p>
+          </div>
+          <div className='ml-auto flex items-center gap-2'>
+            <Chip size='sm' variant='flat' color='primary' className='font-semibold'>
+              {sellers.length} {sellers.length === 1 ? "доставчик" : "доставчици"}
+            </Chip>
+            <Chip size='sm' variant='flat' className='font-semibold'>
+              {visibleProducts.length} продукта
+            </Chip>
+          </div>
+        </div>
+
+        <div className='overflow-x-auto'>
         <Table
           removeWrapper
           aria-label='Наличности по доставчик'
           classNames={{
-            th: "bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wide first:rounded-tl-2xl last:rounded-tr-2xl py-3",
-            td: "py-2.5 align-middle",
+            th: "bg-slate-50/70 text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3",
+            td: "py-3 align-middle",
+            tr: "group",
           }}>
           <TableHeader>
-            <TableColumn className='w-48 min-w-[160px]'>Продукт</TableColumn>
+            <TableColumn className='w-64 min-w-[180px] pl-5'>Продукт</TableColumn>
             {sellers.map((s) => {
               const initials = s.sellerName
                 .split(" ")
@@ -188,12 +284,12 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
                 <TableColumn
                   key={String(s.sellerId)}
                   className='text-center min-w-[140px]'>
-                  <div className='flex flex-col items-center gap-1'>
+                  <div className='flex flex-col items-center gap-1.5'>
                     <Avatar
                       name={initials}
                       src={s.profileImage ?? undefined}
                       size='sm'
-                      className='bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-xs font-bold'
+                      className='bg-gradient-to-br from-indigo-500 to-violet-500 text-white text-xs font-bold ring-2 ring-white shadow-sm'
                     />
                     <span className='font-semibold text-slate-700 normal-case tracking-normal text-xs'>
                       {s.sellerName.split(" ")[0]}
@@ -209,11 +305,14 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
               return (
                 <TableRow
                   key={pid}
-                  className='hover:bg-slate-50/60 transition-colors group'>
-                  <TableCell>
-                    <p className='text-sm font-medium text-slate-700 leading-tight'>
-                      {productTitle(product)}
-                    </p>
+                  className='hover:bg-indigo-50/30 transition-colors border-b border-slate-50 last:border-0'>
+                  <TableCell className='pl-5'>
+                    <div className='flex items-center gap-2.5'>
+                      <ProductThumb product={product} size='sm' />
+                      <p className='text-sm font-medium text-slate-700 leading-tight'>
+                        {productTitle(product)}
+                      </p>
+                    </div>
                   </TableCell>
                   {sellers.map((seller) => {
                     const sid = String(seller.sellerId);
@@ -238,9 +337,9 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
               );
             })}
             {/* Ред с totals */}
-            <TableRow className='border-t-2 border-slate-100'>
-              <TableCell>
-                <span className='text-xs font-bold text-slate-500 uppercase tracking-wide'>
+            <TableRow className='bg-gradient-to-r from-slate-50 to-white border-t-2 border-indigo-100/60'>
+              <TableCell className='pl-5'>
+                <span className='text-[11px] font-bold text-indigo-500 uppercase tracking-wider'>
                   Общо
                 </span>
               </TableCell>
@@ -259,7 +358,7 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
                       variant='flat'
                       color={total === 0 ? "danger" : "primary"}
                       classNames={{
-                        base: "font-bold min-w-[40px] justify-center",
+                        base: "font-bold min-w-[44px] justify-center",
                       }}>
                       {total}
                     </Chip>
@@ -269,6 +368,7 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
             </TableRow>
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {/* ── Мобилен: акордеон ── */}
@@ -342,7 +442,8 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
                     return (
                       <div
                         key={pid}
-                        className={`flex items-center justify-between py-2.5 px-1 transition-colors ${dirty ? "bg-blue-50/30" : ""}`}>
+                        className={`flex items-center gap-2.5 py-2.5 px-1 transition-colors group ${dirty ? "bg-blue-50/30" : ""}`}>
+                        <ProductThumb product={product} size='sm' />
                         <div className='min-w-0 flex-1 pr-3'>
                           <p className='text-sm text-slate-700 truncate'>
                             {productTitle(product)}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Head from "next/head";
+import Image from "next/image";
 
 export default function UploadTest() {
   const [imageSrc, setImageSrc] = useState();
@@ -84,7 +85,7 @@ export default function UploadTest() {
             />
           </p>
 
-          <img src={imageSrc} />
+          {imageSrc && <Image src={imageSrc} alt="upload preview" width={300} height={300} sizes="300px" unoptimized />}
 
           {imageSrc && !uploadData && (
             <p>
