@@ -379,10 +379,12 @@ const ClientOrdersOrdersTab = ({
           return (
             <React.Fragment key={order._id}>
               {showSeparator && (
-                <div className="col-span-full md:hidden flex items-center gap-3 pt-2 first:pt-0">
-                  <div className="flex-1 h-px bg-slate-200/80" />
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{getDayLabel(dayKey)}</span>
-                  <div className="flex-1 h-px bg-slate-200/80" />
+                <div className="col-span-full md:hidden">
+                  <div className="flex items-center gap-3 pt-2">
+                    <div className="flex-1 h-px bg-slate-200/80" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{getDayLabel(dayKey)}</span>
+                    <div className="flex-1 h-px bg-slate-200/80" />
+                  </div>
                 </div>
               )}
               <OrderCard
