@@ -1,8 +1,9 @@
 import React, {useEffect} from "react";
+import {observer} from "mobx-react-lite";
 import {commonStore} from "@/stores/useStore";
 import {addToast} from "@heroui/react";
 
-const Alert = () => {
+const Alert = observer(() => {
     const {setErrorMessage, setSuccessMessage, errorMessage, successMessage} =
         commonStore;
 
@@ -29,6 +30,6 @@ const Alert = () => {
     }, [errorMessage, successMessage, setErrorMessage, setSuccessMessage]);
 
     return null;
-};
+});
 
 export default Alert;

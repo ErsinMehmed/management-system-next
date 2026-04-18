@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Modal, ModalContent, ModalBody, Button } from "@heroui/react";
 import { FiUserPlus, FiPhone, FiX } from "react-icons/fi";
 import Input from "@/components/html/Input";
+import { commonStore } from "@/stores/useStore";
 
 const AddClientModal = ({ isOpen, onClose, onAdded }) => {
   const [phone, setPhone] = useState("");
@@ -29,14 +30,16 @@ const AddClientModal = ({ isOpen, onClose, onAdded }) => {
     setSaving(true);
     try {
       const res = await fetch("/api/client-phones", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: trimmed, name: name.trim() }),
       });
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError("Възникна грешка");
+        commonStore.setErrorMessage(json?.message || "Възникна грешка");
         return;
       }
+      commonStore.setSuccessMessage("Клиентът е добавен.");
       onAdded?.({ phone: trimmed, name: name.trim() });
       onClose();
     } finally { setSaving(false); }

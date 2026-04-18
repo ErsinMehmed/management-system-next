@@ -91,11 +91,6 @@ const CreateOrderModal = observer(({ isOpen, onOpenChange, sellers, isSuperAdmin
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} title="Добави поръчка" isLoading={isCreating} onSave={handleSave}>
-      {apiError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-          <p className="text-sm font-semibold text-red-600">{apiError}</p>
-        </div>
-      )}
       {clientNotes.length > 0 && (
         <div className="bg-amber-50/60 border border-amber-200/70 rounded-xl px-3 py-2.5 flex items-start gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">

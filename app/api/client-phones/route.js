@@ -56,6 +56,33 @@ export async function GET(request) {
   return NextResponse.json({ items: paginated, hasMore, total });
 }
 
+// POST — добавя нов клиент (проверка за дублиран телефон)
+export async function POST(request) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ message: "Няма достъп." }, { status: 401 });
+
+  const { phone, name } = await request.json();
+  const trimmed = phone?.trim();
+  if (!trimmed || !/^\+?[0-9]{7,15}$/.test(trimmed)) {
+    return NextResponse.json({ message: "Невалиден телефон." }, { status: 400 });
+  }
+
+  await connectMongoDB();
+
+  const [existing, orderMatch] = await Promise.all([
+    ClientPhone.findOne({ phone: trimmed }).lean(),
+    ClientOrder.findOne({ phone: trimmed }).select("_id").lean(),
+  ]);
+
+  if (existing || orderMatch) {
+    return NextResponse.json({ message: "Този номер вече е добавен." }, { status: 409 });
+  }
+
+  await ClientPhone.create({ phone: trimmed, name: name?.trim() ?? "" });
+
+  return NextResponse.json({ status: true, message: "Клиентът е добавен." }, { status: 201 });
+}
+
 // PUT — запазване на име за телефонен номер
 export async function PUT(request) {
   const session = await getServerSession(authOptions);
