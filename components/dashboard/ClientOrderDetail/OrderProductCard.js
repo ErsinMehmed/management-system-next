@@ -32,7 +32,7 @@ export default function OrderProductCard({
   const totalPrice = currentPrice + currentPrice2;
 
   return (
-    <div className="mx-4 mb-4 rounded-xl p-4 bg-slate-50 border border-slate-100">
+    <div className="mx-4 mb-4 rounded-xl p-4 bg-slate-50 shadow border border-slate-100">
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex flex-col gap-1 min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">

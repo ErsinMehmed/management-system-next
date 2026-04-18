@@ -1,10 +1,10 @@
 "use client";
 import { observer } from "mobx-react-lite";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button, useDisclosure } from "@heroui/react";
-import { FiArrowLeft, FiCalendar } from "react-icons/fi";
+import { FiArrowLeft, FiCalendar, FiFileText } from "react-icons/fi";
 import { addToast } from "@heroui/toast";
 import PusherClient from "pusher-js";
 import Layout from "@/components/layout/Dashboard";
@@ -43,6 +43,15 @@ const ClientOrderDetailClient = ({ order }) => {
 
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
   const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
+
+  const [clientNotes, setClientNotes] = useState([]);
+  useEffect(() => {
+    if (!order.phone) return;
+    fetch(`/api/client-phones/${encodeURIComponent(order.phone)}`)
+      .then((r) => r.json())
+      .then((d) => setClientNotes(d?.notes || []))
+      .catch(() => {});
+  }, [order.phone]);
 
   const canEdit = currentStatus === "нова" || isSuperAdmin;
   const statusCfg = clientOrderStatusConfig[currentStatus] ?? clientOrderStatusConfig["нова"];
@@ -144,6 +153,21 @@ const ClientOrderDetailClient = ({ order }) => {
         </Button>
 
         <div className="flex flex-col gap-3">
+          {clientNotes.length > 0 && (
+            <div className="bg-amber-50/60 border border-amber-100/80 rounded-2xl px-4 py-3 shadow flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                <FiFileText className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">Бележки за клиента</p>
+                <ul className="space-y-0.5">
+                  {clientNotes.map((n) => (
+                    <li key={n._id} className="text-sm text-slate-700 leading-snug">• {n.text}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div className={`h-1.5 w-full ${statusCfg.accent}`} />
             <OrderHeader

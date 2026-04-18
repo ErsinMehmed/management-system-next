@@ -3,7 +3,6 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import ClientPhone from "@/models/clientPhone";
-import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 // GET — уникални телефони от поръчките с пагинация, обогатени с имена
@@ -18,13 +17,8 @@ export async function GET(request) {
   const perPage = 12;
   const search = searchParams.get("search")?.trim() ?? "";
 
-  const matchStage = session.user.role === "Seller"
-    ? { $match: { assignedTo: new mongoose.Types.ObjectId(session.user.id) } }
-    : null;
-
   const [phones, names] = await Promise.all([
     ClientOrder.aggregate([
-      ...(matchStage ? [matchStage] : []),
       { $group: { _id: "$phone", lastOrder: { $max: "$createdAt" }, orderCount: { $sum: 1 } } },
       { $sort: { lastOrder: -1 } },
     ]),

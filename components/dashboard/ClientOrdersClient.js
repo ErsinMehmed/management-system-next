@@ -136,7 +136,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
           {activeTab === "stock" && (
             <ClientOrdersStockTab isSuperAdmin={isSuperAdmin} />
           )}
-          {activeTab === "clients" && isSuperAdmin && (
+          {activeTab === "clients" && (
             <ClientOrdersClientsTab />
           )}
         </div>

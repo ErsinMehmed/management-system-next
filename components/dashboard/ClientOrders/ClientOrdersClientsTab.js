@@ -1,78 +1,35 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Spinner } from "@heroui/react";
-import { FiUser, FiPhone, FiEdit2, FiCheck, FiX, FiSearch, FiChevronRight } from "react-icons/fi";
+import { FiUser, FiPhone, FiSearch, FiChevronRight } from "react-icons/fi";
 import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
 
-function ClientRow({ item, onSave, onOpenProfile }) {
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(item.name);
-  const [saving, setSaving] = useState(false);
-
-  const handleSave = async () => {
-    setSaving(true);
-    await onSave(item.phone, value);
-    setSaving(false);
-    setEditing(false);
-  };
-
-  const handleCancel = () => {
-    setValue(item.name);
-    setEditing(false);
-  };
-
+function ClientRow({ item, onOpenProfile }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-slate-50/60 transition-colors group cursor-pointer"
-      onClick={() => !editing && onOpenProfile?.(item.phone)}>
+      onClick={() => onOpenProfile?.(item.phone)}>
       <div className="w-9 h-9 rounded-xl bg-[#0071f5]/10 flex items-center justify-center shrink-0">
         <FiUser className="w-4 h-4 text-[#0071f5]" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <FiPhone className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="text-sm font-semibold text-slate-700 tabular-nums group-hover:text-[#0071f5] transition-colors">{item.phone}</span>
-          <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">{item.orderCount} поръч.</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <FiPhone className="w-3 h-3 text-slate-400 shrink-0" />
+            <span className="text-sm font-semibold text-slate-700 tabular-nums group-hover:text-[#0071f5] transition-colors">{item.phone}</span>
+          </div>
+          <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full whitespace-nowrap">{item.orderCount} поръч.</span>
+          <span className="text-[10px] text-slate-400 whitespace-nowrap sm:hidden">
+            · {item.lastOrder ? new Date(item.lastOrder).toLocaleDateString("bg-BG") : "—"}
+          </span>
         </div>
 
-        {editing ? (
-          <div className="flex items-center gap-2 mt-1.5" onClick={(e) => e.stopPropagation()}>
-            <input
-              autoFocus
-              type="text"
-              placeholder="Въведи название"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
-              className="text-sm border border-gray-200 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-[#0071f5]/30 w-48"
-            />
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-6 h-6 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors disabled:opacity-50">
-              {saving ? <Spinner size="sm" color="success" className="scale-75" /> : <FiCheck className="w-3.5 h-3.5 text-green-600" />}
-            </button>
-            <button
-              onClick={handleCancel}
-              className="w-6 h-6 rounded-lg bg-slate-100 hover:bg-red-100 flex items-center justify-center transition-colors">
-              <FiX className="w-3.5 h-3.5 text-slate-400 hover:text-red-500" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 mt-0.5">
-            <p className={`text-xs ${item.name ? "font-medium text-slate-600" : "text-slate-300 italic"}`}>
-              {item.name || "Няма въведено название"}
-            </p>
-            <button
-              onClick={(e) => { e.stopPropagation(); setEditing(true); }}
-              className="w-5 h-5 rounded-md bg-slate-100 hover:bg-[#0071f5]/10 flex items-center justify-center transition-colors">
-              <FiEdit2 className="w-3 h-3 text-slate-400 hover:text-[#0071f5]" />
-            </button>
-          </div>
-        )}
+        <p className={`text-xs mt-0.5 ${item.name ? "font-medium text-slate-600" : "text-slate-300 italic"}`}>
+          {item.name || "Няма въведено название"}
+        </p>
       </div>
 
-      <div className="text-right shrink-0">
+      <div className="text-right shrink-0 hidden sm:block">
         <p className="text-[10px] text-slate-400">Последна поръчка</p>
         <p className="text-xs font-medium text-slate-500">
           {item.lastOrder ? new Date(item.lastOrder).toLocaleDateString("bg-BG") : "—"}
@@ -157,12 +114,7 @@ export default function ClientOrdersClientsTab() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [fetchPage]);
 
-  const handleSave = async (phone, name) => {
-    await fetch("/api/client-phones", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, name }),
-    });
+  const handleNameUpdate = (phone, name) => {
     setItems((prev) => prev.map((i) => (i.phone === phone ? { ...i, name } : i)));
   };
 
@@ -214,7 +166,7 @@ export default function ClientOrdersClientsTab() {
         ) : (
           <>
             {items.map((item) => (
-              <ClientRow key={item.phone} item={item} onSave={handleSave} onOpenProfile={setProfilePhone} />
+              <ClientRow key={item.phone} item={item} onOpenProfile={setProfilePhone} />
             ))}
             {isLoadingMore && (
               <div className="flex items-center justify-center py-5">
@@ -234,6 +186,7 @@ export default function ClientOrdersClientsTab() {
         isOpen={!!profilePhone}
         phone={profilePhone}
         onClose={() => setProfilePhone(null)}
+        onNameChange={handleNameUpdate}
       />
     </div>
   );

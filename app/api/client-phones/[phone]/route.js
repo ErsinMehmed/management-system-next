@@ -17,11 +17,7 @@ export async function GET(request, { params }) {
   const { phone: rawPhone } = await params;
   const phone = decodeURIComponent(rawPhone);
 
-  const role = session.user.role;
-  const isSeller = role === "Seller";
-
   const orderFilter = { phone };
-  if (isSeller) orderFilter.assignedTo = session.user.id;
 
   const [phoneDoc, orders, stats, topProduct] = await Promise.all([
     ClientPhone.findOne({ phone }).populate("notes.createdBy", "name").lean(),

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Modal, ModalContent, ModalBody, Button, Chip, Spinner, Tabs, Tab, Textarea } from "@heroui/react";
-import { FiPhone, FiShoppingBag, FiDollarSign, FiStar, FiFileText, FiX, FiPlus, FiTrash2, FiUser, FiClock, FiCheck } from "react-icons/fi";
+import { FiPhone, FiShoppingBag, FiDollarSign, FiStar, FiFileText, FiX, FiPlus, FiTrash2, FiUser, FiClock, FiCheck, FiEdit2 } from "react-icons/fi";
 import { formatCurrency, formatDate, productTitle } from "@/utils";
 import { clientOrderStatusConfig } from "@/data";
 
@@ -16,11 +16,14 @@ const StatBox = ({ icon, label, value, color = "indigo" }) => (
   </div>
 );
 
-const ClientProfileModal = ({ isOpen, onClose, phone }) => {
+const ClientProfileModal = ({ isOpen, onClose, phone, onNameChange }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [savingNote, setSavingNote] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+  const [savingName, setSavingName] = useState(false);
 
   const fetchProfile = async () => {
     if (!phone) return;
@@ -37,8 +40,24 @@ const ClientProfileModal = ({ isOpen, onClose, phone }) => {
     if (isOpen && phone) {
       fetchProfile();
       setNoteText("");
+      setEditingName(false);
     }
   }, [isOpen, phone]);
+
+  const saveName = async () => {
+    const trimmed = nameValue.trim();
+    setSavingName(true);
+    try {
+      await fetch("/api/client-phones", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, name: trimmed }),
+      });
+      setData((prev) => (prev ? { ...prev, name: trimmed } : prev));
+      onNameChange?.(phone, trimmed);
+      setEditingName(false);
+    } finally { setSavingName(false); }
+  };
 
   const addNote = async () => {
     if (!noteText.trim()) return;
@@ -70,9 +89,39 @@ const ClientProfileModal = ({ isOpen, onClose, phone }) => {
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20">
                   <FiUser className="w-5 h-5 text-white" />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-slate-800 truncate">{data?.name || "Клиент"}</p>
-                  <div className="flex items-center gap-1 text-xs text-slate-400">
+                <div className="min-w-0 flex-1">
+                  {editingName ? (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        autoFocus
+                        type="text"
+                        placeholder="Име на клиента"
+                        value={nameValue}
+                        onChange={(e) => setNameValue(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setEditingName(false); }}
+                        className="text-sm font-semibold border border-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 w-full max-w-[200px]"
+                      />
+                      <button onClick={saveName} disabled={savingName}
+                        className="w-6 h-6 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center shrink-0 transition-colors disabled:opacity-50">
+                        {savingName ? <Spinner size="sm" color="success" className="scale-75" /> : <FiCheck className="w-3.5 h-3.5 text-green-600" />}
+                      </button>
+                      <button onClick={() => setEditingName(false)}
+                        className="w-6 h-6 rounded-lg bg-slate-100 hover:bg-red-100 flex items-center justify-center shrink-0 transition-colors">
+                        <FiX className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <p className={`text-sm font-bold truncate ${data?.name ? "text-slate-800" : "text-slate-400 italic"}`}>
+                        {data?.name || "Без име"}
+                      </p>
+                      <button onClick={() => { setNameValue(data?.name || ""); setEditingName(true); }}
+                        className="w-5 h-5 rounded-md bg-slate-100 hover:bg-indigo-50 flex items-center justify-center transition-colors shrink-0">
+                        <FiEdit2 className="w-3 h-3 text-slate-400 hover:text-indigo-500" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
                     <FiPhone className="w-3 h-3" />
                     <span className="tabular-nums">{phone}</span>
                   </div>
