@@ -35,9 +35,12 @@ export async function GET(request) {
 
   const dateCondition = getDateCondition(dateFrom, dateTo, period);
 
-const matchCondition = {
+  const role = session.user.role;
+  const isPrivileged = role === "Admin" || role === "Super Admin";
+
+  const matchCondition = {
     ...dateCondition,
-    creator: userObjectId,
+    ...(isPrivileged ? {} : { creator: userObjectId }),
   };
 
   const totalIncomesArray = await Sell.aggregate([

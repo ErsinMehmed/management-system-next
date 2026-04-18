@@ -19,12 +19,12 @@ export async function GET(request) {
   await connectMongoDB();
 
   const userObjectId = new mongoose.Types.ObjectId(session.user.id);
+  const role = session.user.role;
+  const isPrivileged = role === "Admin" || role === "Super Admin";
 
   const period = request.nextUrl.searchParams.get("period");
 
-  let matchConditions = {
-    creator: userObjectId,
-  };
+  let matchConditions = isPrivileged ? {} : { creator: userObjectId };
 
   if (period !== "all") {
     let startDate;

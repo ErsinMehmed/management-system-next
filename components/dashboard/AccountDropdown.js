@@ -14,6 +14,7 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 const AccountDropdown = () => {
   const { data: session } = useSession();
   const router = useRouter();
+  const isAdmin = session?.user?.role === "Admin" || session?.user?.role === "Super Admin";
 
   const getUserFirstName = () => {
     let firstName = session?.user.name.split(" ")[0];
@@ -49,6 +50,11 @@ const AccountDropdown = () => {
 
         <DropdownMenu aria-label="User Actions" variant="flat">
           <DropdownItem key="my_data" onPress={() => router.push("/dashboard/profile")}>Моите данни</DropdownItem>
+          {isAdmin ? (
+            <DropdownItem key="compare" onPress={() => router.push("/dashboard/compare")}>
+              Сравнение на периоди
+            </DropdownItem>
+          ) : null}
           <DropdownItem onPress={() => signOut()} key="logout" color="danger">
             Изход
           </DropdownItem>
