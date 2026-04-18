@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/helpers/requireRole";
+import { requireSuperAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import Product from "@/models/product";
 import Category from "@/models/category";
@@ -154,7 +154,7 @@ const aggregatePeriod = async ({ fromStr, toStr }) => {
 };
 
 export async function GET(request) {
-  const { error } = await requireAdmin(request);
+  const { error } = await requireSuperAdmin(request);
   if (error) return error;
 
   const { searchParams } = request.nextUrl;
