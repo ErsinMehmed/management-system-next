@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Spinner } from "@heroui/react";
-import { FiUser, FiPhone, FiSearch, FiChevronRight } from "react-icons/fi";
+import { Spinner, Button } from "@heroui/react";
+import { FiUser, FiPhone, FiSearch, FiChevronRight, FiX, FiPlus } from "react-icons/fi";
 import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
+import AddClientModal from "@/components/dashboard/ClientOrders/AddClientModal";
 
 function ClientRow({ item, onOpenProfile }) {
   return (
@@ -48,6 +49,7 @@ export default function ClientOrdersClientsTab() {
   const [total, setTotal] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [profilePhone, setProfilePhone] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Refs за scroll listener — избягват stale closure
   const pageRef = useRef(1);
@@ -121,20 +123,28 @@ export default function ClientOrdersClientsTab() {
   return (
     <div className="flex flex-col gap-4">
       {/* Търсене */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3 flex items-center gap-3">
-        <FiSearch className="w-4 h-4 text-slate-400 shrink-0" />
-        <input
-          type="text"
-          placeholder="Търси по телефон или название..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="flex-1 text-sm text-slate-700 placeholder:text-slate-300 outline-none bg-transparent"
-        />
-        {searchInput && (
-          <button onClick={() => setSearchInput("")} className="text-slate-300 hover:text-slate-500 transition-colors">
-            <FiX className="w-4 h-4" />
-          </button>
-        )}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3 flex items-center gap-3">
+          <FiSearch className="w-4 h-4 text-slate-400 shrink-0" />
+          <input
+            type="text"
+            placeholder="Търси по телефон или название..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="flex-1 text-sm text-slate-700 placeholder:text-slate-300 outline-none bg-transparent"
+          />
+          {searchInput && (
+            <button onClick={() => setSearchInput("")} className="text-slate-300 hover:text-slate-500 transition-colors">
+              <FiX className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <Button color="primary" radius="full"
+          className="shrink-0 font-semibold h-[40px] px-4 sm:px-5"
+          startContent={<FiPlus className="w-4 h-4" />}
+          onPress={() => setShowAddModal(true)}>
+          <span className="hidden sm:inline">Добави</span>
+        </Button>
       </div>
 
       {/* Списък */}
@@ -187,6 +197,12 @@ export default function ClientOrdersClientsTab() {
         phone={profilePhone}
         onClose={() => setProfilePhone(null)}
         onNameChange={handleNameUpdate}
+      />
+
+      <AddClientModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdded={() => fetchPage(1, searchRef.current, true)}
       />
     </div>
   );

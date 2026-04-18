@@ -17,7 +17,7 @@ export async function GET(request) {
   const perPage = 12;
   const search = searchParams.get("search")?.trim() ?? "";
 
-  const [phones, names] = await Promise.all([
+  const [phones, stored] = await Promise.all([
     ClientOrder.aggregate([
       { $group: { _id: "$phone", lastOrder: { $max: "$createdAt" }, orderCount: { $sum: 1 } } },
       { $sort: { lastOrder: -1 } },
@@ -25,7 +25,8 @@ export async function GET(request) {
     ClientPhone.find({}).lean(),
   ]);
 
-  const nameMap = new Map(names.map((n) => [n.phone, n.name]));
+  const nameMap = new Map(stored.map((n) => [n.phone, n.name]));
+  const fromOrders = new Set(phones.map((p) => p._id));
 
   let items = phones.map(({ _id, lastOrder, orderCount }) => ({
     phone: _id,
@@ -33,6 +34,13 @@ export async function GET(request) {
     lastOrder,
     orderCount,
   }));
+
+  // Включи и клиентите без поръчки (само записани ръчно)
+  for (const p of stored) {
+    if (!fromOrders.has(p.phone)) {
+      items.unshift({ phone: p.phone, name: p.name || "", lastOrder: p.createdAt, orderCount: 0 });
+    }
+  }
 
   if (search) {
     const lower = search.toLowerCase();
