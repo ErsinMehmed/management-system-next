@@ -74,15 +74,15 @@ const ProductsClient = () => {
   return (
     <Layout title='Наличности'>
       {isUserAdmin && (
-        <div className='absolute -top-[4.1rem] sm:-top-[4.6rem] right-3 sm:right-10 flex items-center gap-2'>
+        <div className='absolute -top-[3rem] sm:-top-[3.2rem] right-3 sm:right-10 flex items-center gap-2'>
           <button
             onClick={onCreateOpen}
-            className='text-white bg-green-500 hover:bg-green-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
+            className='text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-4 sm:px-5 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
             Добави
           </button>
           <button
             onClick={onVisibilityOpen}
-            className='text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-4 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
+            className='text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-4 sm:px-5 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
             Видимост
           </button>
         </div>
