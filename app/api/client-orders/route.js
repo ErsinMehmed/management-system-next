@@ -43,8 +43,8 @@ export async function GET(request) {
       .sort({ _id: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage)
-      .populate({ path: "product", select: "name weight flavor puffs count category", populate: { path: "category", select: "name" } })
-      .populate({ path: "secondProduct.product", select: "name weight flavor puffs count category", populate: { path: "category", select: "name" } })
+      .populate({ path: "product", select: "name weight flavor puffs count image_url category", populate: { path: "category", select: "name" } })
+      .populate({ path: "secondProduct.product", select: "name weight flavor puffs count image_url category", populate: { path: "category", select: "name" } })
       .populate({ path: "assignedTo", select: "name" })
       .lean(),
     ClientOrder.countDocuments(dailyFilter),
@@ -149,8 +149,8 @@ export async function POST(request) {
   const order = await ClientOrder.create(data);
   const assignedToId = order.assignedTo; // raw ObjectId — преди populate
   await order.populate([
-    { path: "product", select: "name weight flavor puffs count" },
-    { path: "secondProduct.product", select: "name" },
+    { path: "product", select: "name weight flavor puffs count image_url" },
+    { path: "secondProduct.product", select: "name image_url" },
     { path: "assignedTo", select: "name" },
   ]);
 
