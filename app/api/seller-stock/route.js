@@ -2,6 +2,7 @@ import { requireAdmin, requireSuperAdmin } from "@/helpers/requireRole";
 import { getAuth } from "@/helpers/getAuth";
 import connectMongoDB from "@/libs/mongodb";
 import SellerStock from "@/models/sellerStock";
+import Product from "@/models/product";
 import User from "@/models/user";
 import Role from "@/models/role";
 import { NextResponse } from "next/server";
@@ -12,12 +13,14 @@ export async function GET(request) {
   if (!session) return NextResponse.json({ message: "Не сте оторизирани." }, { status: 401 });
 
   await connectMongoDB();
+  // Подсигуряваме че Product е регистриран (нужно за populate в serverless среда)
+  void Product;
 
   const isSeller = session.user.role === "Seller";
 
   if (isSeller) {
     const stocks = await SellerStock.find({ seller: new mongoose.Types.ObjectId(session.user.id) })
-      .populate("product", "name weight flavor puffs count")
+      .populate("product", "name weight flavor puffs count image_url")
       .lean();
 
     const products = stocks.map((s) => ({
@@ -28,6 +31,7 @@ export async function GET(request) {
       productFlavor: s.product?.flavor,
       productPuffs: s.product?.puffs,
       productCount: s.product?.count,
+      productImage: s.product?.image_url ?? null,
       stock: s.stock,
     }));
 
@@ -67,6 +71,7 @@ export async function GET(request) {
       productFlavor: s.product?.flavor,
       productPuffs: s.product?.puffs,
       productCount: s.product?.count,
+      productImage: s.product?.image_url ?? null,
       stock: s.stock,
     });
     return acc;

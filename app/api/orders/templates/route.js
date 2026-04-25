@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/helpers/requireRole";
 import connectMongoDB from "@/libs/mongodb";
 import OrderTemplate from "@/models/orderTemplate";
+import Product from "@/models/product";
+import Category from "@/models/category";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
@@ -8,6 +10,8 @@ export async function GET(request) {
   if (error) return error;
 
   await connectMongoDB();
+  // Подсигуряваме че Product и Category са регистрирани (за populate в serverless)
+  void Product; void Category;
 
   const templates = await OrderTemplate.find({ createdBy: session.user.id })
     .populate({ path: "product", select: "name weight flavor puffs count price units_per_box category", populate: { path: "category", select: "name" } })
