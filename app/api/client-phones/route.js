@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import ClientPhone from "@/models/clientPhone";
@@ -7,7 +6,7 @@ import { NextResponse } from "next/server";
 
 // GET — уникални телефони от поръчките с пагинация, обогатени с имена
 export async function GET(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Няма достъп." }, { status: 401 });
 
   await connectMongoDB();
@@ -58,7 +57,7 @@ export async function GET(request) {
 
 // POST — добавя нов клиент (проверка за дублиран телефон)
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Няма достъп." }, { status: 401 });
 
   const { phone, name } = await request.json();
@@ -85,7 +84,7 @@ export async function POST(request) {
 
 // PUT — запазване на име за телефонен номер
 export async function PUT(request) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Няма достъп." }, { status: 401 });
 
   const { phone, name } = await request.json();

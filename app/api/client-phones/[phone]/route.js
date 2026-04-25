@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import ClientPhone from "@/models/clientPhone";
@@ -7,7 +6,7 @@ import Product from "@/models/product";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuth(request);
   if (!session) return NextResponse.json({ message: "Няма достъп." }, { status: 401 });
 
   await connectMongoDB();
