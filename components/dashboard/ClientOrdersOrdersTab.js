@@ -370,19 +370,19 @@ const ClientOrdersOrdersTab = ({
         <p className="text-sm font-semibold text-slate-400">Няма поръчки</p>
       </div>
     ) : (() => {
-      // Брой поръчки по работен ден
-      const ordersByDay = new Map();
-      for (const o of orders?.items || []) {
-        const k = getBusinessDayKey(o.createdAt);
-        ordersByDay.set(k, (ordersByDay.get(k) || 0) + 1);
-      }
+      // dayKey → "YYYY-MM-DD" string за справка в server-side dayCounts
+      const dayKeyToString = (k) => {
+        const d = new Date(k);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      };
+      const serverDayCounts = orders?.dayCounts || {};
       return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {orders?.items?.map((order, idx) => {
           const dayKey = getBusinessDayKey(order.createdAt);
           const prevDayKey = idx > 0 ? getBusinessDayKey(orders.items[idx - 1].createdAt) : null;
           const showSeparator = dayKey !== prevDayKey;
-          const dayCount = ordersByDay.get(dayKey) || 0;
+          const dayCount = serverDayCounts[dayKeyToString(dayKey)] || 0;
 
           return (
             <React.Fragment key={order._id}>

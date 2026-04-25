@@ -37,7 +37,16 @@ export async function GET(request) {
   const dailyFilter = { status: "доставена", createdAt: { $gte: dayStart } };
   if (!isAdmin) dailyFilter.assignedTo = session.user.id;
 
-  const [totalItems, items, dailyCount] = await Promise.all([
+  // Брой поръчки по работен ден (групиране по 9:00 Sofia cutoff)
+  // shift-ваме createdAt с -9h в Sofia, после $dateToString → ще се групира по работния ден
+  const dayCountAggFilter = { ...filter };
+  delete dayCountAggFilter.status; // искаме всички статуси за day counts
+  // Ограничаваме до последните 90 дни за производителност
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  dayCountAggFilter.createdAt = { $gte: ninetyDaysAgo };
+
+  const [totalItems, items, dailyCount, dayCountsAgg] = await Promise.all([
     ClientOrder.countDocuments(filter),
     ClientOrder.find(filter)
       .sort({ _id: -1 })
@@ -48,7 +57,25 @@ export async function GET(request) {
       .populate({ path: "assignedTo", select: "name" })
       .lean(),
     ClientOrder.countDocuments(dailyFilter),
+    ClientOrder.aggregate([
+      { $match: dayCountAggFilter },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: { $subtract: ["$createdAt", 9 * 60 * 60 * 1000] },
+              timezone: "Europe/Sofia",
+            },
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
   ]);
+
+  const dayCounts = {};
+  for (const d of dayCountsAgg) dayCounts[d._id] = d.count;
 
   return NextResponse.json({
     items,
@@ -59,6 +86,7 @@ export async function GET(request) {
       per_page: perPage,
     },
     dailyCount,
+    dayCounts,
   });
 }
 
