@@ -57,7 +57,7 @@ export async function GET(request) {
   const sellerIds = sellers.map((s) => s._id);
 
   const stocks = await SellerStock.find({ seller: { $in: sellerIds } })
-    .populate("product", "name weight flavor puffs count")
+    .populate("product", "name weight flavor puffs count image_url")
     .lean();
 
   const stocksBySeller = stocks.reduce((acc, s) => {
