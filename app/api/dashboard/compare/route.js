@@ -26,7 +26,7 @@ const aggregatePeriod = async ({ fromStr, toStr }) => {
   // Sell-ове с product populated — за revenue, orders, topProducts, byCategory, daily
   const rawSales = await Sell.find(dateMatch)
     .select("date quantity price product additional_costs fuel_price")
-    .populate({ path: "product", select: "name weight flavor puffs count image_url category" })
+    .populate({ path: "product", select: "name weight flavor puffs count image_url category price" })
     .lean();
 
   // Категории отделно
@@ -65,10 +65,12 @@ const aggregatePeriod = async ({ fromStr, toStr }) => {
       const existing = productAgg.get(pid) || {
         _id: s.product._id, name: s.product.name, weight: s.product.weight,
         flavor: s.product.flavor, puffs: s.product.puffs, count: s.product.count,
-        image_url: s.product.image_url, qty: 0, revenue: 0, countOrders: 0,
+        image_url: s.product.image_url, cost_price: s.product.price || 0,
+        qty: 0, revenue: 0, countOrders: 0, cost: 0,
       };
       existing.qty += s.quantity || 0;
       existing.revenue += amt;
+      existing.cost += (s.quantity || 0) * (s.product.price || 0);
       existing.countOrders += 1;
       productAgg.set(pid, existing);
 
@@ -115,11 +117,13 @@ const aggregatePeriod = async ({ fromStr, toStr }) => {
 
   const expenses = totalOrderExp + totalAdExp + totalFuelExp + totalAddExp;
 
-  // Топ 5 продукти
-  const topProducts = [...productAgg.values()]
+  // Всички продукти с продажби — sorted по revenue desc
+  const allProducts = [...productAgg.values()]
     .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 5)
-    .map((p) => ({ ...p, count: p.countOrders }));
+    .map((p) => ({ ...p, count: p.countOrders, profit: p.revenue - p.cost }));
+
+  // Топ 5 продукти
+  const topProducts = allProducts.slice(0, 5);
 
   // By category
   const byCategory = [...categoryAgg.values()].sort((a, b) => b.revenue - a.revenue);
@@ -147,6 +151,7 @@ const aggregatePeriod = async ({ fromStr, toStr }) => {
     profit: Number((totalRevenue - expenses).toFixed(2)),
     orders: totalOrders,
     topProducts,
+    allProducts,
     byCategory,
     timeSeries,
     revenueTimeSeries,
