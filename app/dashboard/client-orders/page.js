@@ -30,7 +30,11 @@ export default async function ClientOrdersPage() {
   const dailyFilter = { status: "доставена", createdAt: { $gte: dayStart } };
   if (!isAdmin) dailyFilter.assignedTo = session.user.id;
 
-  const [totalItems, items, sellers, dailyCount] = await Promise.all([
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  const dayCountFilter = { ...filter, createdAt: { $gte: ninetyDaysAgo } };
+
+  const [totalItems, items, sellers, dailyCount, dayCountsAgg] = await Promise.all([
     ClientOrder.countDocuments(filter),
     ClientOrder.find(filter)
       .sort({ _id: -1 })
@@ -46,7 +50,25 @@ export default async function ClientOrdersPage() {
         )
       : Promise.resolve([]),
     ClientOrder.countDocuments(dailyFilter),
+    ClientOrder.aggregate([
+      { $match: dayCountFilter },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: { $subtract: ["$createdAt", 9 * 60 * 60 * 1000] },
+              timezone: "Europe/Sofia",
+            },
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
   ]);
+
+  const dayCounts = {};
+  for (const d of dayCountsAgg) dayCounts[d._id] = d.count;
 
   const initialData = JSON.parse(
     JSON.stringify({
@@ -59,6 +81,7 @@ export default async function ClientOrdersPage() {
           per_page: PER_PAGE,
         },
         dailyCount,
+        dayCounts,
       },
     })
   );
