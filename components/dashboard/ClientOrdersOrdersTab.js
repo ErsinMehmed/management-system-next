@@ -296,14 +296,7 @@ const ClientOrdersOrdersTab = ({
 
   return (
   <>
-    <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-2 mb-4">
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-50 border border-green-100">
-        <FiCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
-        <span className="text-sm font-semibold text-green-700">Поръчки днес:</span>
-        <span className="text-sm font-bold text-green-600 tabular-nums">
-          {isLoading ? "—" : (orders?.dailyCount ?? 0)}
-        </span>
-      </div>
+    <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:ml-auto w-full sm:w-auto">
         <Button
           variant="solid"
@@ -376,12 +369,20 @@ const ClientOrdersOrdersTab = ({
         </div>
         <p className="text-sm font-semibold text-slate-400">Няма поръчки</p>
       </div>
-    ) : (
+    ) : (() => {
+      // Брой поръчки по работен ден
+      const ordersByDay = new Map();
+      for (const o of orders?.items || []) {
+        const k = getBusinessDayKey(o.createdAt);
+        ordersByDay.set(k, (ordersByDay.get(k) || 0) + 1);
+      }
+      return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {orders?.items?.map((order, idx) => {
           const dayKey = getBusinessDayKey(order.createdAt);
           const prevDayKey = idx > 0 ? getBusinessDayKey(orders.items[idx - 1].createdAt) : null;
           const showSeparator = dayKey !== prevDayKey;
+          const dayCount = ordersByDay.get(dayKey) || 0;
 
           return (
             <React.Fragment key={order._id}>
@@ -389,7 +390,12 @@ const ClientOrdersOrdersTab = ({
                 <div className="col-span-full md:hidden">
                   <div className="flex items-center gap-3 pt-2">
                     <div className="flex-1 h-px bg-slate-200/80" />
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{getDayLabel(dayKey)}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{getDayLabel(dayKey)}</span>
+                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-full tabular-nums">
+                        {dayCount} {dayCount === 1 ? "поръчка" : "поръчки"}
+                      </span>
+                    </div>
                     <div className="flex-1 h-px bg-slate-200/80" />
                   </div>
                 </div>
@@ -409,7 +415,8 @@ const ClientOrdersOrdersTab = ({
           );
         })}
       </div>
-    )}
+      );
+    })()}
 
     {/* Mobile status picker bottom sheet */}
     {statusPickerOrder && (
