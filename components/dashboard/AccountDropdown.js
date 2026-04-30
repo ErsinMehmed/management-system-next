@@ -52,7 +52,7 @@ const AccountDropdown = () => {
           <DropdownItem key="my_data" onPress={() => router.push("/dashboard/profile")}>Моите данни</DropdownItem>
           {isSuperAdmin ? (
             <DropdownItem key="compare" onPress={() => router.push("/dashboard/compare")}>
-              Сравнение на периоди
+              Анализ на периоди
             </DropdownItem>
           ) : null}
           <DropdownItem onPress={() => signOut()} key="logout" color="danger">

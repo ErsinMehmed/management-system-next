@@ -456,7 +456,7 @@ const CompareClient = () => {
   };
 
   return (
-    <Layout title="Сравнение на периоди">
+    <Layout title="Анализ на периоди">
       <div className="max-w-7xl mx-auto flex flex-col gap-4 pb-20">
         {/* Periods + presets */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-3">
