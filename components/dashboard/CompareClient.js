@@ -8,6 +8,7 @@ import { FiArrowLeft, FiArrowUp, FiArrowDown, FiDollarSign, FiTrendingDown, FiSh
 import { TbMoneybag } from "react-icons/tb";
 import Layout from "@/components/layout/Dashboard";
 import DatePicker from "@/components/html/DatePicker";
+import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
 import { formatCurrency, productTitle } from "@/utils";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -144,6 +145,7 @@ const formatShortDate = (d) => {
 
 const ClientsModule = ({ period1 }) => {
   const c = period1.clients;
+  const [profilePhone, setProfilePhone] = useState(null);
   if (!c) {
     return (
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 text-center text-xs text-slate-400">
@@ -156,6 +158,7 @@ const ClientsModule = ({ period1 }) => {
   const retPct = c.total > 0 ? (c.returningCount / c.total) * 100 : 0;
 
   return (
+    <>
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
       <div className="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
@@ -211,12 +214,18 @@ const ClientsModule = ({ period1 }) => {
               {c.topClients.map((cl, i) => {
                 const aov = cl.orders > 0 ? cl.revenue / cl.orders : 0;
                 return (
-                  <li key={cl.phone} className="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-50/60 transition-colors">
+                  <li
+                    key={cl.phone}
+                    onClick={() => setProfilePhone(cl.phone)}
+                    className="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-50/60 transition-colors cursor-pointer"
+                  >
                     <span className="w-5 h-5 rounded-md bg-amber-50 text-amber-600 text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-700 truncate tabular-nums">{cl.phone}</p>
-                      <p className="text-[11px] text-slate-400 tabular-nums">
-                        {cl.orders} поръчки · ср. {formatCurrency(aov, 2)}
+                      <p className="text-sm font-semibold text-slate-700 truncate">
+                        {cl.name || <span className="tabular-nums">{cl.phone}</span>}
+                      </p>
+                      <p className="text-[11px] text-slate-400 tabular-nums truncate">
+                        {cl.name ? `${cl.phone} · ` : ""}{cl.orders} поръчки · ср. {formatCurrency(aov, 2)}
                       </p>
                     </div>
                     <span className="text-sm font-bold text-indigo-600 tabular-nums shrink-0 whitespace-nowrap">
@@ -240,14 +249,20 @@ const ClientsModule = ({ period1 }) => {
           ) : (
             <ul className="divide-y divide-slate-50">
               {c.lostClients.map((cl) => (
-                <li key={cl.phone} className="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-50/60 transition-colors">
+                <li
+                  key={cl.phone}
+                  onClick={() => setProfilePhone(cl.phone)}
+                  className="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-50/60 transition-colors cursor-pointer"
+                >
                   <span className="w-5 h-5 rounded-md bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
                     <FiUserX className="w-3 h-3" />
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-700 truncate tabular-nums">{cl.phone}</p>
-                    <p className="text-[11px] text-slate-400 tabular-nums">
-                      {cl.orders} поръчки преди · последна {formatShortDate(cl.lastOrder)}
+                    <p className="text-sm font-semibold text-slate-700 truncate">
+                      {cl.name || <span className="tabular-nums">{cl.phone}</span>}
+                    </p>
+                    <p className="text-[11px] text-slate-400 tabular-nums truncate">
+                      {cl.name ? `${cl.phone} · ` : ""}{cl.orders} поръчки преди · последна {formatShortDate(cl.lastOrder)}
                     </p>
                   </div>
                   <span className="text-sm font-semibold text-slate-600 tabular-nums shrink-0 whitespace-nowrap">
@@ -260,6 +275,13 @@ const ClientsModule = ({ period1 }) => {
         </div>
       </div>
     </div>
+    <ClientProfileModal
+      isOpen={!!profilePhone}
+      phone={profilePhone}
+      onClose={() => setProfilePhone(null)}
+      onNameChange={() => {}}
+    />
+    </>
   );
 };
 

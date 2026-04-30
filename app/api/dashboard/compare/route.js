@@ -6,6 +6,7 @@ import Order from "@/models/order";
 import Sell from "@/models/sell";
 import Ad from "@/models/ad";
 import ClientOrder from "@/models/clientOrder";
+import ClientPhone from "@/models/clientPhone";
 import { NextResponse } from "next/server";
 
 const parseRange = (from, to) => ({ fromStr: from, toStr: to });
@@ -222,14 +223,29 @@ export async function GET(request) {
 
   const topClients = period1.clientsByPhone.slice(0, 5);
 
+  // Обогатяване с името от ClientPhone, ако е попълнено
+  const phonesToLookup = [...new Set([...topClients.map((c) => c.phone), ...lostClients.map((c) => c.phone)])];
+  const phoneNameMap = new Map();
+  if (phonesToLookup.length) {
+    const phoneDocs = await ClientPhone.find({ phone: { $in: phonesToLookup } })
+      .select("phone name")
+      .lean();
+    for (const d of phoneDocs) {
+      if (d.name && d.name.trim()) phoneNameMap.set(d.phone, d.name.trim());
+    }
+  }
+  const enrich = (c) => ({ ...c, name: phoneNameMap.get(c.phone) || "" });
+  const topClientsEnriched = topClients.map(enrich);
+  const lostClientsEnriched = lostClients.map(enrich);
+
   const clientsAnalysis = {
     total: period1.clientsByPhone.length,
     totalPrev: period2.clientsByPhone.length,
     newCount: newClients.length,
     returningCount: returningClients.length,
     retentionRate: Number(retentionRate.toFixed(4)),
-    topClients,
-    lostClients,
+    topClients: topClientsEnriched,
+    lostClients: lostClientsEnriched,
   };
 
   // не връщаме пълния clientsByPhone в response-а
