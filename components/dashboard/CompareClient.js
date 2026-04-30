@@ -270,19 +270,17 @@ const AllProductsTable = ({ period1, period2 }) => {
         <table className="w-full text-sm">
           <thead className="bg-slate-50/70 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             <tr>
-              <th className="text-left px-5 py-2.5 w-8">#</th>
-              <th className="text-left px-3 py-2.5">Продукт</th>
-              <th className="text-right px-3 py-2.5">Количество</th>
-              <th className="text-right px-3 py-2.5">Продажби</th>
-              <th className="text-right px-3 py-2.5">Оборот</th>
-              <th className="text-right px-3 py-2.5">Печалба</th>
-              <th className="text-right px-3 py-2.5">Ср. цена</th>
-              <th className="text-right px-5 py-2.5">Промяна</th>
+              <th className="text-left px-5 py-2.5 w-8 whitespace-nowrap">#</th>
+              <th className="text-left px-3 py-2.5 whitespace-nowrap">Продукт</th>
+              <th className="text-right px-3 py-2.5 whitespace-nowrap">Количество</th>
+              <th className="text-right px-3 py-2.5 whitespace-nowrap">Продажби</th>
+              <th className="text-right px-3 py-2.5 whitespace-nowrap">Оборот</th>
+              <th className="text-right px-3 py-2.5 whitespace-nowrap">Печалба</th>
+              <th className="text-right px-5 py-2.5 whitespace-nowrap">Промяна</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
             {sorted.map((p, i) => {
-              const avgPrice = p.qty > 0 ? p.revenue / p.qty : 0;
               return (
                 <tr key={String(p._id)} className="hover:bg-indigo-50/30 transition-colors group">
                   <td className="px-5 py-2.5 text-[11px] font-bold text-slate-400 tabular-nums">{i + 1}</td>
@@ -303,25 +301,21 @@ const AllProductsTable = ({ period1, period2 }) => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5 text-right">
+                  <td className="px-3 py-2.5 text-right whitespace-nowrap">
                     <p className="text-sm font-bold text-slate-700 tabular-nums">{p.qty}</p>
                     <p className="text-[10px] text-slate-400 tabular-nums">преди: {p.qty2}</p>
                   </td>
-                  <td className="px-3 py-2.5 text-right">
+                  <td className="px-3 py-2.5 text-right whitespace-nowrap">
                     <p className="text-sm font-bold text-slate-700 tabular-nums">{p.count}</p>
                     <p className="text-[10px] text-slate-400 tabular-nums">преди: {p.count2}</p>
                   </td>
-                  <td className="px-3 py-2.5 text-right">
+                  <td className="px-3 py-2.5 text-right whitespace-nowrap">
                     <p className="text-sm font-bold text-indigo-600 tabular-nums">{formatCurrency(p.revenue, 2)}</p>
                     <p className="text-[10px] text-slate-400 tabular-nums">{formatCurrency(p.revenue2, 2)}</p>
                   </td>
-                  <td className="px-3 py-2.5 text-right">
+                  <td className="px-3 py-2.5 text-right whitespace-nowrap">
                     <p className={`text-sm font-bold tabular-nums ${p.profit >= 0 ? "text-emerald-600" : "text-rose-500"}`}>{formatCurrency(p.profit, 2)}</p>
                     <p className="text-[10px] text-slate-400 tabular-nums">{formatCurrency(p.profit2, 2)}</p>
-                  </td>
-                  <td className="px-3 py-2.5 text-right">
-                    <p className="text-sm font-semibold text-slate-600 tabular-nums">{formatCurrency(avgPrice, 2)}</p>
-                    <p className="text-[10px] text-slate-300 tabular-nums">баз.: {formatCurrency(p.cost_price || 0, 2)}</p>
                   </td>
                   <td className="px-5 py-2.5 text-right">
                     <TrendBadge curr={p.revenue} prev={p.revenue2} />
@@ -542,7 +536,18 @@ const CompareClient = () => {
                 <span className="mx-2 text-slate-300">·</span>
                 <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-400" /> {formatRange(data.period2.from, data.period2.to)}</span>
               </p>
-              <ReactApexChart type="area" options={chartOptions} series={series} height={320} />
+              <div className="overflow-x-auto sm:overflow-visible -mx-4 sm:mx-0 px-4 sm:px-0 pb-1">
+                <div
+                  className="sm:min-w-0!"
+                  style={{ minWidth: Math.max(
+                    (data?.period1?.revenueTimeSeries?.length || data?.period1?.timeSeries?.length || 0),
+                    (data?.period2?.revenueTimeSeries?.length || data?.period2?.timeSeries?.length || 0),
+                    1
+                  ) * 55 }}
+                >
+                  <ReactApexChart type="area" options={chartOptions} series={series} height={320} />
+                </div>
+              </div>
             </div>
 
             {/* Top Products + Category pies */}
