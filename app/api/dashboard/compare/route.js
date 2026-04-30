@@ -5,6 +5,7 @@ import Category from "@/models/category";
 import Order from "@/models/order";
 import Sell from "@/models/sell";
 import Ad from "@/models/ad";
+import ClientOrder from "@/models/clientOrder";
 import { NextResponse } from "next/server";
 
 const parseRange = (from, to) => ({ fromStr: from, toStr: to });
@@ -145,6 +146,29 @@ const aggregatePeriod = async ({ fromStr, toStr }) => {
     cursor.setDate(cursor.getDate() + 1);
   }
 
+  // ── Клиентски агрегати: уникални телефони с доставени поръчки в периода ──
+  const deliveredOrders = await ClientOrder.find({
+    status: "доставена",
+    createdAt: { $gte: utcStart, $lte: utcEnd },
+  })
+    .select("phone createdAt price secondProduct")
+    .lean();
+
+  const clientsMap = new Map();
+  for (const o of deliveredOrders) {
+    const day = sofiaDay(o.createdAt);
+    if (day < fromStr || day > toStr) continue;
+    const phone = o.phone;
+    if (!phone) continue;
+    const rev = (o.price || 0) + (o.secondProduct?.price || 0);
+    const ex = clientsMap.get(phone) || { phone, revenue: 0, orders: 0, lastOrder: null };
+    ex.revenue += rev;
+    ex.orders += 1;
+    if (!ex.lastOrder || o.createdAt > ex.lastOrder) ex.lastOrder = o.createdAt;
+    clientsMap.set(phone, ex);
+  }
+  const clientsByPhone = [...clientsMap.values()].sort((a, b) => b.revenue - a.revenue);
+
   return {
     revenue: Number(totalRevenue.toFixed(2)),
     expenses: Number(expenses.toFixed(2)),
@@ -155,6 +179,7 @@ const aggregatePeriod = async ({ fromStr, toStr }) => {
     byCategory,
     timeSeries,
     revenueTimeSeries,
+    clientsByPhone,
   };
 };
 
@@ -182,8 +207,37 @@ export async function GET(request) {
     aggregatePeriod(range2),
   ]);
 
+  // Cross-period клиентски анализ
+  const phonesP1 = new Set(period1.clientsByPhone.map((c) => c.phone));
+  const phonesP2 = new Set(period2.clientsByPhone.map((c) => c.phone));
+
+  const newClients = period1.clientsByPhone.filter((c) => !phonesP2.has(c.phone));
+  const returningClients = period1.clientsByPhone.filter((c) => phonesP2.has(c.phone));
+  const retentionRate =
+    phonesP2.size > 0 ? returningClients.length / phonesP2.size : 0;
+
+  const lostClients = period2.clientsByPhone
+    .filter((c) => !phonesP1.has(c.phone))
+    .slice(0, 5);
+
+  const topClients = period1.clientsByPhone.slice(0, 5);
+
+  const clientsAnalysis = {
+    total: period1.clientsByPhone.length,
+    totalPrev: period2.clientsByPhone.length,
+    newCount: newClients.length,
+    returningCount: returningClients.length,
+    retentionRate: Number(retentionRate.toFixed(4)),
+    topClients,
+    lostClients,
+  };
+
+  // не връщаме пълния clientsByPhone в response-а
+  const { clientsByPhone: _c1, ...p1Public } = period1;
+  const { clientsByPhone: _c2, ...p2Public } = period2;
+
   return NextResponse.json({
-    period1: { from: range1.fromStr, to: range1.toStr, ...period1 },
-    period2: { from: range2.fromStr, to: range2.toStr, ...period2 },
+    period1: { from: range1.fromStr, to: range1.toStr, ...p1Public, clients: clientsAnalysis },
+    period2: { from: range2.fromStr, to: range2.toStr, ...p2Public },
   });
 }

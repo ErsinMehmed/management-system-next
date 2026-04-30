@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Spinner, Chip, Tabs, Tab } from "@heroui/react";
-import { FiArrowLeft, FiArrowUp, FiArrowDown, FiDollarSign, FiTrendingDown, FiShoppingBag, FiTrendingUp, FiPackage, FiMinus, FiPieChart, FiAward } from "react-icons/fi";
+import { FiArrowLeft, FiArrowUp, FiArrowDown, FiDollarSign, FiTrendingDown, FiShoppingBag, FiTrendingUp, FiPackage, FiMinus, FiPieChart, FiAward, FiUsers, FiUserPlus, FiRepeat, FiUserX } from "react-icons/fi";
 import { TbMoneybag } from "react-icons/tb";
 import Layout from "@/components/layout/Dashboard";
 import DatePicker from "@/components/html/DatePicker";
@@ -135,48 +135,130 @@ const formatRange = (from, to) => {
   return `${fmt(from)} – ${fmt(to)}`;
 };
 
-const TopProductsCompare = ({ period1, period2 }) => {
-  const rank2 = new Map(period2.topProducts.map((p, i) => [String(p._id), i + 1]));
-  return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-      <div className="px-5 py-3.5 border-b border-slate-100">
-        <p className="text-sm font-bold text-slate-800">Топ 5 продукти — текущ период</p>
-      </div>
-      {period1.topProducts.length === 0 ? (
-        <div className="py-8 text-center text-xs text-slate-400">Няма доставени поръчки</div>
-      ) : (
-        <ul className="divide-y divide-slate-50">
-          {period1.topProducts.map((p, i) => {
-            const prevRank = rank2.get(String(p._id));
-            let badge;
-            if (!prevRank) badge = <Chip size="sm" color="primary" variant="flat" className="text-[10px] h-5">нов</Chip>;
-            else if (prevRank > i + 1) badge = <span className="text-emerald-600 text-xs font-bold flex items-center gap-0.5"><FiArrowUp className="w-3 h-3" />{prevRank - (i + 1)}</span>;
-            else if (prevRank < i + 1) badge = <span className="text-rose-500 text-xs font-bold flex items-center gap-0.5"><FiArrowDown className="w-3 h-3" />{(i + 1) - prevRank}</span>;
-            else badge = <FiMinus className="w-3 h-3 text-slate-300" />;
+const formatShortDate = (d) => {
+  if (!d) return "—";
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return "—";
+  return `${String(dt.getDate()).padStart(2, "0")}.${String(dt.getMonth() + 1).padStart(2, "0")}.${dt.getFullYear()}`;
+};
 
-            return (
-              <li key={String(p._id)} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50/60 transition-colors">
-                <span className="w-5 h-5 rounded-md bg-indigo-50 text-indigo-600 text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
-                {p.image_url ? (
-                  <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-slate-50 border border-slate-200">
-                    <Image src={p.image_url} alt={p.name || ""} width={32} height={32} sizes="32px" className="w-full h-full object-cover" unoptimized />
+const ClientsModule = ({ period1 }) => {
+  const c = period1.clients;
+  if (!c) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 text-center text-xs text-slate-400">
+        Няма данни за клиенти
+      </div>
+    );
+  }
+
+  const newPct = c.total > 0 ? (c.newCount / c.total) * 100 : 0;
+  const retPct = c.total > 0 ? (c.returningCount / c.total) * 100 : 0;
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+      <div className="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+          <FiUsers className="w-3.5 h-3.5 text-white" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-slate-800">Клиенти — текущ период</p>
+          <p className="text-[11px] text-slate-400 truncate">
+            {c.total} уникални клиента · преди: {c.totalPrev}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 divide-x divide-slate-100 border-b border-slate-100">
+        <div className="p-3 sm:p-4">
+          <div className="flex items-center gap-1.5 mb-1">
+            <FiUserPlus className="w-3 h-3 text-emerald-500" />
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Нови</p>
+          </div>
+          <p className="text-xl font-bold text-emerald-600 tabular-nums leading-tight">{c.newCount}</p>
+          <p className="text-[10px] text-slate-400 tabular-nums mt-0.5">{newPct.toFixed(0)}% от общо</p>
+        </div>
+        <div className="p-3 sm:p-4">
+          <div className="flex items-center gap-1.5 mb-1">
+            <FiRepeat className="w-3 h-3 text-indigo-500" />
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Повторни</p>
+          </div>
+          <p className="text-xl font-bold text-indigo-600 tabular-nums leading-tight">{c.returningCount}</p>
+          <p className="text-[10px] text-slate-400 tabular-nums mt-0.5">{retPct.toFixed(0)}% от общо</p>
+        </div>
+        <div className="p-3 sm:p-4">
+          <div className="flex items-center gap-1.5 mb-1">
+            <FiAward className="w-3 h-3 text-violet-500" />
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Задържане</p>
+          </div>
+          <p className="text-xl font-bold text-violet-600 tabular-nums leading-tight">
+            {(c.retentionRate * 100).toFixed(0)}%
+          </p>
+          <p className="text-[10px] text-slate-400 mt-0.5">върнати от пред.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:divide-x divide-slate-100">
+        <div>
+          <div className="px-5 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/40">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Топ 5 клиенти</p>
+            <span className="text-[10px] text-slate-400">по приходи</span>
+          </div>
+          {c.topClients.length === 0 ? (
+            <div className="py-6 text-center text-xs text-slate-400">Няма доставени поръчки</div>
+          ) : (
+            <ul className="divide-y divide-slate-50">
+              {c.topClients.map((cl, i) => {
+                const aov = cl.orders > 0 ? cl.revenue / cl.orders : 0;
+                return (
+                  <li key={cl.phone} className="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-50/60 transition-colors">
+                    <span className="w-5 h-5 rounded-md bg-amber-50 text-amber-600 text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-700 truncate tabular-nums">{cl.phone}</p>
+                      <p className="text-[11px] text-slate-400 tabular-nums">
+                        {cl.orders} поръчки · ср. {formatCurrency(aov, 2)}
+                      </p>
+                    </div>
+                    <span className="text-sm font-bold text-indigo-600 tabular-nums shrink-0 whitespace-nowrap">
+                      {formatCurrency(cl.revenue, 2)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="border-t lg:border-t-0 border-slate-100">
+          <div className="px-5 py-2.5 bg-rose-50/30 border-b border-rose-100/50 flex items-center gap-1.5">
+            <FiUserX className="w-3 h-3 text-rose-500" />
+            <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">„Загубени" клиенти</p>
+            <span className="text-[10px] text-slate-400 ml-auto whitespace-nowrap">поръчвали преди, не сега</span>
+          </div>
+          {!c.lostClients?.length ? (
+            <div className="py-6 text-center text-xs text-slate-400">Всички стари клиенти се върнаха</div>
+          ) : (
+            <ul className="divide-y divide-slate-50">
+              {c.lostClients.map((cl) => (
+                <li key={cl.phone} className="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-50/60 transition-colors">
+                  <span className="w-5 h-5 rounded-md bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
+                    <FiUserX className="w-3 h-3" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-700 truncate tabular-nums">{cl.phone}</p>
+                    <p className="text-[11px] text-slate-400 tabular-nums">
+                      {cl.orders} поръчки преди · последна {formatShortDate(cl.lastOrder)}
+                    </p>
                   </div>
-                ) : (
-                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                    <FiPackage className="w-3.5 h-3.5 text-slate-400" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-700 truncate">{productTitle(p)}</p>
-                  <p className="text-[11px] text-slate-400">{p.qty} бр. · {p.count} поръчки</p>
-                </div>
-                <span className="text-sm font-bold text-indigo-600 tabular-nums shrink-0">{formatCurrency(p.revenue, 2)}</span>
-                <span className="shrink-0 w-8 flex justify-end">{badge}</span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  <span className="text-sm font-semibold text-slate-600 tabular-nums shrink-0 whitespace-nowrap">
+                    {formatCurrency(cl.revenue, 2)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -457,7 +539,7 @@ const CompareClient = () => {
 
   return (
     <Layout title="Анализ на периоди">
-      <div className="max-w-7xl mx-auto flex flex-col gap-4 pb-20">
+      <div className="max-w-7xl mx-auto flex flex-col gap-4 pb-10">
         {/* Periods + presets */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -529,7 +611,7 @@ const CompareClient = () => {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
               <div className="flex items-center gap-2 mb-2">
                 <FiTrendingUp className="w-4 h-4 text-indigo-500" />
-                <p className="text-sm font-bold text-slate-800">Приходи — overlay на двата периода</p>
+                <p className="text-sm font-bold text-slate-800">Приходи — сравнение на двата периода</p>
               </div>
               <p className="text-[11px] text-slate-400 mb-3">
                 <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-500" /> {formatRange(data.period1.from, data.period1.to)}</span>
@@ -550,13 +632,13 @@ const CompareClient = () => {
               </div>
             </div>
 
-            {/* Top Products + Category pies */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <TopProductsCompare period1={data.period1} period2={data.period2} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <CategoryPie title="Текущ" subtitle={formatRange(data.period1.from, data.period1.to)} data={data.period1.byCategory} />
-                <CategoryPie title="Предишен" subtitle={formatRange(data.period2.from, data.period2.to)} data={data.period2.byCategory} />
-              </div>
+            {/* Clients module — full width */}
+            <ClientsModule period1={data.period1} period2={data.period2} />
+
+            {/* Category pies — full width row, 2 cols */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <CategoryPie title="Текущ" subtitle={formatRange(data.period1.from, data.period1.to)} data={data.period1.byCategory} />
+              <CategoryPie title="Предишен" subtitle={formatRange(data.period2.from, data.period2.to)} data={data.period2.byCategory} />
             </div>
 
             {/* Подробна таблица на всички продукти */}
