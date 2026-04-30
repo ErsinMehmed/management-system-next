@@ -292,7 +292,7 @@ const ClientOrdersStatsTab = () => {
               curr={k.profit} prev={kp.profit}
               fmt={(v) => formatCurrency(v || 0, 2)}
               gradient="from-emerald-500 to-teal-500" />
-            <KpiCard label="Margin %" icon={FiTrendingUp}
+            <KpiCard label="Марж %" icon={FiTrendingUp}
               curr={(k.margin || 0) * 100} prev={(kp.margin || 0) * 100}
               fmt={(v) => `${(v || 0).toFixed(1)}%`}
               gradient="from-rose-500 to-pink-500" />
@@ -356,7 +356,7 @@ const ClientOrdersStatsTab = () => {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-700 truncate">{productTitle(p)}</p>
                       <p className="text-[11px] text-slate-400 tabular-nums">
-                        {p.qty} бр. · {p.orders} поръчки{canSeeProfit ? ` · margin ${((p.margin || 0) * 100).toFixed(0)}%` : ""}
+                        {p.qty} бр. · {p.orders} поръчки{canSeeProfit ? ` · марж ${((p.margin || 0) * 100).toFixed(0)}%` : ""}
                       </p>
                     </div>
                     <span className="text-sm font-bold text-indigo-600 tabular-nums shrink-0 whitespace-nowrap">
