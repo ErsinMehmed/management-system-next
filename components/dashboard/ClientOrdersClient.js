@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSession } from "next-auth/react";
 import { Tabs, Tab, useDisclosure } from "@heroui/react";
-import { FiPackage, FiBarChart2, FiClock, FiLayers, FiUsers } from "react-icons/fi";
+import { FiPackage, FiBarChart2, FiClock, FiLayers, FiUsers, FiPieChart } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
 import LinearLoader from "@/components/LinearLoader";
 import { clientOrderStore } from "@/stores/useStore";
@@ -17,6 +17,7 @@ import ClientOrdersSummaryTab from "@/components/dashboard/ClientOrdersSummaryTa
 import ClientOrdersHistoryTab from "@/components/dashboard/ClientOrdersHistoryTab";
 import ClientOrdersStockTab from "@/components/dashboard/ClientOrders/ClientOrdersStockTab";
 import ClientOrdersClientsTab from "@/components/dashboard/ClientOrders/ClientOrdersClientsTab";
+import ClientOrdersStatsTab from "@/components/dashboard/ClientOrders/ClientOrdersStatsTab";
 
 const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { data: session } = useSession();
@@ -72,6 +73,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
     ...(showHistory ? [{ key: "history", label: "История", Icon: FiClock }] : []),
     { key: "stock", label: "Наличности", Icon: FiLayers },
     { key: "clients", label: "Клиенти", Icon: FiUsers },
+    { key: "stats", label: "Статистика", Icon: FiPieChart },
   ];
 
   return (
@@ -91,6 +93,7 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
             {showHistory && <Tab key="history" title="История" />}
             <Tab key="stock" title="Наличности" />
             <Tab key="clients" title="Клиенти" />
+            <Tab key="stats" title="Статистика" />
           </Tabs>
         </div>
 
@@ -138,6 +141,9 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
           )}
           {activeTab === "clients" && (
             <ClientOrdersClientsTab />
+          )}
+          {activeTab === "stats" && (
+            <ClientOrdersStatsTab />
           )}
         </div>
       </div>
