@@ -41,23 +41,25 @@ const ClientOrderForm = ({
         onChange={(value) => handleFieldChange("product", value)}
       />
 
-      <Input
-        type='number'
-        label='Брой'
-        value={data.quantity || ""}
-        disabled={!data.product}
-        errorMessage={errorFields?.quantity}
-        onChange={(value) => handleFieldChange("quantity", value)}
-      />
+      <div className='grid grid-cols-2 gap-3'>
+        <Input
+          type='number'
+          label='Брой'
+          value={data.quantity || ""}
+          disabled={!data.product}
+          errorMessage={errorFields?.quantity}
+          onChange={(value) => handleFieldChange("quantity", value)}
+        />
 
-      <Input
-        type='number'
-        label='Цена'
-        value={data.price || ""}
-        disabled={!data.quantity}
-        errorMessage={errorFields?.price}
-        onChange={(value) => handleFieldChange("price", value)}
-      />
+        <Input
+          type='number'
+          label='Цена'
+          value={data.price || ""}
+          disabled={!data.quantity}
+          errorMessage={errorFields?.price}
+          onChange={(value) => handleFieldChange("price", value)}
+        />
+      </div>
 
       {/* Втори продукт */}
       {showSecond ? (
@@ -82,20 +84,22 @@ const ClientOrderForm = ({
             value={data.product2 || ""}
             onChange={(value) => handleFieldChange("product2", value)}
           />
-          <Input
-            type='number'
-            label='Брой'
-            value={data.quantity2 || ""}
-            disabled={!data.product2}
-            onChange={(value) => handleFieldChange("quantity2", value)}
-          />
-          <Input
-            type='number'
-            label='Цена'
-            value={data.price2 || ""}
-            disabled={!data.product2}
-            onChange={(value) => handleFieldChange("price2", value)}
-          />
+          <div className='grid grid-cols-2 gap-3'>
+            <Input
+              type='number'
+              label='Брой'
+              value={data.quantity2 || ""}
+              disabled={!data.product2}
+              onChange={(value) => handleFieldChange("quantity2", value)}
+            />
+            <Input
+              type='number'
+              label='Цена'
+              value={data.price2 || ""}
+              disabled={!data.product2}
+              onChange={(value) => handleFieldChange("price2", value)}
+            />
+          </div>
         </div>
       ) : (
         <button
@@ -121,7 +125,7 @@ const ClientOrderForm = ({
       />
 
       {/* Начин на връзка — два toggle-а, взаимно изключващи се */}
-      <div className='rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100'>
+      <div className='grid grid-cols-2 gap-2'>
         {[
           {
             method: "Viber",
@@ -141,8 +145,8 @@ const ClientOrderForm = ({
           return (
             <div
               key={method}
-              className={`flex items-center justify-between px-3.5 py-3 transition-colors ${isSelected ? "bg-slate-50" : ""}`}>
-              <div className='flex items-center gap-2.5'>
+              className={`flex items-center justify-between gap-2 rounded-xl border border-gray-200 px-3 py-2.5 transition-colors ${isSelected ? "bg-slate-50" : ""}`}>
+              <div className='flex items-center gap-2 min-w-0'>
                 <div
                   className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? bg : "bg-slate-100"}`}>
                   <Icon
@@ -150,7 +154,7 @@ const ClientOrderForm = ({
                   />
                 </div>
                 <p
-                  className={`text-sm font-medium ${isSelected ? "text-slate-800" : "text-slate-500"}`}>
+                  className={`text-sm font-medium truncate ${isSelected ? "text-slate-800" : "text-slate-500"}`}>
                   {method}
                 </p>
               </div>
