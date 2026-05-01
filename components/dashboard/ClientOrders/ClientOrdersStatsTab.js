@@ -1,14 +1,15 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Spinner, Button } from "@heroui/react";
+import { Spinner, Button, Tooltip } from "@heroui/react";
 import {
   FiArrowUp, FiArrowDown, FiMinus, FiDollarSign, FiTrendingUp,
   FiShoppingBag, FiUsers, FiClock, FiPackage,
-  FiFilter, FiAward,
+  FiFilter, FiAward, FiInfo,
 } from "react-icons/fi";
 import { TbMoneybag } from "react-icons/tb";
 import { formatCurrency, productTitle } from "@/utils";
+import DatePicker from "@/components/html/DatePicker";
 import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -23,6 +24,7 @@ const presets = [
   { key: "month", label: "Този месец" },
   { key: "quarter", label: "Тримесечие" },
   { key: "year", label: "Тази година" },
+  { key: "custom", label: "По избор" },
 ];
 
 const getQuarterRange = (q) => {
@@ -73,7 +75,7 @@ const formatShortDate = (d) => {
   return `${String(dt.getDate()).padStart(2, "0")}.${String(dt.getMonth() + 1).padStart(2, "0")}.${dt.getFullYear()}`;
 };
 
-const KpiCard = ({ label, icon: Icon, curr, prev, fmt: fmtVal, gradient, invertColors = false }) => {
+const KpiCard = ({ label, icon: Icon, curr, prev, fmt: fmtVal, gradient, invertColors = false, tooltip = null }) => {
   const change = pct(curr, prev);
   const isUp = change > 0;
   const good = invertColors ? !isUp : isUp;
@@ -83,8 +85,15 @@ const KpiCard = ({ label, icon: Icon, curr, prev, fmt: fmtVal, gradient, invertC
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-2.5 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</p>
-        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+        <div className="flex items-center gap-1 min-w-0">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate">{label}</p>
+          {tooltip && (
+            <Tooltip content={tooltip} placement="top" className="max-w-xs">
+              <FiInfo className="w-3 h-3 text-slate-400 shrink-0 cursor-help" />
+            </Tooltip>
+          )}
+        </div>
+        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0`}>
           <Icon className="w-3.5 h-3.5 text-white" />
         </div>
       </div>
@@ -171,6 +180,9 @@ const ClientOrdersStatsTab = () => {
         type: "gradient",
         gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0, stops: [0, 100] },
       },
+      dataLabels: {
+        formatter: (v) => m === "orders" ? `${Math.round(v)} бр.` : `${Number(v).toFixed(2)} €`,
+      },
       xaxis: {
         categories: aggregatedSeries.map((s) => {
           const [, mo, dd] = s.date.split("-");
@@ -184,7 +196,7 @@ const ClientOrdersStatsTab = () => {
       },
       yaxis: {
         labels: {
-          formatter: (v) => m === "orders" ? Math.round(v) : formatCurrency(v, 0),
+          formatter: (v) => m === "orders" ? `${Math.round(v)} бр.` : formatCurrency(v, 0),
           style: { fontSize: "10px", colors: "#94a3b8" }
         },
       },
@@ -208,6 +220,9 @@ const ClientOrdersStatsTab = () => {
     setActivePreset(key);
     if (key === "quarter") {
       setRange(getPresetRange("quarter", { quarter: selectedQuarter }));
+    } else if (key === "custom") {
+      // запазваме текущия range, само превключваме UI-то
+      return;
     } else {
       setRange(getPresetRange(key));
     }
@@ -217,6 +232,11 @@ const ClientOrdersStatsTab = () => {
     setSelectedQuarter(q);
     setActivePreset("quarter");
     setRange(getQuarterRange(q));
+  };
+
+  const setCustomDate = (field, value) => {
+    setActivePreset("custom");
+    setRange((prev) => ({ ...prev, [field]: value || "" }));
   };
 
   if (loading || !data) {
@@ -274,6 +294,22 @@ const ClientOrdersStatsTab = () => {
             ))}
           </div>
         )}
+        {activePreset === "custom" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <DatePicker
+              label="От"
+              value={range.from}
+              maxValue={range.to}
+              onChange={(v) => setCustomDate("from", v)}
+            />
+            <DatePicker
+              label="До"
+              value={range.to}
+              minValue={range.from}
+              onChange={(v) => setCustomDate("to", v)}
+            />
+          </div>
+        )}
       </div>
 
       {/* KPI хедър */}
@@ -295,7 +331,8 @@ const ClientOrdersStatsTab = () => {
             <KpiCard label="Марж %" icon={FiTrendingUp}
               curr={(k.margin || 0) * 100} prev={(kp.margin || 0) * 100}
               fmt={(v) => `${(v || 0).toFixed(1)}%`}
-              gradient="from-rose-500 to-pink-500" />
+              gradient="from-rose-500 to-pink-500"
+              tooltip="Каква част от приходите остават като чиста печалба. Формула: печалба ÷ приходи × 100%. Печалбата вече е след себестойност, комисионни, доставка и хонорар на дистрибутор." />
           </>
         )}
       </div>
@@ -454,7 +491,7 @@ const ClientOrdersStatsTab = () => {
 
         return (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_4fr] gap-3 mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-[3fr_7fr] gap-3 mb-4">
               {sellersCard}
               {trendCard}
             </div>
