@@ -5,6 +5,7 @@ import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import User from "@/models/user";
 import Role from "@/models/role";
+import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
 import ClientOrdersClient from "@/components/dashboard/ClientOrdersClient";
@@ -21,7 +22,7 @@ export default async function ClientOrdersPage() {
   await connectMongoDB();
 
   // Filter orders: admins see all, sellers see only their own
-  const filter = isAdmin ? {} : { assignedTo: session.user.id };
+  const filter = isAdmin ? {} : { assignedTo: new mongoose.Types.ObjectId(session.user.id) };
 
   const now = new Date();
   const dayStart = new Date(now);

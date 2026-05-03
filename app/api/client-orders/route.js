@@ -28,14 +28,14 @@ export async function GET(request) {
   const isAdmin = ["Admin", "Super Admin"].includes(session.user.role);
   const filter = {};
   if (status) filter.status = status;
-  if (!isAdmin) filter.assignedTo = session.user.id;
+  if (!isAdmin) filter.assignedTo = new mongoose.Types.ObjectId(session.user.id);
 
   const now = new Date();
   const dayStart = new Date(now);
   dayStart.setHours(7, 0, 0, 0);
   if (now < dayStart) dayStart.setDate(dayStart.getDate() - 1);
   const dailyFilter = { status: "доставена", createdAt: { $gte: dayStart } };
-  if (!isAdmin) dailyFilter.assignedTo = session.user.id;
+  if (!isAdmin) dailyFilter.assignedTo = new mongoose.Types.ObjectId(session.user.id);
 
   // Брой поръчки по работен ден (групиране по 9:00 Sofia cutoff)
   // shift-ваме createdAt с -9h в Sofia, после $dateToString → ще се групира по работния ден
