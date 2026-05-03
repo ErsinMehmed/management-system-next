@@ -32,7 +32,15 @@ export async function GET(request, { params }) {
         $group: {
           _id: null,
           totalOrders: { $sum: 1 },
-          totalRevenue: { $sum: { $multiply: ["$quantity", "$price"] } },
+          totalRevenue: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "доставена"] },
+                { $add: ["$price", { $ifNull: ["$secondProduct.price", 0] }] },
+                0,
+              ],
+            },
+          },
           firstOrder: { $min: "$createdAt" },
           lastOrder: { $max: "$createdAt" },
           delivered: { $sum: { $cond: [{ $eq: ["$status", "доставена"] }, 1, 0] } },
@@ -41,7 +49,7 @@ export async function GET(request, { params }) {
       },
     ]),
     ClientOrder.aggregate([
-      { $match: orderFilter },
+      { $match: { ...orderFilter, status: "доставена" } },
       { $group: { _id: "$product", qty: { $sum: "$quantity" }, count: { $sum: 1 } } },
       { $sort: { qty: -1 } },
       { $limit: 1 },
