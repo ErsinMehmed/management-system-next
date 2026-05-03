@@ -186,7 +186,7 @@ export async function POST(request) {
   const clientType = data.isNewClient ? "🆕 Нов клиент" : "Съществуващ клиент";
   const notifPayload = {
     title: "📦 Нова поръчка",
-    body: `${clientType} · ${data.phone}\n${order.product?.name} × ${data.quantity} бр. — ${data.price} лв.`,
+    body: `${clientType} · ${data.phone}\n${order.product?.name} × ${data.quantity} бр. — ${data.price} €`,
     data: { url: `/dashboard/client-orders/${order._id}`, orderId: String(order._id) },
   };
   const createdByAssignee = String(data.assignedTo) === String(session.user.id);
