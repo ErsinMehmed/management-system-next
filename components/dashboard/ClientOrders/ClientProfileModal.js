@@ -242,7 +242,7 @@ const ClientProfileModal = ({ isOpen, onClose, phone, onNameChange }) => {
                                     </div>
                                   </div>
                                   <div className="text-right shrink-0">
-                                    <p className="text-sm font-bold text-indigo-600 tabular-nums">{formatCurrency(o.quantity * o.price, 2)}</p>
+                                    <p className="text-sm font-bold text-indigo-600 tabular-nums">{formatCurrency((o.price || 0) + (o.secondProduct?.price || 0), 2)}</p>
                                   </div>
                                 </Link>
                               </li>
