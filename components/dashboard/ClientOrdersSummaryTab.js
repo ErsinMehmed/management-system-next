@@ -325,16 +325,18 @@ const ClientOrdersSummaryTab = ({
                       );
                     })}
 
-                  <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-8" : "grid-cols-4"}`}>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
-                    <span />
-                    <span className="text-sm font-bold text-slate-800 text-right tabular-nums">{formatCurrency(seller.sellerTotal, 2)}</span>
-                    <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{seller.sellerDelivery > 0 ? formatCurrency(seller.sellerDelivery, 2) : "—"}</span>
-                    {isSuperAdmin && <span className={`text-sm font-bold text-right tabular-nums ${seller.sellerUnpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(seller.sellerPayout, 2)}</span>}
-                    {isSuperAdmin && <span className="text-sm font-bold text-orange-400 text-right tabular-nums">{(seller.sellerDistributorPayout ?? 0) > 0 ? formatCurrency(seller.sellerDistributorPayout, 2) : "—"}</span>}
-                    {isSuperAdmin && <span className="text-sm font-bold text-purple-600 text-right tabular-nums">{formatCurrency(seller.sellerTotal - seller.sellerPayout - (seller.sellerDistributorPayout ?? 0), 2)}</span>}
-                    {isSuperAdmin && <span className="text-sm font-bold text-emerald-600 text-right tabular-nums">{formatCurrency(seller.sellerTotal - seller.sellerPayout - (seller.sellerDistributorPayout ?? 0) - seller.items.reduce((s, i) => s + (i.product?.price ?? 0) * i.totalQuantity, 0), 2)}</span>}
-                  </div>
+                  {seller.items.length > 1 && (
+                    <div className={`grid px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center ${isSuperAdmin ? "grid-cols-8" : "grid-cols-4"}`}>
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
+                      <span className="text-sm font-bold text-slate-700 text-center tabular-nums">{seller.items.reduce((s, i) => s + (i.totalQuantity ?? 0), 0)} бр.</span>
+                      <span className="text-sm font-bold text-slate-800 text-right tabular-nums">{formatCurrency(seller.sellerTotal, 2)}</span>
+                      <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{seller.sellerDelivery > 0 ? formatCurrency(seller.sellerDelivery, 2) : "—"}</span>
+                      {isSuperAdmin && <span className={`text-sm font-bold text-right tabular-nums ${seller.sellerUnpaidCount === 0 ? "text-green-600" : "text-orange-500"}`}>{formatCurrency(seller.sellerPayout, 2)}</span>}
+                      {isSuperAdmin && <span className="text-sm font-bold text-orange-400 text-right tabular-nums">{(seller.sellerDistributorPayout ?? 0) > 0 ? formatCurrency(seller.sellerDistributorPayout, 2) : "—"}</span>}
+                      {isSuperAdmin && <span className="text-sm font-bold text-purple-600 text-right tabular-nums">{formatCurrency(seller.sellerTotal - seller.sellerPayout - (seller.sellerDistributorPayout ?? 0), 2)}</span>}
+                      {isSuperAdmin && <span className="text-sm font-bold text-emerald-600 text-right tabular-nums">{formatCurrency(seller.sellerTotal - seller.sellerPayout - (seller.sellerDistributorPayout ?? 0) - seller.items.reduce((s, i) => s + (i.product?.price ?? 0) * i.totalQuantity, 0), 2)}</span>}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -401,12 +403,14 @@ const ClientOrdersSummaryTab = ({
                   </div>
                 ))}
 
-                <div className="grid grid-cols-4 px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
-                  <span />
-                  <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(summary.grandTotal, 2)}</span>
-                  <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{summary.grandDelivery > 0 ? formatCurrency(summary.grandDelivery, 2) : "—"}</span>
-                </div>
+                {summary.items.length > 1 && (
+                  <div className="grid grid-cols-4 px-4 py-3 bg-slate-50/80 border-t border-gray-100 items-center">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Общо</span>
+                    <span className="text-sm font-bold text-slate-700 text-center tabular-nums">{summary.items.reduce((s, i) => s + (i.totalQuantity ?? 0), 0)} бр.</span>
+                    <span className="text-sm font-bold text-[#0071f5] text-right tabular-nums">{formatCurrency(summary.grandTotal, 2)}</span>
+                    <span className="text-sm font-bold text-slate-700 text-right tabular-nums">{summary.grandDelivery > 0 ? formatCurrency(summary.grandDelivery, 2) : "—"}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
