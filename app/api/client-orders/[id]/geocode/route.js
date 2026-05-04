@@ -26,8 +26,16 @@ export async function POST(request, { params }) {
     return NextResponse.json({ message: "Нямате достъп." }, { status: 403 });
   }
 
-  // Кеширан резултат
-  if (order.coords?.lat != null && order.coords?.lng != null) {
+  // Кеширан резултат — валидираме че е в очаквания регион (Варна),
+  // иначе forсе re-geocode (за orders кеширани преди viewbox fix-a)
+  const isInVarna = (lat, lng) =>
+    lng >= 27.0 && lng <= 28.4 && lat >= 42.9 && lat <= 43.6;
+
+  if (
+    order.coords?.lat != null &&
+    order.coords?.lng != null &&
+    isInVarna(order.coords.lat, order.coords.lng)
+  ) {
     return NextResponse.json({
       coords: { lat: order.coords.lat, lng: order.coords.lng },
       cached: true,
