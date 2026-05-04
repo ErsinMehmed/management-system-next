@@ -107,6 +107,56 @@ export async function PUT(request, { params }) {
   }
 
   const finalStatuses = ["доставена", "отказана"];
+
+  // Изчисляваме кои продукти ще трябва да се преместят в/извън наличността
+  const sellerId = existing?.assignedTo;
+  const wasDelivered = existing?.status === "доставена";
+  const isNowDelivered = status === "доставена";
+
+  const stockItems = [];
+  if (sellerId && wasDelivered !== isNowDelivered) {
+    if (existing.product && existing.quantity > 0) {
+      stockItems.push({ product: existing.product, quantity: existing.quantity });
+    }
+    const sp = existing.secondProduct;
+    if (sp?.product && sp?.quantity > 0) {
+      stockItems.push({ product: sp.product, quantity: sp.quantity });
+    }
+  }
+
+  // Преход → "доставена": atomic decrement с guard. При недостатъчна наличност
+  // връщаме грешка преди да обновим статуса, и rollback-ваме partial decrements.
+  if (stockItems.length && isNowDelivered) {
+    const succeeded = [];
+    let insufficient = null;
+    for (const item of stockItems) {
+      const result = await SellerStock.findOneAndUpdate(
+        { seller: sellerId, product: item.product, stock: { $gte: item.quantity } },
+        { $inc: { stock: -item.quantity } },
+        { new: true }
+      );
+      if (!result) {
+        insufficient = item;
+        break;
+      }
+      succeeded.push(item);
+    }
+    if (insufficient) {
+      await Promise.all(
+        succeeded.map((item) =>
+          SellerStock.updateOne(
+            { seller: sellerId, product: item.product },
+            { $inc: { stock: item.quantity } }
+          )
+        )
+      );
+      return NextResponse.json(
+        { message: "Недостатъчна наличност за маркиране като доставена.", status: false },
+        { status: 400 }
+      );
+    }
+  }
+
   const update = {
     status,
     rejectionReason: status === "отказана" ? (rejectionReason ?? "") : "",
@@ -114,51 +164,17 @@ export async function PUT(request, { params }) {
   };
   await ClientOrder.findByIdAndUpdate(id, update);
 
-  // Промяна на наличността на доставчика при смяна на статус
-  const sellerId = existing?.assignedTo;
-  const wasDelivered = existing?.status === "доставена";
-  const isNowDelivered = status === "доставена";
-
-  if (sellerId && wasDelivered !== isNowDelivered) {
-    const delta = isNowDelivered ? -1 : 1;
-    const stockOps = [];
-
-    if (existing.product && existing.quantity > 0) {
-      stockOps.push(
+  // Преход ИЗВЪН "доставена": връщаме наличността (всеки $inc + е безопасен)
+  if (stockItems.length && !isNowDelivered) {
+    await Promise.all(
+      stockItems.map((item) =>
         SellerStock.findOneAndUpdate(
-          { seller: sellerId, product: existing.product },
-          { $inc: { stock: delta * existing.quantity } },
+          { seller: sellerId, product: item.product },
+          { $inc: { stock: item.quantity } },
           { upsert: true, new: true }
-        ).then(() =>
-          delta < 0
-            ? SellerStock.updateOne(
-                { seller: sellerId, product: existing.product, stock: { $lt: 0 } },
-                { $set: { stock: 0 } }
-              )
-            : null
         )
-      );
-    }
-
-    const sp = existing.secondProduct;
-    if (sp?.product && sp?.quantity > 0) {
-      stockOps.push(
-        SellerStock.findOneAndUpdate(
-          { seller: sellerId, product: sp.product },
-          { $inc: { stock: delta * sp.quantity } },
-          { upsert: true, new: true }
-        ).then(() =>
-          delta < 0
-            ? SellerStock.updateOne(
-                { seller: sellerId, product: sp.product, stock: { $lt: 0 } },
-                { $set: { stock: 0 } }
-              )
-            : null
-        )
-      );
-    }
-
-    await Promise.all(stockOps);
+      )
+    );
   }
 
   const statusEvent = { type: "updated", orderId: id, orderNumber: existing?.orderNumber, changedBy: session.user.name, changedByUserId: String(session.user.id), assignedTo: existing?.assignedTo ? String(existing.assignedTo) : null, status, change: "status" };
