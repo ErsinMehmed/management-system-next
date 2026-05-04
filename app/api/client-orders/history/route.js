@@ -2,80 +2,14 @@ import { getAuth } from "@/helpers/getAuth";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import Product from "@/models/product";
+import { expandProducts, productLookup } from "@/libs/clientOrderQueries";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-
-// Разгъва всяка поръчка в 1-2 реда (основен + втори продукт ако има)
-const expandProducts = [
-  {
-    $addFields: {
-      _entries: {
-        $concatArrays: [
-          [
-            {
-              product: "$product",
-              quantity: "$quantity",
-              price: "$price",
-              deliveryCost: { $ifNull: ["$deliveryCost", 0] },
-              payout: {
-                $subtract: [
-                  { $ifNull: ["$payout", 0] },
-                  { $ifNull: ["$secondProduct.payout", 0] },
-                ],
-              },
-              isMain: true,
-            },
-          ],
-          {
-            $cond: [
-              {
-                $and: [
-                  { $ne: [{ $ifNull: ["$secondProduct.product", null] }, null] },
-                  { $gt: [{ $ifNull: ["$secondProduct.quantity", 0] }, 0] },
-                ],
-              },
-              [
-                {
-                  product: "$secondProduct.product",
-                  quantity: "$secondProduct.quantity",
-                  price: { $ifNull: ["$secondProduct.price", 0] },
-                  deliveryCost: { $literal: 0 },
-                  payout: { $ifNull: ["$secondProduct.payout", 0] },
-                  isMain: false,
-                },
-              ],
-              [],
-            ],
-          },
-        ],
-      },
-    },
-  },
-  { $unwind: "$_entries" },
-  {
-    $addFields: {
-      product: "$_entries.product",
-      quantity: "$_entries.quantity",
-      price: "$_entries.price",
-      deliveryCost: "$_entries.deliveryCost",
-      payout: "$_entries.payout",
-      _isMain: "$_entries.isMain",
-    },
-  },
-];
 
 // Pipeline за платени поръчки (историята)
 const paidHistoryPipeline = [
   ...expandProducts,
-  {
-    $lookup: {
-      from: "products",
-      localField: "product",
-      foreignField: "_id",
-      as: "productDoc",
-    },
-  },
-  { $unwind: { path: "$productDoc", preserveNullAndEmptyArrays: true } },
+  ...productLookup,
   {
     $group: {
       _id: { seller: "$assignedTo", paidAt: "$paidAt" },

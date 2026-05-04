@@ -5,6 +5,12 @@ import User from "@/models/user";
 import Product from "@/models/product";
 import Category from "@/models/category";
 import ClientPhone from "@/models/clientPhone";
+import {
+  orderRevenue,
+  orderCost,
+  orderCommission,
+  orderProfit,
+} from "@/libs/clientOrderQueries";
 import { NextResponse } from "next/server";
 
 const sofiaDay = (date) =>
@@ -41,15 +47,6 @@ const computeAnalytics = async (fromStr, toStr) => {
   const newCount = filtered.filter((o) => o.status === "нова").length;
   const rejected = filtered.filter((o) => o.status === "отказана");
 
-  const profitOf = (o) => {
-    const rev = (o.price || 0) + (o.secondProduct?.price || 0);
-    const cost =
-      (o.product?.price || 0) * (o.quantity || 0) +
-      (o.secondProduct?.product?.price || 0) * (o.secondProduct?.quantity || 0);
-    const commission = (o.payout || 0) + (o.secondProduct?.payout || 0);
-    return rev - cost - commission - (o.deliveryCost || 0) - (o.distributorPayout || 0);
-  };
-
   let revenue = 0;
   let cost = 0;
   let commissions = 0;
@@ -61,12 +58,10 @@ const computeAnalytics = async (fromStr, toStr) => {
   let unpaidSum = 0;
 
   for (const o of delivered) {
-    const rev = (o.price || 0) + (o.secondProduct?.price || 0);
+    const rev = orderRevenue(o);
     revenue += rev;
-    cost +=
-      (o.product?.price || 0) * (o.quantity || 0) +
-      (o.secondProduct?.product?.price || 0) * (o.secondProduct?.quantity || 0);
-    commissions += (o.payout || 0) + (o.secondProduct?.payout || 0);
+    cost += orderCost(o);
+    commissions += orderCommission(o);
     delivery += o.deliveryCost || 0;
     distributorPayoutSum += o.distributorPayout || 0;
     if (o.isPaid) {
@@ -86,9 +81,8 @@ const computeAnalytics = async (fromStr, toStr) => {
   for (const o of delivered) {
     const day = sofiaDay(o.createdAt);
     const e = seriesMap.get(day) || { date: day, revenue: 0, profit: 0, orders: 0 };
-    const rev = (o.price || 0) + (o.secondProduct?.price || 0);
-    e.revenue += rev;
-    e.profit += profitOf(o);
+    e.revenue += orderRevenue(o);
+    e.profit += orderProfit(o);
     e.orders += 1;
     seriesMap.set(day, e);
   }
@@ -121,10 +115,9 @@ const computeAnalytics = async (fromStr, toStr) => {
   for (const o of delivered) {
     if (!o.assignedTo) continue;
     const e = ensureSeller(String(o.assignedTo._id), o.assignedTo.name);
-    const rev = (o.price || 0) + (o.secondProduct?.price || 0);
-    const payout = (o.payout || 0) + (o.secondProduct?.payout || 0);
+    const payout = orderCommission(o);
     e.orders += 1;
-    e.revenue += rev;
+    e.revenue += orderRevenue(o);
     e.payout += payout;
     if (o.isPaid) e.paidPayout += payout;
   }
@@ -189,9 +182,8 @@ const computeAnalytics = async (fromStr, toStr) => {
   for (const o of delivered) {
     if (!o.phone) continue;
     const e = clientsMap.get(o.phone) || { phone: o.phone, orders: 0, revenue: 0, lastOrder: null };
-    const rev = (o.price || 0) + (o.secondProduct?.price || 0);
     e.orders += 1;
-    e.revenue += rev;
+    e.revenue += orderRevenue(o);
     if (!e.lastOrder || o.createdAt > e.lastOrder) e.lastOrder = o.createdAt;
     clientsMap.set(o.phone, e);
   }

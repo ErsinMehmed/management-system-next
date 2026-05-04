@@ -3,6 +3,7 @@ import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import ClientPhone from "@/models/clientPhone";
 import Product from "@/models/product";
+import { revenueExpr } from "@/libs/clientOrderQueries";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
@@ -34,11 +35,7 @@ export async function GET(request, { params }) {
           totalOrders: { $sum: 1 },
           totalRevenue: {
             $sum: {
-              $cond: [
-                { $eq: ["$status", "доставена"] },
-                { $add: ["$price", { $ifNull: ["$secondProduct.price", 0] }] },
-                0,
-              ],
+              $cond: [{ $eq: ["$status", "доставена"] }, revenueExpr, 0],
             },
           },
           firstOrder: { $min: "$createdAt" },

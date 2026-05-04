@@ -1,89 +1,9 @@
 import { getAuth } from "@/helpers/getAuth";
 import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
+import { expandProducts, productAndCategoryLookup } from "@/libs/clientOrderQueries";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-
-// Разгъва всяка поръчка в 1-2 реда (основен + втори продукт ако има)
-const expandProducts = [
-  {
-    $addFields: {
-      _entries: {
-        $concatArrays: [
-          [{
-            product:          "$product",
-            quantity:         "$quantity",
-            price:            "$price",
-            deliveryCost:     { $ifNull: ["$deliveryCost", 0] },
-            payout:           { $subtract: [{ $ifNull: ["$payout", 0] }, { $ifNull: ["$secondProduct.payout", 0] }] },
-            distributorPayout: { $ifNull: ["$distributorPayout", 0] },
-            isPaid:           "$isPaid",
-            isMain:           true,
-          }],
-          {
-            $cond: [
-              { $and: [
-                { $ne: [{ $ifNull: ["$secondProduct.product", null] }, null] },
-                { $gt: [{ $ifNull: ["$secondProduct.quantity", 0] }, 0] },
-              ]},
-              [{
-                product:          "$secondProduct.product",
-                quantity:         "$secondProduct.quantity",
-                price:            { $ifNull: ["$secondProduct.price", 0] },
-                deliveryCost:     { $literal: 0 },
-                payout:           { $ifNull: ["$secondProduct.payout", 0] },
-                distributorPayout: { $literal: 0 },
-                isPaid:           "$isPaid",
-                isMain:           false,
-              }],
-              [],
-            ],
-          },
-        ],
-      },
-    },
-  },
-  { $unwind: "$_entries" },
-  {
-    $addFields: {
-      product:          "$_entries.product",
-      quantity:         "$_entries.quantity",
-      price:            "$_entries.price",
-      deliveryCost:     "$_entries.deliveryCost",
-      payout:           "$_entries.payout",
-      distributorPayout: "$_entries.distributorPayout",
-      isPaid:           "$_entries.isPaid",
-      _isMain:          "$_entries.isMain",
-    },
-  },
-];
-
-const productAndCategoryLookup = [
-  {
-    $lookup: {
-      from: "products",
-      localField: "product",
-      foreignField: "_id",
-      as: "productDoc",
-    },
-  },
-  { $unwind: { path: "$productDoc", preserveNullAndEmptyArrays: true } },
-  {
-    $lookup: {
-      from: "categories",
-      localField: "productDoc.category",
-      foreignField: "_id",
-      as: "categoryArr",
-    },
-  },
-  {
-    $addFields: {
-      "productDoc.category": { $arrayElemAt: ["$categoryArr", 0] },
-      orderPayout: { $ifNull: ["$payout", 0] },
-    },
-  },
-  { $unset: "categoryArr" },
-];
 
 export async function GET(request) {
   const session = await getAuth(request);
