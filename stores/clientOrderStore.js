@@ -142,7 +142,10 @@ class ClientOrderStore {
     if (data.status) {
       commonStore.setSuccessMessage(data.message);
       this.loadOrders();
+      return true;
     }
+    commonStore.setErrorMessage(data.message || "Грешка при смяна на статуса.");
+    return false;
   };
 
   loadSummary = async (from = null, to = null) => {
