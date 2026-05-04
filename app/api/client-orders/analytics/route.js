@@ -6,87 +6,346 @@ import Product from "@/models/product";
 import Category from "@/models/category";
 import ClientPhone from "@/models/clientPhone";
 import {
-  orderRevenue,
-  orderCost,
-  orderCommission,
-  orderProfit,
+  revenueExpr,
+  commissionExpr,
+  costExpr,
+  profitExpr,
 } from "@/libs/clientOrderQueries";
 import { NextResponse } from "next/server";
-
-const sofiaDay = (date) =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(new Date(date));
 
 const fmtKey = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
+const buildPipeline = (fromStr, toStr, utcStart, utcEnd) => [
+  // Hot match по индекса createdAt
+  { $match: { createdAt: { $gte: utcStart, $lte: utcEnd } } },
+
+  // Sofia ден като computed поле, после стесняваме до точния прозорец
+  {
+    $addFields: {
+      _sofiaDay: {
+        $dateToString: {
+          format: "%Y-%m-%d",
+          date: "$createdAt",
+          timezone: "Europe/Sofia",
+        },
+      },
+    },
+  },
+  { $match: { _sofiaDay: { $gte: fromStr, $lte: toStr } } },
+
+  // Lookup-и за продуктите
+  {
+    $lookup: {
+      from: "products",
+      localField: "product",
+      foreignField: "_id",
+      as: "_productDoc",
+    },
+  },
+  { $unwind: { path: "$_productDoc", preserveNullAndEmptyArrays: true } },
+  {
+    $lookup: {
+      from: "products",
+      localField: "secondProduct.product",
+      foreignField: "_id",
+      as: "_secondProductDoc",
+    },
+  },
+  { $unwind: { path: "$_secondProductDoc", preserveNullAndEmptyArrays: true } },
+
+  // Per-order суми
+  {
+    $addFields: {
+      _revenue: revenueExpr,
+      _cost: costExpr,
+      _commissions: commissionExpr,
+    },
+  },
+  { $addFields: { _profit: profitExpr } },
+
+  // Една facet — всички секции наведнъж
+  {
+    $facet: {
+      kpi: [
+        { $match: { status: "доставена" } },
+        {
+          $group: {
+            _id: null,
+            orders: { $sum: 1 },
+            revenue: { $sum: "$_revenue" },
+            cost: { $sum: "$_cost" },
+            commissions: { $sum: "$_commissions" },
+            delivery: { $sum: { $ifNull: ["$deliveryCost", 0] } },
+            distributorPayout: { $sum: { $ifNull: ["$distributorPayout", 0] } },
+            profit: { $sum: "$_profit" },
+            uniqueClients: { $addToSet: "$phone" },
+            paidCount: { $sum: { $cond: [{ $eq: ["$isPaid", true] }, 1, 0] } },
+            paidSum: { $sum: { $cond: [{ $eq: ["$isPaid", true] }, "$_revenue", 0] } },
+            unpaidCount: { $sum: { $cond: [{ $ne: ["$isPaid", true] }, 1, 0] } },
+            unpaidSum: { $sum: { $cond: [{ $ne: ["$isPaid", true] }, "$_revenue", 0] } },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            orders: 1,
+            revenue: 1,
+            cost: 1,
+            commissions: 1,
+            delivery: 1,
+            distributorPayout: 1,
+            profit: 1,
+            uniqueClients: { $size: "$uniqueClients" },
+            paidCount: 1,
+            paidSum: 1,
+            unpaidCount: 1,
+            unpaidSum: 1,
+          },
+        },
+      ],
+
+      series: [
+        { $match: { status: "доставена" } },
+        {
+          $group: {
+            _id: "$_sofiaDay",
+            revenue: { $sum: "$_revenue" },
+            profit: { $sum: "$_profit" },
+            orders: { $sum: 1 },
+          },
+        },
+        { $project: { _id: 0, date: "$_id", revenue: 1, profit: 1, orders: 1 } },
+      ],
+
+      sellers: [
+        { $match: { assignedTo: { $ne: null } } },
+        {
+          $group: {
+            _id: "$assignedTo",
+            orders: { $sum: { $cond: [{ $eq: ["$status", "доставена"] }, 1, 0] } },
+            rejected: { $sum: { $cond: [{ $eq: ["$status", "отказана"] }, 1, 0] } },
+            revenue: { $sum: { $cond: [{ $eq: ["$status", "доставена"] }, "$_revenue", 0] } },
+            payout: { $sum: { $cond: [{ $eq: ["$status", "доставена"] }, "$_commissions", 0] } },
+            paidPayout: {
+              $sum: {
+                $cond: [
+                  { $and: [{ $eq: ["$status", "доставена"] }, { $eq: ["$isPaid", true] }] },
+                  "$_commissions",
+                  0,
+                ],
+              },
+            },
+          },
+        },
+        // Изхвърляме доставчици само с "нова" статус (без delivered/rejected)
+        { $match: { $or: [{ orders: { $gt: 0 } }, { rejected: { $gt: 0 } }] } },
+        { $sort: { revenue: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "_user",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: { $ifNull: [{ $arrayElemAt: ["$_user.name", 0] }, ""] },
+            orders: 1,
+            rejected: 1,
+            revenue: 1,
+            payout: 1,
+            paidPayout: 1,
+          },
+        },
+      ],
+
+      products: [
+        { $match: { status: "доставена" } },
+        {
+          $project: {
+            entries: {
+              $concatArrays: [
+                [{
+                  pid: "$product",
+                  qty: { $ifNull: ["$quantity", 0] },
+                  price: { $ifNull: ["$price", 0] },
+                  doc: "$_productDoc",
+                }],
+                {
+                  $cond: [
+                    {
+                      $and: [
+                        { $ne: [{ $ifNull: ["$secondProduct.product", null] }, null] },
+                        { $gt: [{ $ifNull: ["$secondProduct.quantity", 0] }, 0] },
+                      ],
+                    },
+                    [{
+                      pid: "$secondProduct.product",
+                      qty: { $ifNull: ["$secondProduct.quantity", 0] },
+                      price: { $ifNull: ["$secondProduct.price", 0] },
+                      doc: "$_secondProductDoc",
+                    }],
+                    [],
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        { $unwind: "$entries" },
+        // Игнорираме записи с изтрит продукт (orphan FK), за да съвпада със
+        // старата JS логика, която филтрираше null product-и от populate-а.
+        { $match: { "entries.doc": { $ne: null } } },
+        {
+          $group: {
+            _id: "$entries.pid",
+            qty: { $sum: "$entries.qty" },
+            orders: { $sum: 1 },
+            revenue: { $sum: "$entries.price" },
+            cost: {
+              $sum: {
+                $multiply: [
+                  { $ifNull: ["$entries.doc.price", 0] },
+                  "$entries.qty",
+                ],
+              },
+            },
+            doc: { $first: "$entries.doc" },
+          },
+        },
+        { $sort: { revenue: -1 } },
+        { $limit: 10 },
+        {
+          $project: {
+            _id: 1,
+            name: "$doc.name",
+            flavor: "$doc.flavor",
+            weight: "$doc.weight",
+            puffs: "$doc.puffs",
+            image_url: "$doc.image_url",
+            cost_price: { $ifNull: ["$doc.price", 0] },
+            qty: 1,
+            orders: 1,
+            revenue: 1,
+            cost: 1,
+          },
+        },
+      ],
+
+      clients: [
+        { $match: { status: "доставена", phone: { $nin: [null, ""] } } },
+        {
+          $group: {
+            _id: "$phone",
+            orders: { $sum: 1 },
+            revenue: { $sum: "$_revenue" },
+            lastOrder: { $max: "$createdAt" },
+          },
+        },
+        { $sort: { revenue: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "clientphones",
+            localField: "_id",
+            foreignField: "phone",
+            as: "_phoneDoc",
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            phone: "$_id",
+            orders: 1,
+            revenue: 1,
+            lastOrder: 1,
+            name: { $ifNull: [{ $arrayElemAt: ["$_phoneDoc.name", 0] }, ""] },
+          },
+        },
+      ],
+
+      clientFrequency: [
+        { $match: { status: "доставена", phone: { $nin: [null, ""] } } },
+        { $group: { _id: "$phone", orders: { $sum: 1 } } },
+        {
+          $group: {
+            _id: null,
+            f1: { $sum: { $cond: [{ $eq: ["$orders", 1] }, 1, 0] } },
+            f2: { $sum: { $cond: [{ $eq: ["$orders", 2] }, 1, 0] } },
+            f3: { $sum: { $cond: [{ $eq: ["$orders", 3] }, 1, 0] } },
+            f4plus: { $sum: { $cond: [{ $gte: ["$orders", 4] }, 1, 0] } },
+          },
+        },
+        { $project: { _id: 0, f1: 1, f2: 1, f3: 1, f4plus: 1 } },
+      ],
+
+      statusCounts: [
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ],
+
+      topReasons: [
+        { $match: { status: "отказана" } },
+        {
+          $project: {
+            reason: {
+              $let: {
+                vars: { trimmed: { $trim: { input: { $ifNull: ["$rejectionReason", ""] } } } },
+                in: { $cond: [{ $eq: ["$$trimmed", ""] }, "Без причина", "$$trimmed"] },
+              },
+            },
+          },
+        },
+        { $group: { _id: "$reason", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+        { $project: { _id: 0, reason: "$_id", count: 1 } },
+      ],
+    },
+  },
+];
+
 const computeAnalytics = async (fromStr, toStr) => {
+  // Mongoose registers — нужни заради $lookup от тези колекции.
   void User;
   void Product;
   void Category;
+  void ClientPhone;
 
   const utcStart = new Date(`${fromStr}T00:00:00.000Z`);
   utcStart.setUTCDate(utcStart.getUTCDate() - 1);
   const utcEnd = new Date(`${toStr}T23:59:59.999Z`);
   utcEnd.setUTCDate(utcEnd.getUTCDate() + 1);
 
-  const orders = await ClientOrder.find({ createdAt: { $gte: utcStart, $lte: utcEnd } })
-    .select(
-      "phone status price payout deliveryCost distributorPayout secondProduct product quantity assignedTo isPaid rejectionReason createdAt"
-    )
-    .populate({ path: "product", select: "name flavor weight puffs price image_url" })
-    .populate({ path: "secondProduct.product", select: "name flavor weight puffs price image_url" })
-    .populate({ path: "assignedTo", select: "name" })
-    .lean();
+  const pipeline = buildPipeline(fromStr, toStr, utcStart, utcEnd);
+  const [result] = await ClientOrder.aggregate(pipeline).option({ allowDiskUse: true });
 
-  const filtered = orders.filter((o) => {
-    const d = sofiaDay(o.createdAt);
-    return d >= fromStr && d <= toStr;
-  });
+  const round2 = (n) => Number((n ?? 0).toFixed(2));
+  const round4 = (n) => Number((n ?? 0).toFixed(4));
 
-  const delivered = filtered.filter((o) => o.status === "доставена");
-  const newCount = filtered.filter((o) => o.status === "нова").length;
-  const rejected = filtered.filter((o) => o.status === "отказана");
+  const kpiRaw = result.kpi[0] ?? {};
+  const orders = kpiRaw.orders ?? 0;
+  const revenue = kpiRaw.revenue ?? 0;
+  const profit = kpiRaw.profit ?? 0;
 
-  let revenue = 0;
-  let cost = 0;
-  let commissions = 0;
-  let delivery = 0;
-  let distributorPayoutSum = 0;
-  let paidCount = 0;
-  let paidSum = 0;
-  let unpaidCount = 0;
-  let unpaidSum = 0;
+  const kpi = {
+    orders,
+    revenue: round2(revenue),
+    cost: round2(kpiRaw.cost),
+    commissions: round2(kpiRaw.commissions),
+    delivery: round2(kpiRaw.delivery),
+    distributorPayout: round2(kpiRaw.distributorPayout),
+    profit: round2(profit),
+    margin: revenue > 0 ? round4(profit / revenue) : 0,
+    aov: orders > 0 ? round2(revenue / orders) : 0,
+    uniqueClients: kpiRaw.uniqueClients ?? 0,
+  };
 
-  for (const o of delivered) {
-    const rev = orderRevenue(o);
-    revenue += rev;
-    cost += orderCost(o);
-    commissions += orderCommission(o);
-    delivery += o.deliveryCost || 0;
-    distributorPayoutSum += o.distributorPayout || 0;
-    if (o.isPaid) {
-      paidCount += 1;
-      paidSum += rev;
-    } else {
-      unpaidCount += 1;
-      unpaidSum += rev;
-    }
-  }
-
-  const profit = revenue - cost - commissions - delivery - distributorPayoutSum;
-  const margin = revenue > 0 ? profit / revenue : 0;
-
-  // Daily series (доставени)
-  const seriesMap = new Map();
-  for (const o of delivered) {
-    const day = sofiaDay(o.createdAt);
-    const e = seriesMap.get(day) || { date: day, revenue: 0, profit: 0, orders: 0 };
-    e.revenue += orderRevenue(o);
-    e.profit += orderProfit(o);
-    e.orders += 1;
-    seriesMap.set(day, e);
-  }
-
+  // Series + gap-filling по дни
+  const seriesMap = new Map(result.series.map((s) => [s.date, s]));
   const series = [];
   const [y1, m1, d1] = fromStr.split("-").map(Number);
   const [y2, m2, d2] = toStr.split("-").map(Number);
@@ -94,167 +353,83 @@ const computeAnalytics = async (fromStr, toStr) => {
   const endDay = new Date(y2, m2 - 1, d2, 12);
   while (cursor <= endDay) {
     const key = fmtKey(cursor);
-    const v = seriesMap.get(key) || { date: key, revenue: 0, profit: 0, orders: 0 };
+    const v = seriesMap.get(key) ?? { date: key, revenue: 0, profit: 0, orders: 0 };
     series.push({
-      date: v.date,
-      revenue: Number(v.revenue.toFixed(2)),
-      profit: Number(v.profit.toFixed(2)),
+      date: key,
+      revenue: round2(v.revenue),
+      profit: round2(v.profit),
       orders: v.orders,
     });
     cursor.setDate(cursor.getDate() + 1);
   }
 
-  // Sellers
-  const sellersMap = new Map();
-  const ensureSeller = (id, name) => {
-    if (!sellersMap.has(id)) {
-      sellersMap.set(id, { _id: id, name, orders: 0, rejected: 0, revenue: 0, payout: 0, paidPayout: 0 });
-    }
-    return sellersMap.get(id);
-  };
-  for (const o of delivered) {
-    if (!o.assignedTo) continue;
-    const e = ensureSeller(String(o.assignedTo._id), o.assignedTo.name);
-    const payout = orderCommission(o);
-    e.orders += 1;
-    e.revenue += orderRevenue(o);
-    e.payout += payout;
-    if (o.isPaid) e.paidPayout += payout;
-  }
-  for (const o of rejected) {
-    if (!o.assignedTo) continue;
-    const e = ensureSeller(String(o.assignedTo._id), o.assignedTo.name);
-    e.rejected += 1;
-  }
-  const sellers = [...sellersMap.values()]
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 10)
-    .map((s) => ({
-      ...s,
-      revenue: Number(s.revenue.toFixed(2)),
-      payout: Number(s.payout.toFixed(2)),
-      paidPayout: Number(s.paidPayout.toFixed(2)),
-    }));
+  const sellers = (result.sellers ?? []).map((s) => ({
+    _id: String(s._id),
+    name: s.name,
+    orders: s.orders,
+    rejected: s.rejected,
+    revenue: round2(s.revenue),
+    payout: round2(s.payout),
+    paidPayout: round2(s.paidPayout),
+  }));
 
-  // Products
-  const productsMap = new Map();
-  const addProductEntry = (prod, qty, rev) => {
-    if (!prod) return;
-    const pid = String(prod._id);
-    const e = productsMap.get(pid) || {
-      _id: pid,
-      name: prod.name,
-      flavor: prod.flavor,
-      weight: prod.weight,
-      puffs: prod.puffs,
-      image_url: prod.image_url,
-      cost_price: prod.price || 0,
-      qty: 0,
-      orders: 0,
-      revenue: 0,
-      cost: 0,
+  const products = (result.products ?? []).map((p) => {
+    const profitVal = (p.revenue ?? 0) - (p.cost ?? 0);
+    return {
+      _id: String(p._id),
+      name: p.name,
+      flavor: p.flavor,
+      weight: p.weight,
+      puffs: p.puffs,
+      image_url: p.image_url,
+      cost_price: p.cost_price ?? 0,
+      qty: p.qty,
+      orders: p.orders,
+      revenue: round2(p.revenue),
+      cost: round2(p.cost),
+      profit: round2(profitVal),
+      margin: p.revenue > 0 ? round4(profitVal / p.revenue) : 0,
     };
-    e.qty += qty;
-    e.orders += 1;
-    e.revenue += rev;
-    e.cost += (prod.price || 0) * qty;
-    productsMap.set(pid, e);
+  });
+
+  const clients = (result.clients ?? []).map((c) => ({
+    phone: c.phone,
+    orders: c.orders,
+    revenue: round2(c.revenue),
+    lastOrder: c.lastOrder,
+    name: c.name ?? "",
+  }));
+
+  const freqRaw = result.clientFrequency[0] ?? {};
+  const clientFrequency = {
+    f1: freqRaw.f1 ?? 0,
+    f2: freqRaw.f2 ?? 0,
+    f3: freqRaw.f3 ?? 0,
+    f4plus: freqRaw.f4plus ?? 0,
   };
-  for (const o of delivered) {
-    addProductEntry(o.product, o.quantity || 0, o.price || 0);
-    if (o.secondProduct?.product) {
-      addProductEntry(o.secondProduct.product, o.secondProduct.quantity || 0, o.secondProduct.price || 0);
-    }
-  }
-  const products = [...productsMap.values()]
-    .map((p) => ({
-      ...p,
-      profit: Number((p.revenue - p.cost).toFixed(2)),
-      margin: p.revenue > 0 ? Number(((p.revenue - p.cost) / p.revenue).toFixed(4)) : 0,
-      revenue: Number(p.revenue.toFixed(2)),
-      cost: Number(p.cost.toFixed(2)),
-    }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 10);
 
-  // Clients
-  const clientsMap = new Map();
-  for (const o of delivered) {
-    if (!o.phone) continue;
-    const e = clientsMap.get(o.phone) || { phone: o.phone, orders: 0, revenue: 0, lastOrder: null };
-    e.orders += 1;
-    e.revenue += orderRevenue(o);
-    if (!e.lastOrder || o.createdAt > e.lastOrder) e.lastOrder = o.createdAt;
-    clientsMap.set(o.phone, e);
-  }
-  const clients = [...clientsMap.values()]
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 10)
-    .map((c) => ({ ...c, revenue: Number(c.revenue.toFixed(2)) }));
-
-  if (clients.length) {
-    const phones = clients.map((c) => c.phone);
-    const phoneDocs = await ClientPhone.find({ phone: { $in: phones } }).select("phone name").lean();
-    const map = new Map(phoneDocs.filter((d) => d.name && d.name.trim()).map((d) => [d.phone, d.name.trim()]));
-    for (const c of clients) c.name = map.get(c.phone) || "";
-  }
-
-  // Frequency distribution на клиентите (1, 2, 3, 4+)
-  const freq = { f1: 0, f2: 0, f3: 0, f4plus: 0 };
-  for (const c of clientsMap.values()) {
-    if (c.orders === 1) freq.f1 += 1;
-    else if (c.orders === 2) freq.f2 += 1;
-    else if (c.orders === 3) freq.f3 += 1;
-    else freq.f4plus += 1;
-  }
-
-  // Status + rejection reasons
-  const reasonsMap = new Map();
-  for (const o of rejected) {
-    const r = (o.rejectionReason || "").trim() || "Без причина";
-    reasonsMap.set(r, (reasonsMap.get(r) || 0) + 1);
-  }
-  const topReasons = [...reasonsMap.entries()]
-    .map(([reason, count]) => ({ reason, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
-
-  const total = delivered.length + newCount + rejected.length;
-  const conversionRate = total > 0 ? delivered.length / total : 0;
-
-  return {
-    kpi: {
-      orders: delivered.length,
-      revenue: Number(revenue.toFixed(2)),
-      cost: Number(cost.toFixed(2)),
-      commissions: Number(commissions.toFixed(2)),
-      delivery: Number(delivery.toFixed(2)),
-      distributorPayout: Number(distributorPayoutSum.toFixed(2)),
-      profit: Number(profit.toFixed(2)),
-      margin: Number(margin.toFixed(4)),
-      aov: delivered.length > 0 ? Number((revenue / delivered.length).toFixed(2)) : 0,
-      uniqueClients: clientsMap.size,
-    },
-    series,
-    status: {
-      delivered: delivered.length,
-      new: newCount,
-      rejected: rejected.length,
-      total,
-      conversionRate: Number(conversionRate.toFixed(4)),
-      topReasons,
-    },
-    sellers,
-    products,
-    clients,
-    clientFrequency: freq,
-    payments: {
-      paidCount,
-      paidSum: Number(paidSum.toFixed(2)),
-      unpaidCount,
-      unpaidSum: Number(unpaidSum.toFixed(2)),
-    },
+  const statusByKey = new Map((result.statusCounts ?? []).map((s) => [s._id, s.count]));
+  const delivered = statusByKey.get("доставена") ?? 0;
+  const newCount = statusByKey.get("нова") ?? 0;
+  const rejectedCount = statusByKey.get("отказана") ?? 0;
+  const total = delivered + newCount + rejectedCount;
+  const status = {
+    delivered,
+    new: newCount,
+    rejected: rejectedCount,
+    total,
+    conversionRate: total > 0 ? round4(delivered / total) : 0,
+    topReasons: result.topReasons ?? [],
   };
+
+  const payments = {
+    paidCount: kpiRaw.paidCount ?? 0,
+    paidSum: round2(kpiRaw.paidSum),
+    unpaidCount: kpiRaw.unpaidCount ?? 0,
+    unpaidSum: round2(kpiRaw.unpaidSum),
+  };
+
+  return { kpi, series, sellers, products, clients, clientFrequency, status, payments };
 };
 
 export async function GET(request) {

@@ -34,6 +34,40 @@ export const commissionExpr = {
   ],
 };
 
+// Cost изразът разчита, че _productDoc и _secondProductDoc са били $lookup-нати
+// и въведени в pipeline-а преди да се ползва.
+export const costExpr = {
+  $add: [
+    {
+      $multiply: [
+        { $ifNull: ["$_productDoc.price", 0] },
+        { $ifNull: ["$quantity", 0] },
+      ],
+    },
+    {
+      $multiply: [
+        { $ifNull: ["$_secondProductDoc.price", 0] },
+        { $ifNull: ["$secondProduct.quantity", 0] },
+      ],
+    },
+  ],
+};
+
+// Profit изразът разчита на проектирани _revenue, _cost, _commissions полета.
+export const profitExpr = {
+  $subtract: [
+    "$_revenue",
+    {
+      $add: [
+        "$_cost",
+        "$_commissions",
+        { $ifNull: ["$deliveryCost", 0] },
+        { $ifNull: ["$distributorPayout", 0] },
+      ],
+    },
+  ],
+};
+
 // ───────── MongoDB pipelines ─────────
 
 // Разгъва всяка поръчка в 1 (или 2 ако има secondProduct) реда. След това
