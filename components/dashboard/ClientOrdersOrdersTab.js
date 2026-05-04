@@ -3,13 +3,14 @@ import React, { useEffect, useRef, useState, memo, useCallback } from "react";
 import { observer } from "mobx-react-lite";
 import Link from "next/link";
 import { Button } from "@heroui/react";
-import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX, FiClock, FiRefreshCw } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEye, FiEyeOff, FiPhone, FiMapPin, FiFileText, FiUser, FiPackage, FiCheck, FiX, FiClock, FiRefreshCw, FiArrowDown } from "react-icons/fi";
 import Pagination from "@/components/table/Pagination";
 import Select from "@/components/html/Select";
 import { productTitle, formatCurrency, formatDate } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
 import { clientOrderStatuses, clientOrderStatusConfig } from "@/data";
 import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
+import { usePullToRefresh } from "@/components/dashboard/ClientOrders/usePullToRefresh";
 
 const SWIPE_THRESHOLD = 72;
 
@@ -283,6 +284,10 @@ const ClientOrdersOrdersTab = ({
   const [statusPickerOrder, setStatusPickerOrder] = useState(null);
   const [profilePhone, setProfilePhone] = useState(null);
 
+  const { pullDistance, isRefreshing, threshold } = usePullToRefresh(
+    () => clientOrderStore.refreshOrders()
+  );
+
   useEffect(() => {
     if (typeof window === "undefined" || window.innerWidth >= 640) return;
     const observer = new IntersectionObserver(
@@ -294,8 +299,34 @@ const ClientOrdersOrdersTab = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const pullProgress = Math.min(1, pullDistance / threshold);
+  const triggered = pullDistance >= threshold;
+
   return (
   <>
+    {/* Pull-to-refresh индикатор — само на мобилен */}
+    <div
+      className="sm:hidden fixed top-0 left-0 right-0 flex justify-center pointer-events-none z-40"
+      style={{
+        transform: `translateY(${Math.max(0, pullDistance - 36)}px)`,
+        opacity: pullDistance > 4 || isRefreshing ? 1 : 0,
+        transition: pullDistance === 0 ? "transform 200ms ease-out, opacity 200ms ease-out" : "none",
+      }}
+      aria-hidden="true">
+      <div className="mt-2 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center">
+        {isRefreshing ? (
+          <div className="w-4 h-4 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
+        ) : (
+          <FiArrowDown
+            className="w-4 h-4 text-[#0071f5] transition-transform duration-150"
+            style={{
+              transform: `rotate(${triggered ? 180 : 0}deg) scale(${0.7 + 0.3 * pullProgress})`,
+            }}
+          />
+        )}
+      </div>
+    </div>
+
     <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 mb-4">
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:ml-auto w-full sm:w-auto">
         <Button

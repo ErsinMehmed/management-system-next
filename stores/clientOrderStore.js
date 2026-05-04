@@ -102,6 +102,9 @@ class ClientOrderStore {
 
   loadOrders = debounce((page) => this._fetchOrders(page), 300);
 
+  // Без debounce — за pull-to-refresh и manual reload
+  refreshOrders = () => this._fetchOrders();
+
   createOrder = async () => {
     this.isCreating = true;
     commonStore.resetMessages();
