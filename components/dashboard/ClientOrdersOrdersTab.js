@@ -239,7 +239,7 @@ const OrderCard = memo(({ order, isAdmin, isSuperAdmin, isSeller, deletingId, on
           />
           <Button isIconOnly variant="light" color="danger" size="sm"
             isLoading={deletingId === order._id}
-            onPress={() => handleDelete(order._id)}>
+            onPress={() => handleDelete(order)}>
             <FiTrash2 className="w-4 h-4" />
           </Button>
         </div>
@@ -262,7 +262,7 @@ const OrderCard = memo(({ order, isAdmin, isSuperAdmin, isSeller, deletingId, on
           <SwipeableCard
             canSwipe={isAdmin}
             deletingId={deletingId === order._id}
-            onSwipeLeft={() => handleDelete(order._id)}
+            onSwipeLeft={() => handleDelete(order)}
             onSwipeRight={!isLocked ? () => setStatusPickerOrder(order) : null}>
             {cardInner}
           </SwipeableCard>

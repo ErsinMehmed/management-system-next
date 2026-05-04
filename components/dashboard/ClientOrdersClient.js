@@ -12,6 +12,7 @@ import { useSummaryFilter } from "./ClientOrders/useSummaryFilter";
 import CreateOrderModal from "./ClientOrders/CreateOrderModal";
 import PayoutModal from "./ClientOrders/PayoutModal";
 import RejectionModal from "./ClientOrders/RejectionModal";
+import DeleteOrderModal from "./ClientOrders/DeleteOrderModal";
 import ClientOrdersOrdersTab from "@/components/dashboard/ClientOrdersOrdersTab";
 import ClientOrdersSummaryTab from "@/components/dashboard/ClientOrdersSummaryTab";
 import ClientOrdersHistoryTab from "@/components/dashboard/ClientOrdersHistoryTab";
@@ -32,8 +33,10 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
   const { isOpen: isCreateOpen, onOpen: onCreateOpen, onOpenChange: onCreateOpenChange } = useDisclosure();
   const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
   const { isOpen: isPayoutOpen, onOpen: onPayoutOpen, onOpenChange: onPayoutOpenChange } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
 
   const [deletingId, setDeletingId] = useState(null);
+  const [pendingDeleteOrder, setPendingDeleteOrder] = useState(null);
   const [pendingRejectionOrderId, setPendingRejectionOrderId] = useState(null);
   const [pendingPayout, setPendingPayout] = useState(null);
   const [activeTab, setActiveTab] = useState("orders");
@@ -42,10 +45,18 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
 
   usePusherClientOrders(initialData, sessionRef);
 
-  const handleDelete = async (id) => {
-    setDeletingId(id);
-    await clientOrderStore.deleteOrder(id);
+  const handleDelete = (order) => {
+    setPendingDeleteOrder(order);
+    onDeleteOpen();
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteOrder) return false;
+    setDeletingId(pendingDeleteOrder._id);
+    await clientOrderStore.deleteOrder(pendingDeleteOrder._id);
     setDeletingId(null);
+    setPendingDeleteOrder(null);
+    return true;
   };
 
   const handleRejectionTrigger = (orderId) => {
@@ -173,6 +184,13 @@ const ClientOrdersClient = ({ initialData, sellers = [] }) => {
       <CreateOrderModal isOpen={isCreateOpen} onOpenChange={onCreateOpenChange} sellers={sellers} isSuperAdmin={isSuperAdmin} />
       <PayoutModal isOpen={isPayoutOpen} onOpenChange={onPayoutOpenChange} pendingPayout={pendingPayout} />
       <RejectionModal isOpen={isRejectionOpen} onOpenChange={onRejectionOpenChange} orderId={pendingRejectionOrderId} />
+      <DeleteOrderModal
+        isOpen={isDeleteOpen}
+        onOpenChange={onDeleteOpenChange}
+        order={pendingDeleteOrder}
+        isDeleting={deletingId === pendingDeleteOrder?._id}
+        onConfirm={confirmDelete}
+      />
     </Layout>
   );
 };
