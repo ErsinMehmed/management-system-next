@@ -11,6 +11,7 @@ import { TbMoneybag } from "react-icons/tb";
 import { formatCurrency, productTitle } from "@/utils";
 import DatePicker from "@/components/html/DatePicker";
 import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
+import { Skeleton, SkeletonKpiCard, SkeletonListRow } from "@/components/Skeleton";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -241,8 +242,37 @@ const ClientOrdersStatsTab = () => {
 
   if (loading || !data) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Spinner />
+      <div className="flex flex-col gap-4">
+        {/* Filter bar placeholder */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-wrap gap-2">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-24 rounded-full" />
+          ))}
+        </div>
+        {/* KPI cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonKpiCard key={i} />
+          ))}
+        </div>
+        {/* Trend chart placeholder */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <Skeleton className="h-4 w-40 mb-4" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+        {/* Sellers / products / clients tables placeholders */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, ti) => (
+            <div key={ti} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <Skeleton className="h-4 w-32" />
+              </div>
+              {Array.from({ length: 5 }).map((_, ri) => (
+                <SkeletonListRow key={ri} />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

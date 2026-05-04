@@ -19,6 +19,7 @@ import {
 import { FiPlus, FiMinus, FiSave, FiPackage, FiCheck } from "react-icons/fi";
 import { clientOrderStore, productStore } from "@/stores/useStore";
 import { productTitle } from "@/utils";
+import { Skeleton, SkeletonListRow } from "@/components/Skeleton";
 
 // ─── Thumbnail за продукт (снимка или fallback икона) ─────────────────────
 
@@ -168,9 +169,21 @@ const ClientOrdersStockTab = ({ isSuperAdmin }) => {
   // ── Зареждане ──
   if (isStockLoading) {
     return (
-      <div className='flex flex-col items-center justify-center py-16 gap-3'>
-        <div className='w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin' />
-        <span className='text-sm text-slate-400 font-medium'>Зареждане...</span>
+      <div className="flex flex-col gap-3">
+        {Array.from({ length: 3 }).map((_, si) => (
+          <div key={si} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-[#0071f5]/5 to-transparent border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-8 h-8 rounded-xl" />
+                <Skeleton className="h-4 w-28" />
+              </div>
+              <Skeleton className="h-6 w-16" />
+            </div>
+            {Array.from({ length: 4 }).map((_, ri) => (
+              <SkeletonListRow key={ri} />
+            ))}
+          </div>
+        ))}
       </div>
     );
   }

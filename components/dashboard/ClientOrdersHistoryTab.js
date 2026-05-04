@@ -5,6 +5,7 @@ import { Button, Accordion, AccordionItem } from "@heroui/react";
 import { FiDollarSign, FiTrendingUp, FiCheckCircle, FiPackage } from "react-icons/fi";
 import { formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
+import { SkeletonKpiCard, SkeletonListRow } from "@/components/Skeleton";
 
 const PAYMENTS_PAGE = 8;
 
@@ -35,9 +36,17 @@ const ClientOrdersHistoryTab = ({ history, isHistoryLoading, isSuperAdmin }) => 
   const loadMorePayments = (si) => setVisiblePayments((prev) => ({ ...prev, [si]: (prev[si] ?? PAYMENTS_PAGE) + PAYMENTS_PAGE }));
   if (isHistoryLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
-        <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
+      <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <SkeletonKpiCard />
+          <SkeletonKpiCard />
+          <SkeletonKpiCard />
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonListRow key={i} />
+          ))}
+        </div>
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { Spinner, Button } from "@heroui/react";
 import { FiUser, FiPhone, FiSearch, FiChevronRight, FiX, FiPlus } from "react-icons/fi";
 import ClientProfileModal from "@/components/dashboard/ClientOrders/ClientProfileModal";
 import AddClientModal from "@/components/dashboard/ClientOrders/AddClientModal";
+import { SkeletonListRow } from "@/components/Skeleton";
 
 function ClientRow({ item, onOpenProfile }) {
   return (
@@ -164,10 +165,11 @@ export default function ClientOrdersClientsTab() {
         </div>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
-            <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
-          </div>
+          <>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <SkeletonListRow key={i} />
+            ))}
+          </>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 gap-2">
             <FiUser className="w-8 h-8 text-slate-200" />

@@ -6,6 +6,7 @@ import { now, getLocalTimeZone, toCalendarDateTime } from "@internationalized/da
 import { FiFilter, FiTrendingUp, FiDollarSign, FiCheckCircle, FiTruck, FiZap } from "react-icons/fi";
 import { productTitle, formatCurrency } from "@/utils";
 import { clientOrderStore } from "@/stores/useStore";
+import { SkeletonKpiCard, SkeletonListRow, Skeleton } from "@/components/Skeleton";
 
 const PERIOD_LABELS = {
   "24h": "последните 24 часа",
@@ -165,9 +166,26 @@ const ClientOrdersSummaryTab = ({
     )}
 
     {isSummaryLoading ? (
-      <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin" />
-        <span className="text-sm text-slate-400 font-medium">Зареждане...</span>
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonKpiCard key={i} />
+          ))}
+        </div>
+        {Array.from({ length: 2 }).map((_, si) => (
+          <div key={si} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-[#0071f5]/5 to-transparent border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-8 h-8 rounded-xl" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+            {Array.from({ length: 3 }).map((_, ri) => (
+              <SkeletonListRow key={ri} />
+            ))}
+          </div>
+        ))}
       </div>
     ) : summary?.bySeller ? (
       !summary?.sellers?.length ? (
