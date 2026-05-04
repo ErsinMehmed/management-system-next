@@ -16,6 +16,7 @@ import OrderProductCard from "./ClientOrderDetail/OrderProductCard";
 import OrderDetailsCard from "./ClientOrderDetail/OrderDetailsCard";
 import EditOrderModal from "./ClientOrderDetail/EditOrderModal";
 import RejectionModal from "./ClientOrderDetail/RejectionModal";
+import RouteMapModal from "./ClientOrders/RouteMapModal";
 
 const ClientOrderDetailClient = ({ order }) => {
   const { data: session } = useSession();
@@ -43,6 +44,7 @@ const ClientOrderDetailClient = ({ order }) => {
 
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
   const { isOpen: isRejectionOpen, onOpen: onRejectionOpen, onOpenChange: onRejectionOpenChange } = useDisclosure();
+  const { isOpen: isRouteOpen, onOpen: onRouteOpen, onOpenChange: onRouteOpenChange } = useDisclosure();
 
   const [clientNotes, setClientNotes] = useState([]);
   useEffect(() => {
@@ -196,6 +198,7 @@ const ClientOrderDetailClient = ({ order }) => {
             currentRejectionReason={currentRejectionReason}
             viewed={viewed}
             isSuperAdmin={isSuperAdmin}
+            onRouteClick={onRouteOpen}
           />
 
           <div className="bg-white rounded-2xl shadow-sm px-5 py-3.5 flex items-center gap-3">
@@ -227,6 +230,12 @@ const ClientOrderDetailClient = ({ order }) => {
         onOpenChange={onRejectionOpenChange}
         orderId={order._id}
         onSuccess={handleRejectionSuccess}
+      />
+
+      <RouteMapModal
+        isOpen={isRouteOpen}
+        onOpenChange={onRouteOpenChange}
+        order={order}
       />
     </Layout>
   );

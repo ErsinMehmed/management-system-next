@@ -1,4 +1,4 @@
-import { FiMapPin, FiFileText, FiUser, FiAlertCircle, FiTruck, FiEye, FiEyeOff, FiDollarSign } from "react-icons/fi";
+import { FiMapPin, FiFileText, FiUser, FiAlertCircle, FiTruck, FiEye, FiEyeOff, FiDollarSign, FiNavigation } from "react-icons/fi";
 import { formatCurrency } from "@/utils";
 
 function DetailRow({ icon, label, value }) {
@@ -22,24 +22,29 @@ function StatusBadge({ active, activeIcon, inactiveIcon, activeLabel, inactiveLa
   );
 }
 
-export default function OrderDetailsCard({ order, currentRejectionReason, viewed, isSuperAdmin }) {
+export default function OrderDetailsCard({ order, currentRejectionReason, viewed, isSuperAdmin, onRouteClick }) {
   const hasContent = order.address || order.note || currentRejectionReason || order.assignedTo?.name || isSuperAdmin;
   if (!hasContent) return null;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-50">
       {order.address && (
-        <a
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-start gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors group">
-          <FiMapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0 group-hover:text-[#0071f5] transition-colors" />
-          <div>
+        <div className="flex items-start gap-3 px-5 py-3.5">
+          <FiMapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-400 font-medium mb-0.5">Адрес</p>
-            <p className="text-sm font-medium text-slate-700 group-hover:text-[#0071f5] transition-colors">{order.address}</p>
+            <p className="text-sm font-medium text-slate-700 break-words">{order.address}</p>
+            {onRouteClick && (
+              <button
+                type="button"
+                onClick={onRouteClick}
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[#0071f5] hover:text-[#005bc4] transition-colors cursor-pointer">
+                <FiNavigation className="w-3.5 h-3.5" />
+                Виж маршрут
+              </button>
+            )}
           </div>
-        </a>
+        </div>
       )}
 
       {order.note && (

@@ -37,6 +37,11 @@ const clientOrderSchema = new Schema(
     distributorPayout: { type: Number, default: 0 },
     statusChangedAt: { type: Date, default: null },
     orderNumber: { type: Number, default: 0 },
+    coords: {
+      lat: { type: Number },
+      lng: { type: Number },
+      geocodedAt: { type: Date },
+    },
   },
   { timestamps: true }
 );
