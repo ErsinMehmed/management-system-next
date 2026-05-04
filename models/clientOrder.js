@@ -43,9 +43,21 @@ const clientOrderSchema = new Schema(
 
 clientOrderSchema.index({ status: 1, createdAt: -1 });
 clientOrderSchema.index({ assignedTo: 1, status: 1 });
-clientOrderSchema.index({ phone: 1 });
 clientOrderSchema.index({ createdAt: -1 });
 clientOrderSchema.index({ isPaid: 1, status: 1, assignedTo: 1 });
+
+// Профил на клиента (последни поръчки по телефон)
+clientOrderSchema.index({ phone: 1, createdAt: -1 });
+// Pagination на seller-а сортирана по дата
+clientOrderSchema.index({ assignedTo: 1, createdAt: -1 });
+// Seller + статус с time-sort (analytics, history с филтър)
+clientOrderSchema.index({ status: 1, assignedTo: 1, createdAt: -1 });
+// Lookup по номер на поръчката. Партиален филтър пропуска legacy записи с
+// orderNumber=0 (default стойност преди атомарния брояч).
+clientOrderSchema.index(
+  { orderNumber: 1 },
+  { unique: true, partialFilterExpression: { orderNumber: { $gt: 0 } } }
+);
 
 const ClientOrder =
   mongoose.models.ClientOrder ||

@@ -17,6 +17,13 @@ const clientPhoneSchema = new Schema(
   { timestamps: true }
 );
 
+// Търсене по име (prefix regex или exact). Партиалният филтър изключва празни
+// имена, които ги има предимно — индексът остава компактен.
+clientPhoneSchema.index(
+  { name: 1 },
+  { partialFilterExpression: { name: { $gt: "" } } }
+);
+
 const ClientPhone =
   mongoose.models.ClientPhone || mongoose.model("ClientPhone", clientPhoneSchema);
 
