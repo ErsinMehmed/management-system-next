@@ -133,10 +133,17 @@ export default function RouteMapModal({ isOpen, onOpenChange, order }) {
     return `https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=driving`;
   })();
 
-  const overlayMessage = (() => {
-    if (destError) return null;
+  // Loading states
+  const isLocalizing =
+    (!myCoords && !routeError) || (!destCoords && !destError);
+  const isCalculatingRoute =
+    myCoords != null && destCoords != null && distance == null;
+  const cardsPending = !destError && !routeError && distance == null;
+
+  const loadingLabel = (() => {
     if (!myCoords && !routeError) return "Локализирам твоето местоположение...";
     if (!destCoords && !destError) return "Локализирам адрес на клиента...";
+    if (isCalculatingRoute) return "Изчислявам маршрут...";
     return null;
   })();
 
@@ -171,16 +178,33 @@ export default function RouteMapModal({ isOpen, onOpenChange, order }) {
                 className="rounded-xl overflow-hidden border border-gray-100 relative bg-slate-50"
                 style={{ height: "280px" }}
               >
-                {isOpen && (
+                {/* Skeleton слой докато не приключи геолокацията/геокодирането */}
+                {isLocalizing && (
+                  <div className="absolute inset-0 bg-slate-100 animate-pulse" />
+                )}
+
+                {/* Картата се монтира след като поне един outcome е готов */}
+                {!isLocalizing && isOpen && (
                   <RouteMap
                     myCoords={myCoords}
                     destCoords={destCoords}
                     routeGeometry={routeGeometry}
                   />
                 )}
-                {overlayMessage && (
-                  <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center text-sm text-slate-500 font-medium pointer-events-none">
-                    {overlayMessage}
+
+                {/* Loader: full-cover при initial localizing, по-дискретен badge при route calc */}
+                {(isLocalizing || isCalculatingRoute) && loadingLabel && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <div
+                      className={
+                        isCalculatingRoute
+                          ? "flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-full pl-3 pr-4 py-2 shadow-md border border-gray-100"
+                          : "flex flex-col items-center gap-2"
+                      }
+                    >
+                      <div className="w-5 h-5 rounded-full border-2 border-[#0071f5] border-t-transparent animate-spin shrink-0" />
+                      <p className="text-xs text-slate-600 font-medium">{loadingLabel}</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -195,16 +219,24 @@ export default function RouteMapModal({ isOpen, onOpenChange, order }) {
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white rounded-xl border border-gray-100 px-3.5 py-3 flex items-center gap-2.5">
                   <FiNavigation className="w-4 h-4 text-[#0071f5] shrink-0" />
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-slate-400 font-medium">Разстояние</p>
-                    <p className="text-base font-bold text-slate-700 tabular-nums">{formatDistance(distance)}</p>
+                    {cardsPending ? (
+                      <div className="h-5 w-20 bg-slate-200 rounded mt-1 animate-pulse" />
+                    ) : (
+                      <p className="text-base font-bold text-slate-700 tabular-nums">{formatDistance(distance)}</p>
+                    )}
                   </div>
                 </div>
                 <div className="bg-white rounded-xl border border-gray-100 px-3.5 py-3 flex items-center gap-2.5">
                   <FiClock className="w-4 h-4 text-[#0071f5] shrink-0" />
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-slate-400 font-medium">Време</p>
-                    <p className="text-base font-bold text-slate-700 tabular-nums">{formatDuration(duration)}</p>
+                    {cardsPending ? (
+                      <div className="h-5 w-16 bg-slate-200 rounded mt-1 animate-pulse" />
+                    ) : (
+                      <p className="text-base font-bold text-slate-700 tabular-nums">{formatDuration(duration)}</p>
+                    )}
                   </div>
                 </div>
               </div>
