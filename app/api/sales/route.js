@@ -3,17 +3,11 @@ import Sell from "@/models/sell";
 import Product from "@/models/product";
 import RequestHandler from "@/helpers/RequestHandler";
 import { NextResponse } from "next/server";
-import { getAuth } from "@/helpers/getAuth";
+import { requireAdmin } from "@/helpers/requireRole";
 
 export async function POST(request) {
-  const session = await getAuth(request);
-
-  if (!session) {
-    return NextResponse.json(
-      { status: false, message: "Не сте оторизирани." },
-      { status: 401 }
-    );
-  }
+  const { error, session } = await requireAdmin(request);
+  if (error) return error;
 
   const data = await request.json();
   data.creator = session.user.id;
@@ -77,6 +71,9 @@ export async function GET(request) {
 }
 
 export async function DELETE(request) {
+  const { error } = await requireAdmin(request);
+  if (error) return error;
+
   const id = request.nextUrl.searchParams.get("id");
 
   await connectMongoDB();
