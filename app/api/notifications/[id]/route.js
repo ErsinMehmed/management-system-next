@@ -1,16 +1,16 @@
 import { getAuth } from "@/helpers/getAuth";
+import { apiOk, apiUnauthorized } from "@/helpers/apiResponse";
 import connectMongoDB from "@/libs/mongodb";
 import Notification from "@/models/notification";
-import { NextResponse } from "next/server";
 
 export async function DELETE(request, { params }) {
   const session = await getAuth(request);
-  if (!session) return NextResponse.json({ status: false }, { status: 401 });
+  if (!session) return apiUnauthorized();
 
   const { id } = await params;
 
   await connectMongoDB();
   await Notification.findByIdAndDelete(id);
 
-  return NextResponse.json({ status: true });
+  return apiOk({}, "Известието е изтрито.");
 }

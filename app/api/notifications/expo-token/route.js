@@ -1,26 +1,26 @@
 import { getAuth } from "@/helpers/getAuth";
-import { NextResponse } from "next/server";
+import { apiOk, apiUnauthorized, apiBadRequest } from "@/helpers/apiResponse";
 import connectMongoDB from "@/libs/mongodb";
 import User from "@/models/user";
 
 export async function POST(request) {
   const session = await getAuth(request);
-  if (!session) return NextResponse.json({ status: false }, { status: 401 });
+  if (!session) return apiUnauthorized();
 
   const { token } = await request.json();
-  if (!token) return NextResponse.json({ status: false }, { status: 400 });
+  if (!token) return apiBadRequest("Липсва Expo push token.");
 
   await connectMongoDB();
   await User.findByIdAndUpdate(session.user.id, {
     $addToSet: { expoPushTokens: token },
   });
 
-  return NextResponse.json({ status: true });
+  return apiOk({}, "Token-ът е записан.");
 }
 
 export async function DELETE(request) {
   const session = await getAuth(request);
-  if (!session) return NextResponse.json({ status: false }, { status: 401 });
+  if (!session) return apiUnauthorized();
 
   const { token } = await request.json();
   await connectMongoDB();
@@ -28,5 +28,5 @@ export async function DELETE(request) {
     $pull: { expoPushTokens: token },
   });
 
-  return NextResponse.json({ status: true });
+  return apiOk({}, "Token-ът е изтрит.");
 }

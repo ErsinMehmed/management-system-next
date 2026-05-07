@@ -1,21 +1,15 @@
 import { getAuth } from "@/helpers/getAuth";
-import { NextResponse } from "next/server";
+import { apiOk, apiUnauthorized, apiBadRequest } from "@/helpers/apiResponse";
 import connectMongoDB from "@/libs/mongodb";
 import User from "@/models/user";
 
 // Записва FCM token към текущия потребител
 export async function POST(request) {
   const session = await getAuth(request);
-
-  if (!session) {
-    return NextResponse.json({ status: false }, { status: 401 });
-  }
+  if (!session) return apiUnauthorized();
 
   const { token } = await request.json();
-
-  if (!token) {
-    return NextResponse.json({ status: false }, { status: 400 });
-  }
+  if (!token) return apiBadRequest("Липсва FCM token.");
 
   await connectMongoDB();
 
@@ -24,16 +18,13 @@ export async function POST(request) {
     $addToSet: { fcmTokens: token },
   });
 
-  return NextResponse.json({ status: true });
+  return apiOk({}, "Token-ът е записан.");
 }
 
 // Изтрива FCM token (при logout)
 export async function DELETE(request) {
   const session = await getAuth(request);
-
-  if (!session) {
-    return NextResponse.json({ status: false }, { status: 401 });
-  }
+  if (!session) return apiUnauthorized();
 
   const { token } = await request.json();
 
@@ -43,5 +34,5 @@ export async function DELETE(request) {
     $pull: { fcmTokens: token },
   });
 
-  return NextResponse.json({ status: true });
+  return apiOk({}, "Token-ът е изтрит.");
 }

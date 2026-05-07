@@ -1,4 +1,5 @@
 import { getAuth } from "@/helpers/getAuth";
+import { apiOk, apiUnauthorized } from "@/helpers/apiResponse";
 import connectMongoDB from "@/libs/mongodb";
 import Notification from "@/models/notification";
 import { NextResponse } from "next/server";
@@ -13,7 +14,7 @@ function buildFilter(userId, role) {
 
 export async function GET(request) {
   const session = await getAuth(request);
-  if (!session) return NextResponse.json({ status: false }, { status: 401 });
+  if (!session) return apiUnauthorized();
 
   await connectMongoDB();
 
@@ -46,7 +47,7 @@ export async function GET(request) {
 // Маркира всички като прочетени
 export async function PATCH(request) {
   const session = await getAuth(request);
-  if (!session) return NextResponse.json({ status: false }, { status: 401 });
+  if (!session) return apiUnauthorized();
 
   await connectMongoDB();
 
@@ -57,5 +58,5 @@ export async function PATCH(request) {
     { $addToSet: { readBy: String(session.user.id) } }
   );
 
-  return NextResponse.json({ status: true });
+  return apiOk({}, "Всички известия са маркирани като прочетени.");
 }

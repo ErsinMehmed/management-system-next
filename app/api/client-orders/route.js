@@ -15,7 +15,10 @@ export async function GET(request) {
   const session = await getAuth(request);
 
   if (!session) {
-    return NextResponse.json({ status: false }, { status: 401 });
+    return NextResponse.json(
+      { status: false, message: "Не сте оторизирани." },
+      { status: 401 }
+    );
   }
 
   await connectMongoDB();
