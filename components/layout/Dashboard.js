@@ -9,11 +9,12 @@ import { productStore } from "@/stores/useStore";
 import { I18nProvider } from "@react-aria/i18n";
 import PushNotificationInit from "@/components/PushNotificationInit";
 
-const DashboardLayout = (props) => {
+const DashboardLayout = ({ title, breadcrumb, children }) => {
   const { data: session } = useSession();
   const { loadProductsIfNotLoaded } = productStore;
   const [isVisible, setIsVisible] = useState(false);
   const isSeller = session?.user?.role === "Seller";
+  const hasBreadcrumb = Array.isArray(breadcrumb) && breadcrumb.length > 0;
 
   useEffect(() => {
     loadProductsIfNotLoaded();
@@ -40,14 +41,35 @@ const DashboardLayout = (props) => {
             onMenuClick={toggleMenu}
             show={isVisible}
             hideSidebarToggle={isSeller}
+            title={title}
+            breadcrumb={breadcrumb}
           />
 
           <div className='mt-16'>
-            <div className='p-5 text-xl 2xl:text-2xl font-semibold text-slate-600 border-b border-gray-300'>
-              {props.title}
-            </div>
+            {/* Mobile-only заглавна лента — компактна. На десктоп title-ът е в Navbar-а. */}
+            {(title || hasBreadcrumb) && (
+              <div className='sm:hidden flex items-center px-4 py-2 text-sm font-semibold text-slate-700 border-b border-gray-200 bg-white truncate'>
+                {hasBreadcrumb
+                  ? breadcrumb.map((item, i) => (
+                      <span key={i} className='flex items-center min-w-0'>
+                        {i > 0 && (
+                          <span className='mx-1.5 text-slate-300'>›</span>
+                        )}
+                        <span
+                          className={`truncate ${
+                            i === breadcrumb.length - 1
+                              ? "text-slate-700"
+                              : "text-slate-400 font-medium"
+                          }`}>
+                          {item.label}
+                        </span>
+                      </span>
+                    ))
+                  : title}
+              </div>
+            )}
 
-            <div className='relative p-4 sm:p-5'>{props.children}</div>
+            <div className='relative p-4 sm:p-5'>{children}</div>
           </div>
         </div>
       </div>

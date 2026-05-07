@@ -143,7 +143,15 @@ const ClientOrderDetailClient = ({ order }) => {
   };
 
   return (
-    <Layout title="Детайли на заявката">
+    <Layout
+      title="Детайли на заявката"
+      breadcrumb={[
+        { label: "Заявки", href: "/dashboard/client-orders" },
+        {
+          label: order.orderNumber ? `#${order.orderNumber}` : "Детайли",
+          current: true,
+        },
+      ]}>
       <div className="max-w-xl mx-auto 2xl:px-10">
         <Button
           variant="light"
