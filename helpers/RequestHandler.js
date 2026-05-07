@@ -1,7 +1,6 @@
 import connectMongoDB from "@/libs/mongodb";
 import Product from "@/models/product";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuth } from "@/helpers/getAuth";
 
 export default class RequestHandler {
   constructor(Model) {
@@ -14,10 +13,10 @@ export default class RequestHandler {
     getUserRecords = false,
     populateProduct = true
   ) {
-    const [session, searchParams] = await Promise.all([
-      getServerSession(authOptions),
-      request.nextUrl.searchParams,
-    ]);
+    // getAuth поддържа както NextAuth cookie session, така и Bearer JWT
+    // от mobile приложението — getServerSession без request е cookie-only.
+    const session = await getAuth(request);
+    const { searchParams } = request.nextUrl;
 
     const page = Math.max(1, parseInt(searchParams.get("page")) || 1);
     const perPage = Math.min(
