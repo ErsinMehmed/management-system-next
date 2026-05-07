@@ -18,6 +18,10 @@ const notificationSchema = new Schema(
 notificationSchema.index({ assignedTo: 1, createdAt: -1 });
 notificationSchema.index({ changedByUserId: 1, createdAt: -1 });
 notificationSchema.index({ createdAt: -1 });
+// Multikey за "notifications, които user X вече е прочел" (readBy.includes)
+notificationSchema.index({ readBy: 1 });
+// Lookup на нотификации за конкретна поръчка (audit / bulk delete при delete на поръчка)
+notificationSchema.index({ orderId: 1 });
 
 const Notification =
   mongoose.models.Notification ||
