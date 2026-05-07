@@ -28,6 +28,13 @@ const InputComponent = (props) => {
     }
   };
 
+  // На mobile (особено iOS) type="number" отваря клавиатура с -, ., е,
+  // което е объркващо за обикновени количества/цени. inputMode="decimal" дава
+  // чиста цифрова клавиатура с десетична точка. Caller-ът може да override-не
+  // изрично с inputMode="numeric" за integer-only полета.
+  const inputMode =
+    props.inputMode ?? (props.type === "number" ? "decimal" : undefined);
+
   return (
     <Input
       size={"sm"}
@@ -38,6 +45,7 @@ const InputComponent = (props) => {
             : "password"
           : props.type
       }
+      inputMode={inputMode}
       {...style}
       label={props.label}
       value={props.value}

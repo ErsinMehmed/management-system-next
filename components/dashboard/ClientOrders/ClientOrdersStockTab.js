@@ -74,6 +74,7 @@ const StockCell = ({ value, onChange, isSuperAdmin, isDirty }) => {
       </Button>
       <Input
         type='number'
+        inputMode='numeric'
         min={0}
         value={String(value)}
         onValueChange={(v) => onChange(Math.max(0, parseInt(v) || 0))}

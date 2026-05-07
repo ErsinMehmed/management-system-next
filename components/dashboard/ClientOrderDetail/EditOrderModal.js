@@ -16,10 +16,11 @@ function FormField({ label, accent, children }) {
   );
 }
 
-function NumberInput({ borderClass = "border-gray-200", focusClass = "focus:ring-blue-500", className = "", ...props }) {
+function NumberInput({ borderClass = "border-gray-200", focusClass = "focus:ring-blue-500", className = "", inputMode = "decimal", ...props }) {
   return (
     <input
       type="number"
+      inputMode={inputMode}
       {...props}
       className={`w-full rounded-xl border px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 ${borderClass} ${focusClass} ${className}`}
     />
@@ -119,7 +120,7 @@ export default function EditOrderModal({ isOpen, onOpenChange, order, availableP
         </FormField>
 
         <FormField label="Бройка">
-          <NumberInput min={1} value={editQuantity} onChange={handleQuantityChange} />
+          <NumberInput min={1} inputMode="numeric" value={editQuantity} onChange={handleQuantityChange} />
         </FormField>
 
         <FormField label="Обща цена">
@@ -167,6 +168,7 @@ export default function EditOrderModal({ isOpen, onOpenChange, order, availableP
             />
             <NumberInput
               min={1}
+              inputMode="numeric"
               placeholder="Брой"
               value={editQuantity2}
               disabled={!editProduct2}

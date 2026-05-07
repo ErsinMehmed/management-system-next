@@ -209,7 +209,7 @@ const CreateProductModal = ({ isOpen, onOpenChange }) => {
                         onChange={(v) => set("category", v)}
                       />
                       <Input label="Тегло (г)" type="number" value={data.weight} onChange={(v) => set("weight", v)} />
-                      <Input label="Бр. в кашон" type="number" value={data.units_per_box} onChange={(v) => set("units_per_box", v)} />
+                      <Input label="Бр. в кашон" type="number" inputMode="numeric" value={data.units_per_box} onChange={(v) => set("units_per_box", v)} />
                     </div>
 
                     <div className="rounded-xl bg-amber-50/40 border border-amber-100/70 p-3 flex items-start gap-2.5">
@@ -218,7 +218,7 @@ const CreateProductModal = ({ isOpen, onOpenChange }) => {
                       </div>
                       <div className="flex-1 grid grid-cols-2 gap-3">
                         <Input label="Цена на зареждане (€)" type="number" value={data.price} onChange={(v) => set("price", v)} />
-                        <Input label="Наличност" type="number" value={data.availability} onChange={(v) => set("availability", v)} />
+                        <Input label="Наличност" type="number" inputMode="numeric" value={data.availability} onChange={(v) => set("availability", v)} />
                       </div>
                     </div>
                   </div>

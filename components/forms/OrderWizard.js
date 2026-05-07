@@ -229,6 +229,7 @@ const OrderWizard = ({ data, errorFields, updatedProducts, handleFieldChange, se
           <div className="grid grid-cols-2 gap-3">
             <Input
               type="number"
+              inputMode="numeric"
               label="Бройки"
               value={data.quantity || ""}
               errorMessage={errorFields.quantity}
@@ -236,6 +237,7 @@ const OrderWizard = ({ data, errorFields, updatedProducts, handleFieldChange, se
             />
             <Input
               type="number"
+              inputMode="numeric"
               label={`Кашони (×${unitsPerBox})`}
               value={boxCount}
               onChange={handleBoxChange}

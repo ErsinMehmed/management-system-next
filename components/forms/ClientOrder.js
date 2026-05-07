@@ -44,6 +44,7 @@ const ClientOrderForm = ({
       <div className='grid grid-cols-2 gap-3'>
         <Input
           type='number'
+          inputMode='numeric'
           label='Брой'
           value={data.quantity || ""}
           disabled={!data.product}
@@ -87,6 +88,7 @@ const ClientOrderForm = ({
           <div className='grid grid-cols-2 gap-3'>
             <Input
               type='number'
+              inputMode='numeric'
               label='Брой'
               value={data.quantity2 || ""}
               disabled={!data.product2}
