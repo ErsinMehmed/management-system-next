@@ -6,17 +6,13 @@ import Sell from "@/models/sell";
 
 export const dynamic = "force-dynamic";
 import Order from "@/models/order";
-import Ad from "@/models/ad";
 import Category from "@/models/category";
 import Income from "@/models/income";
 import mongoose from "mongoose";
 import DashboardClient from "@/components/dashboard/DashboardClient";
 
 async function fetchExpenses() {
-  const [adResult, fuelResult, orderResult, byProductResult] = await Promise.all([
-    Ad.aggregate([
-      { $group: { _id: null, total_ad_price: { $sum: "$amount" } } },
-    ]),
+  const [fuelResult, orderResult, byProductResult] = await Promise.all([
     Sell.aggregate([
       { $group: { _id: null, total_fuel_price: { $sum: "$fuel_price" }, additional_costs: { $sum: "$additional_costs" } } },
     ]),
@@ -35,7 +31,6 @@ async function fetchExpenses() {
   ]);
 
   return {
-    total_ad_expenses: adResult[0]?.total_ad_price ?? 0,
     total_order_expenses: orderResult[0]?.total_amount ?? 0,
     total_fuel_expenses: fuelResult[0]?.total_fuel_price ?? 0,
     total_additional_expenses: fuelResult[0]?.additional_costs ?? 0,
@@ -167,7 +162,6 @@ export default async function DashboardPage() {
     isAdmin
       ? fetchExpenses()
       : Promise.resolve({
-          total_ad_expenses: 0,
           total_order_expenses: 0,
           total_fuel_expenses: 0,
           total_additional_expenses: 0,
