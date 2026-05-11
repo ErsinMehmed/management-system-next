@@ -5,6 +5,7 @@ import { Button } from "@heroui/react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Link from "next/link";
 import Input from "@/components/html/Input";
+import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -94,6 +95,8 @@ export default function RegisterPage() {
                   onChange={(value) => setPassword(value)}
                   onEnterPress={handleSubmit}
                 />
+
+                <PasswordStrengthMeter password={password} />
 
                 <Input
                   label="Потвърди паролата"

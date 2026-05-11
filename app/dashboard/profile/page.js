@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Button } from "@heroui/react";
 import { FiLock, FiEye, FiEyeOff, FiCheck, FiCamera, FiUser, FiMail, FiShield, FiArrowLeft } from "react-icons/fi";
 import Layout from "@/components/layout/Dashboard";
+import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import { addToast } from "@heroui/toast";
 
 const CLOUDINARY_CLOUD = "dhp0zcdke";
@@ -242,6 +243,9 @@ export default function ProfilePage() {
               onToggle={() => setShowNext(p => !p)}
               placeholder="Минимум 8 символа"
             />
+
+            <PasswordStrengthMeter password={next} />
+
             <PasswordField
               label="Потвърди новата парола"
               value={confirm}
