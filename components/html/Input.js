@@ -6,10 +6,31 @@ import { AiOutlineEyeInvisible } from "react-icons/ai";
 const InputComponent = (props) => {
   const [isVisible, setIsVisible] = useState(false);
 
+  // На mobile (особено iOS) type="number" отваря клавиатура с -, ., е,
+  // което е объркващо за обикновени количества/цени. inputMode="decimal" дава
+  // чиста цифрова клавиатура с десетична точка. Caller-ът може да override-не
+  // изрично с inputMode="numeric" за integer-only полета.
+  const inputMode =
+    props.inputMode ?? (props.type === "number" ? "decimal" : undefined);
+
+  // Decimal полета с type="number" блокират запетая на BG локал, преди тя
+  // да достигне React. Премахваме type="number" в полза на type="text" +
+  // inputMode="decimal" и нормализираме `,` → `.` + изхвърляме нечислови
+  // символи в handleChange. Integer полета (inputMode="numeric") си запазват
+  // type="number" — там запетая е изключена.
+  const isDecimalNumber =
+    props.type === "number" && inputMode === "decimal";
+
   const handleChange = (event) => {
-    if (props.onChange) {
-      props.onChange(event.target.value);
+    if (!props.onChange) return;
+    let value = event.target.value;
+    if (isDecimalNumber) {
+      value = value
+        .replace(/,/g, ".") // запетая → точка
+        .replace(/[^0-9.]/g, "") // само цифри + точка
+        .replace(/(\..*)\./g, "$1"); // максимум една точка
     }
+    props.onChange(value);
   };
 
   const toggleVisibility = () => {
@@ -28,23 +49,19 @@ const InputComponent = (props) => {
     }
   };
 
-  // На mobile (особено iOS) type="number" отваря клавиатура с -, ., е,
-  // което е объркващо за обикновени количества/цени. inputMode="decimal" дава
-  // чиста цифрова клавиатура с десетична точка. Caller-ът може да override-не
-  // изрично с inputMode="numeric" за integer-only полета.
-  const inputMode =
-    props.inputMode ?? (props.type === "number" ? "decimal" : undefined);
+  const resolvedType =
+    props.type === "password"
+      ? isVisible
+        ? "text"
+        : "password"
+      : isDecimalNumber
+      ? "text"
+      : props.type;
 
   return (
     <Input
       size={"sm"}
-      type={
-        props.type === "password"
-          ? isVisible
-            ? "text"
-            : "password"
-          : props.type
-      }
+      type={resolvedType}
       inputMode={inputMode}
       {...style}
       label={props.label}

@@ -16,12 +16,31 @@ function FormField({ label, accent, children }) {
   );
 }
 
-function NumberInput({ borderClass = "border-gray-200", focusClass = "focus:ring-blue-500", className = "", inputMode = "decimal", ...props }) {
+function NumberInput({ borderClass = "border-gray-200", focusClass = "focus:ring-blue-500", className = "", inputMode = "decimal", onChange, ...props }) {
+  // За decimal полета type="number" блокира запетая на BG локал. Ползваме
+  // type="text" + inputMode="decimal" и нормализираме входа.
+  const isDecimal = inputMode === "decimal";
+  const handleChange = (e) => {
+    if (!onChange) return;
+    if (isDecimal) {
+      const raw = e.target.value;
+      const cleaned = raw
+        .replace(/,/g, ".")
+        .replace(/[^0-9.]/g, "")
+        .replace(/(\..*)\./g, "$1");
+      // Препредаваме event с нормализираната стойност, за да не променяме
+      // подписа на onChange (callers ползват e.target.value).
+      onChange({ ...e, target: { ...e.target, value: cleaned } });
+      return;
+    }
+    onChange(e);
+  };
   return (
     <input
-      type="number"
-      inputMode={inputMode}
       {...props}
+      type={isDecimal ? "text" : "number"}
+      inputMode={inputMode}
+      onChange={handleChange}
       className={`w-full rounded-xl border px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 ${borderClass} ${focusClass} ${className}`}
     />
   );
