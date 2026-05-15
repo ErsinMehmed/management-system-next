@@ -6,15 +6,58 @@ import { FiPhone, FiShoppingBag, FiDollarSign, FiStar, FiFileText, FiX, FiPlus, 
 import { formatCurrency, formatDate, productTitle } from "@/utils";
 import { clientOrderStatusConfig } from "@/data";
 
-const StatBox = ({ icon, label, value, color = "indigo" }) => (
+const StatBox = ({ icon, label, value, color = "indigo", valueClass = "text-lg" }) => (
   <div className="bg-white rounded-xl p-3 border border-slate-200 shadow">
     <div className="flex items-center gap-1.5 mb-1">
       <span className={`text-${color}-500`}>{icon}</span>
       <p className={`text-[10px] font-bold text-${color}-500 uppercase tracking-wider`}>{label}</p>
     </div>
-    <p className={`text-lg font-bold text-${color}-600 tabular-nums`}>{value}</p>
+    <p className={`${valueClass} font-bold text-${color}-600 tabular-nums`}>{value}</p>
   </div>
 );
+
+const monthsSince = (dateStr) => {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  const now = new Date();
+  let months =
+    (now.getFullYear() - d.getFullYear()) * 12 +
+    (now.getMonth() - d.getMonth());
+  if (now.getDate() < d.getDate()) months -= 1;
+  return Math.max(0, months);
+};
+
+const formatTenure = (dateStr) => {
+  const months = monthsSince(dateStr);
+  if (months === null) return "—";
+  if (months === 0) return "< 1 месец";
+  if (months === 1) return "1 месец";
+  if (months < 12) return `${months} месеца`;
+  const years = Math.floor(months / 12);
+  const remMonths = months % 12;
+  if (remMonths === 0) return years === 1 ? "1 година" : `${years} години`;
+  return `${years}г. ${remMonths}м.`;
+};
+
+const formatLastOrder = (dateStr) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dayDiff = Math.floor((startOfToday - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+  if (dayDiff === 0) return "Днес";
+  if (dayDiff === 1) return "Вчера";
+  if (dayDiff < 7) return `Преди ${dayDiff} дни`;
+  if (dayDiff < 30) {
+    const weeks = Math.floor(dayDiff / 7);
+    return weeks === 1 ? "Преди седмица" : `Преди ${weeks} седм.`;
+  }
+  return d.toLocaleDateString("bg-BG", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
 const ClientProfileModal = ({ isOpen, onClose, phone, onNameChange }) => {
   const [data, setData] = useState(null);
@@ -144,8 +187,20 @@ const ClientProfileModal = ({ isOpen, onClose, phone, onNameChange }) => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   <StatBox icon={<FiShoppingBag className="w-3.5 h-3.5" />} label="Поръчки" value={data.summary.totalOrders} color="indigo" />
                   <StatBox icon={<FiDollarSign className="w-3.5 h-3.5" />} label="Общо" value={formatCurrency(data.summary.totalRevenue, 2)} color="emerald" />
-                  <StatBox icon={<FiCheck className="w-3.5 h-3.5" />} label="Доставени" value={data.summary.delivered} color="sky" />
-                  <StatBox icon={<FiX className="w-3.5 h-3.5" />} label="Отказани" value={data.summary.rejected} color="rose" />
+                  <StatBox
+                    icon={<FiUser className="w-3.5 h-3.5" />}
+                    label="Клиент от"
+                    value={formatTenure(data.summary.firstOrder)}
+                    color="sky"
+                    valueClass="text-sm sm:text-base"
+                  />
+                  <StatBox
+                    icon={<FiClock className="w-3.5 h-3.5" />}
+                    label="Последна поръчка"
+                    value={formatLastOrder(data.summary.lastOrder)}
+                    color="amber"
+                    valueClass="text-sm sm:text-base"
+                  />
                 </div>
 
                 {/* Favorite product */}
