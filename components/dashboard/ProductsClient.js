@@ -7,6 +7,7 @@ import Modal from "@/components/Modal";
 import Box from "@/components/product/Box";
 import { commonStore, productStore } from "@/stores/useStore";
 import { Switch, Chip, useDisclosure } from "@heroui/react";
+import { FiPlus, FiEye } from "react-icons/fi";
 import { productTitle } from "@/utils";
 import ProductForm from "@/components/forms/Product";
 import productAction from "@/actions/productAction";
@@ -74,16 +75,20 @@ const ProductsClient = () => {
   return (
     <Layout title='Наличности'>
       {isUserAdmin && (
-        <div className='absolute -top-[3rem] sm:-top-[3.2rem] right-3 sm:right-10 flex items-center gap-2'>
+        <div className='flex items-center justify-end gap-2 mb-4'>
           <button
             onClick={onCreateOpen}
-            className='text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-4 sm:px-5 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
-            Добави
+            aria-label='Добави'
+            className='flex items-center gap-1.5 text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-5 py-2 transition-all active:scale-90 cursor-pointer'>
+            <FiPlus className='w-4 h-4' />
+            <span className='hidden sm:inline'>Добави</span>
           </button>
           <button
             onClick={onVisibilityOpen}
-            className='text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-4 sm:px-5 2xl:px-6 py-1.5 2xl:py-2.5 text-center transition-all active:scale-90'>
-            Видимост
+            aria-label='Видимост'
+            className='flex items-center gap-1.5 text-white bg-[#0071f5] hover:bg-blue-600 focus:outline-none font-semibold rounded-full text-sm px-3 sm:px-5 py-2 transition-all active:scale-90 cursor-pointer'>
+            <FiEye className='w-4 h-4' />
+            <span className='hidden sm:inline'>Видимост</span>
           </button>
         </div>
       )}
