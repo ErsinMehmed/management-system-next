@@ -6,6 +6,7 @@ import {
   BsPeople,
   BsCashCoin,
   BsClipboard,
+  BsShieldCheck,
 } from "react-icons/bs";
 import { FiPhone, FiTruck, FiXCircle } from "react-icons/fi";
 
@@ -74,6 +75,12 @@ const dashboardLinks = [
     text: "Заявки",
     role: ["Super Admin", "Admin", "Seller"],
     icon: <BsClipboard className='w-5 h-5' />,
+  },
+  {
+    link: "/dashboard/audit",
+    text: "Одит",
+    role: ["Super Admin"],
+    icon: <BsShieldCheck className='w-5 h-5' />,
   },
   // {
   //   link: "/dashboard/users/sales",

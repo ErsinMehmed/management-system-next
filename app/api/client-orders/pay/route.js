@@ -3,11 +3,14 @@ import connectMongoDB from "@/libs/mongodb";
 import ClientOrder from "@/models/clientOrder";
 import Sell from "@/models/sell";
 import Product from "@/models/product";
+import User from "@/models/user";
+import PaymentAudit from "@/models/paymentAudit";
+import { orderRevenue, orderCommission } from "@/libs/clientOrderQueries";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
 export async function POST(request) {
-  const { error } = await requireSuperAdmin(request);
+  const { error, session } = await requireSuperAdmin(request);
   if (error) return error;
 
   const { sellerId } = await request.json();
@@ -79,6 +82,28 @@ export async function POST(request) {
     { assignedTo: sellerObjectId, status: "доставена", isPaid: { $ne: true } },
     { $set: { isPaid: true, paidAt } }
   );
+
+  // Audit log: само ако реално е имало batch (else няма за какво да пишем)
+  if (orders.length > 0) {
+    const seller = await User.findById(sellerObjectId).select("name").lean();
+    let totalRevenue = 0;
+    let totalPayout = 0;
+    for (const o of orders) {
+      totalRevenue += orderRevenue(o);
+      totalPayout += orderCommission(o);
+    }
+    PaymentAudit.create({
+      type: "payout",
+      actor: session.user.id,
+      actorName: session.user.name,
+      seller: sellerObjectId,
+      sellerName: seller?.name || "",
+      paidAt,
+      revenue: Number(totalRevenue.toFixed(2)),
+      payout: Number(totalPayout.toFixed(2)),
+      orderCount: orders.length,
+    }).catch((e) => console.error("PaymentAudit create failed:", e));
+  }
 
   return NextResponse.json({ status: true, updated: result.modifiedCount });
 }
